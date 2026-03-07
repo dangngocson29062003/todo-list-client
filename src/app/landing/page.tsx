@@ -88,7 +88,7 @@ export default function LandingPage() {
                 </Button>
               </Link>
             </div>
-            <div className="flex mt-5 gap-4 justify-center xl:justify-start">
+            <div className="flex mt-5 gap-2 flex-wrap xl:gap-4 justify-center xl:justify-start">
               <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                 <BadgeCheck />
                 No credit card required
@@ -288,7 +288,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        <section className="w-full px-6 py-28 bg-blue-200 dark:bg-blue-500 gap-5 flex flex-col justify-center items-center text-center">
+        <section className="w-full px-6 py-28 bg-blue-200 dark:bg-blue-800 gap-5 flex flex-col justify-center items-center text-center">
           <div>
             <h3 className="text-3xl font-bold mb-5">
               Ready to boost your team's productivity?
