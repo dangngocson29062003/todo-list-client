@@ -1,5 +1,11 @@
 "use client";
 import Header from "@/src/components/landing/header";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/src/components/shadcn/accordion";
 import { Badge } from "@/src/components/shadcn/badge";
 import { Button } from "@/src/components/shadcn/button";
 import {
@@ -16,11 +22,19 @@ import {
   TabsTrigger,
 } from "@/src/components/shadcn/tabs";
 import Typeanimation from "@/src/components/shadcn/typeanimation";
-import { BadgeCheck } from "lucide-react";
+import {
+  BadgeCheck,
+  LucideMoveRight,
+  MoveRight,
+  MoveRightIcon,
+} from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function LandingPage() {
   const { theme } = useTheme();
+  const [tab, setTab] = useState("chatting");
   return (
     <div>
       <Header />
@@ -58,15 +72,15 @@ export default function LandingPage() {
               </Button>
             </div>
             <div className="flex mt-5 gap-4 justify-center xl:justify-start">
-              <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+              <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                 <BadgeCheck />
                 No credit card required
               </Badge>
-              <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+              <Badge className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300">
                 <BadgeCheck />
                 Free plan available
               </Badge>
-              <Badge className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">
+              <Badge className="bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">
                 <BadgeCheck />
                 Cancel anytime
               </Badge>
@@ -101,35 +115,73 @@ export default function LandingPage() {
 
           <Tabs
             defaultValue="chatting"
+            value={tab}
+            onValueChange={setTab}
             orientation="vertical"
-            className="grid grid-cols-[1fr_1fr] w-full gap-0 shadow-lg rounded-2xl overflow-hidden"
+            className="grid grid-cols-[550px_1fr] w-full min-h-[500px] gap-0 shadow-lg rounded-2xl overflow-hidden bg-background/60 backdrop-blur"
           >
-            <TabsList className="flex flex-col h-full w-full gap-20 rounded-r-none p-6 bg-background/60 backdrop-blur">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eum
-              dolor adipisci omnis aut cumque, obcaecati, delectus expedita
-              eaque, sed ratione quo neque unde quis tempore labore molestias
-              animi itaque rerum.
+            <TabsList className="flex flex-col h-full! w-full gap-15 rounded-r-none p-6">
+              <Link href="#">
+                <h2 className="font-semibold text-black dark:text-white">
+                  Our powerful features help teams stay organized and deliver
+                  projects on time.
+                </h2>
+                <Button className="mt-5">
+                  Get Started
+                  <MoveRightIcon className="font-bold" />
+                </Button>
+              </Link>
+
               <div className="flex flex-col h-full w-full ">
-                <TabsTrigger className="justify-center py-4" value="chatting">
-                  Chatting
-                </TabsTrigger>
-                <TabsTrigger className="justify-start py-4" value="task">
-                  Task
-                </TabsTrigger>
-                <TabsTrigger className="justify-start py-4" value="project">
-                  Project
-                </TabsTrigger>
-                <TabsTrigger
-                  className="justify-start py-4"
-                  value="notification"
+                <Accordion
+                  type="single"
+                  collapsible
+                  defaultValue="shipping"
+                  className="max-w-lg"
+                  value={tab}
+                  onValueChange={(value) =>
+                    value !== "" ? setTab(value) : setTab((prev) => prev)
+                  }
                 >
-                  Notification
-                </TabsTrigger>
+                  <AccordionItem value="chatting">
+                    <AccordionTrigger className="text-lg text-black dark:text-white">
+                      Chatting
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Real-time team communication.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="project">
+                    <AccordionTrigger className="text-lg text-black dark:text-white">
+                      Project
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Manage projects in one place.
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="task">
+                    <AccordionTrigger className="text-lg text-black dark:text-white">
+                      Task
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Organize work with tasks and subtasks.
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="notification">
+                    <AccordionTrigger className="text-lg text-black dark:text-white">
+                      Team & Notification
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      Stay updated and manage your team.
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </TabsList>
 
             <TabsContent value="chatting">
-              <div className="w-full h-full relative bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">
+              <div className="w-full h-full relative bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">
                 <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden 2xl:block overflow-visible">
                   <img
                     src="/images/image2.png"
@@ -145,7 +197,7 @@ export default function LandingPage() {
               </div>
             </TabsContent>
             <TabsContent value="task">
-              <div className="w-full h-full relative bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+              <div className="w-full h-full relative bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300">
                 <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden 2xl:block overflow-visible">
                   <img
                     src="/images/image2.png"
@@ -161,7 +213,7 @@ export default function LandingPage() {
               </div>
             </TabsContent>
             <TabsContent value="project">
-              <div className="w-full h-full relative  bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+              <div className="w-full h-full relative  bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                 <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden 2xl:block overflow-visible">
                   <img
                     src="/images/image2.png"
@@ -177,7 +229,7 @@ export default function LandingPage() {
               </div>
             </TabsContent>
             <TabsContent value="notification">
-              <div className="w-full h-full relative bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+              <div className="w-full h-full relative bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
                 <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden 2xl:block overflow-visible">
                   <img
                     src="/images/image2.png"
