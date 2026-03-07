@@ -13,7 +13,6 @@
   },
   "license": "ISC",
   "author": "",
-  
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -26,6 +25,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "flowbite": "^3.1.2",
+    "framer-motion": "^12.35.1",
     "lucide-react": "^0.577.0",
     "motion": "^12.35.0",
     "next": "16.0.1",

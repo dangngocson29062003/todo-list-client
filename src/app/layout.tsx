@@ -13,7 +13,11 @@ export default async function RootLayout({
 }>) {
   return (
     <>
-      <html lang="en" suppressHydrationWarning className={lexend.className}>
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={`${lexend.className} scroll-smooth`}
+      >
         <head />
         <body>
           <ThemeProvider
@@ -22,9 +26,7 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <NotificationProvider>
-              {children}
-            </NotificationProvider>
+            <NotificationProvider>{children}</NotificationProvider>
           </ThemeProvider>
         </body>
       </html>
