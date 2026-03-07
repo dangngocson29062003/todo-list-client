@@ -1,3 +1,4 @@
+import { NotificationProvider } from "../components/notification/notificationProvider";
 import { ThemeProvider } from "../components/theme-provider";
 import "./globals.css";
 import { Lexend } from "next/font/google";
@@ -21,7 +22,9 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <NotificationProvider>
+              {children}
+            </NotificationProvider>
           </ThemeProvider>
         </body>
       </html>
