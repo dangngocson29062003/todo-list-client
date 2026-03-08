@@ -1,5 +1,5 @@
 "use client";
-import { FeatureCard } from "@/src/components/landing/featureCard";
+import { StepCard } from "@/src/components/landing/stepCard";
 import Footer from "@/src/components/landing/footer";
 import Header from "@/src/components/landing/header";
 import {
@@ -16,6 +16,8 @@ import { BadgeCheck, MoveRightIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FeaturePreview } from "@/src/components/landing/featurePreview";
+import { FeatureItem } from "@/src/components/landing/featureItem";
 const features = [
   {
     title: "Create Project",
@@ -81,9 +83,15 @@ export default function LandingPage() {
               seamlessly, and deliver projects faster.
             </p>
             <div className="flex mt-5 gap-4 justify-center xl:justify-start">
-              <Button size="lg">Get started free</Button>
+              <Button size="lg" className="cursor-pointer">
+                Get started free
+              </Button>
               <Link href="#features">
-                <Button variant="secondary" size="lg">
+                <Button
+                  variant="secondary"
+                  className="cursor-pointer"
+                  size="lg"
+                >
                   See Features
                 </Button>
               </Link>
@@ -150,7 +158,7 @@ export default function LandingPage() {
                 </Button>
               </Link>
 
-              <div className="flex flex-col h-full w-full ">
+              <div className="h-full w-full ">
                 <Accordion
                   type="single"
                   collapsible
@@ -161,106 +169,54 @@ export default function LandingPage() {
                     value !== "" ? setTab(value) : setTab((prev) => prev)
                   }
                 >
-                  <AccordionItem value="chatting">
-                    <AccordionTrigger className="text-lg text-black dark:text-white">
-                      Chatting
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Real-time team communication.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="project">
-                    <AccordionTrigger className="text-lg text-black dark:text-white">
-                      Project
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Manage projects in one place.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="task">
-                    <AccordionTrigger className="text-lg text-black dark:text-white">
-                      Task
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Organize work with tasks and subtasks.
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="notification">
-                    <AccordionTrigger className="text-lg text-black dark:text-white">
-                      Team & Notification
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Stay updated and manage your team.
-                    </AccordionContent>
-                  </AccordionItem>
+                  <FeatureItem
+                    value="chatting"
+                    title="Chatting"
+                    description="Real-time team communication."
+                    isNew
+                  />
+                  <FeatureItem
+                    value="project"
+                    title="Project"
+                    description="Manage projects in one place."
+                  />
+                  <FeatureItem
+                    value="task"
+                    title="Task"
+                    description="Organize work with tasks and subtasks."
+                  />
+                  <FeatureItem
+                    value="notification"
+                    title="Team & Notification"
+                    description="Stay updated and manage your team."
+                  />
                 </Accordion>
               </div>
             </TabsList>
             <div className="hidden xl:block">
               <TabsContent value="chatting" className="w-full h-full">
-                <div className="w-full h-full relative bg-orange-100 text-orange-700 dark:bg-orange-500 dark:text-orange-300">
-                  <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden xl:block overflow-visible">
-                    <img
-                      src="/images/image2.png"
-                      alt="App preview"
-                      className="
-                    relative
-                    w-[1000px]
-                    rounded-2xl
-                    rounded-r-none
-                  "
-                    />
-                  </div>
-                </div>
+                <FeaturePreview
+                  image="/images/image2.png"
+                  bg="bg-yellow-100 dark:bg-yellow-500"
+                />
               </TabsContent>
               <TabsContent value="task" className="w-full h-full">
-                <div className="w-full h-full relative bg-green-100 text-green-700 dark:bg-green-500 dark:text-green-300">
-                  <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden xl:block overflow-visible">
-                    <img
-                      src="/images/image2.png"
-                      alt="App preview"
-                      className="
-                    relative
-                    w-[1000px]
-                    rounded-2xl
-                    rounded-r-none
-                  "
-                    />
-                  </div>
-                </div>
+                <FeaturePreview
+                  image="/images/image2.png"
+                  bg="bg-green-100 dark:bg-green-500"
+                />
               </TabsContent>
               <TabsContent value="project" className="w-full h-full">
-                <div className="w-full h-full relative  bg-blue-100 text-blue-700 dark:bg-blue-500 dark:text-blue-300">
-                  <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden xl:block overflow-visible">
-                    <img
-                      src="/images/image2.png"
-                      alt="App preview"
-                      className="
-                    relative
-                    w-[1000px]
-                    rounded-2xl
-                    rounded-r-none
-                  "
-                    />
-                  </div>
-                </div>
+                <FeaturePreview
+                  image="/images/image2.png"
+                  bg="bg-blue-100 dark:bg-blue-500"
+                />
               </TabsContent>
               <TabsContent value="notification" className="w-full h-full">
-                <div className="w-full h-full relative bg-purple-100 text-purple-700 dark:bg-purple-500 dark:text-purple-300">
-                  <div className="absolute w-[1000px] flex-1 top-10 left-10 hidden xl:block overflow-visible">
-                    <img
-                      src="/images/image2.png"
-                      alt="App preview"
-                      className="
-                    relative
-                    w-[1000px]
-                    rounded-2xl
-                    rounded-r-none
-                  "
-                    />
-                  </div>
-                </div>
+                <FeaturePreview
+                  image="/images/image2.png"
+                  bg="bg-purple-100 dark:bg-purple-500"
+                />
               </TabsContent>
             </div>
           </Tabs>
@@ -278,7 +234,7 @@ export default function LandingPage() {
           <div className="w-full mx-auto">
             <div className="flex gap-6 flex-col md:flex-row">
               {features.map((feature, index) => (
-                <FeatureCard
+                <StepCard
                   key={index}
                   {...feature}
                   onClick={() => setActive(index)}

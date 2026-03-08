@@ -142,8 +142,8 @@ export default function HomePage() {
                 ...t,
                 startHour: Math.max(0, Math.min(23, startHour + deltaHours)),
               }
-            : t
-        )
+            : t,
+        ),
       );
     } else if (resizingTask) {
       setTasks((prev) =>
@@ -153,11 +153,11 @@ export default function HomePage() {
                 ...t,
                 duration: Math.max(
                   1,
-                  Math.min(24 - startHour, duration + deltaHours)
+                  Math.min(24 - startHour, duration + deltaHours),
                 ),
               }
-            : t
-        )
+            : t,
+        ),
       );
     }
   };
@@ -316,195 +316,6 @@ export default function HomePage() {
           </button>
         </div>
       </aside>
-
-      <main className="md:ml-64 bg-gray-50 ">
-        <div className="p-10 min-h-screen">
-          <div className="flex items-center justify-center mb-4">
-            <div className="flex gap-2 justify-center items-center">
-              <button
-                onClick={handlePrevWeek}
-                className="md:px-3 md:py-1 hover:bg-gray-100"
-              >
-                <svg
-                  className="w-6 h-6 "
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m15 19-7-7 7-7"
-                  />
-                </svg>
-              </button>
-              <div
-                className="flex items-center gap-2"
-                onClick={() => setShowCalendar(!showCalendar)}
-              >
-                <h2 className="text-md md:text-lg font-semibold">
-                  {days[0].format("DD MMM")} - {days[6].format("DD MMM YYYY")}
-                </h2>
-              </div>
-              <button
-                onClick={handleNextWeek}
-                className="md:px-3 md:py-1 hover:bg-gray-100"
-              >
-                <svg
-                  className="w-6 h-6"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m9 5 7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
-            {showCalendar && (
-              <div
-                ref={ref}
-                className="absolute top-12   w-72 bg-white border border-gray-200 rounded-2xl shadow-lg p-4 animate-in fade-in slide-in-from-top-2 z-50"
-              >
-                <div className="flex justify-between items-center mb-3">
-                  <button
-                    onClick={() => handleMonthChange(-1)}
-                    className="p-1 hover:bg-gray-100 rounded-md"
-                  >
-                    ←
-                  </button>
-                  <span className="font-semibold text-gray-800 text-sm">
-                    {selectedDate.format("MMMM YYYY")}
-                  </span>
-                  <button
-                    onClick={() => handleMonthChange(1)}
-                    className="p-1 hover:bg-gray-100 rounded-md"
-                  >
-                    →
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 mb-1">
-                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                    <div key={d}>{d}</div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 text-sm">
-                  {weeks.map((week, wi) =>
-                    week.map((d) => {
-                      const isCurrentMonth = d.month() === selectedDate.month();
-                      const isToday = d.isSame(dayjs(), "day");
-                      const isSelected = d.isSame(currentWeek, "day");
-
-                      return (
-                        <div
-                          key={d.format("YYYY-MM-DD") + wi}
-                          onClick={() => handleSelect(d)}
-                          className={`flex items-center justify-center h-8 w-8 rounded-lg cursor-pointer transition
-                        ${
-                          !isCurrentMonth
-                            ? "text-gray-300"
-                            : isSelected
-                            ? "bg-blue-500 text-white"
-                            : isToday
-                            ? "text-blue-500 border border-blue-300"
-                            : "hover:bg-gray-100 text-gray-700"
-                        }`}
-                        >
-                          {d.date()}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-between w-full">
-            {days.map((d) => {
-              const isSelected = selectedDate.isSame(d, "day");
-              return (
-                <div
-                  key={d.format("YYYY-MM-DD")}
-                  onClick={() => handleClick(d)}
-                  className={`cursor-pointer rounded-md md-p-4 transition text-gray-400 flex flex-col items-center
-              ${isSelected ? "text-gray-900" : "hover:bg-gray-100"}`}
-                >
-                  <div className="text-2xl md:text-4xl font-black">
-                    {d.format("DD")}
-                  </div>
-                  <div className="text-lg uppercase">{d.format("ddd")}</div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="border rounded-lg bg-white shadow-sm p-4">
-            <h2 className="text-lg md:text-xl font-semibold mb-4 text-center">
-              {selectedDate.format("dddd, DD MMMM YYYY")}
-            </h2>
-
-            <div className="relative border-t border-gray-200">
-              {hours.map((h) => (
-                <div
-                  key={h}
-                  onClick={() => handleAddTask(h)}
-                  className="relative h-14 border-t border-gray-100 pl-16 text-sm text-gray-500 hover:bg-gray-50 cursor-pointer"
-                >
-                  <span className="absolute left-0 top-1 text-xs text-gray-400">
-                    {String(h).padStart(2, "0")}:00
-                  </span>
-                </div>
-              ))}
-
-              {/* Tasks */}
-              {tasks
-                .filter((t) => t.date === selectedDate.format("YYYY-MM-DD"))
-                .map((t) => {
-                  const top = t.startHour * HOUR_HEIGHT;
-                  const height = t.duration * HOUR_HEIGHT;
-                  return (
-                    <div
-                      key={t.id}
-                      onPointerDown={(e) => handlePointerDownTask(e, t.id)}
-                      className={`absolute left-16 right-2 rounded-lg cursor-grab active:cursor-grabbing text-white p-2 shadow-md`}
-                      style={{
-                        top: `${top}px`,
-                        height: `${height}px`,
-                        backgroundColor: "rgba(239,68,68,0.85)", // đỏ + alpha
-                        touchAction: "none",
-                      }}
-                    >
-                      <div className="font-semibold">{t.title}</div>
-                      <div className="text-xs">
-                        {t.startHour}:00 - {t.startHour + t.duration}:00
-                      </div>
-                      {/* handle resize */}
-                      <div
-                        onPointerDown={(e) => handlePointerDownResize(e, t.id)}
-                        className="absolute bottom-0 left-0 w-full h-2 bg-red-600 rounded-b-md cursor-s-resize"
-                        style={{ touchAction: "none" }}
-                      />
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        </div>
-      </main>
     </div>
   );
 }

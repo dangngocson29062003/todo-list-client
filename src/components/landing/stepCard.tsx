@@ -8,7 +8,7 @@ interface FeatureCardProps {
   onClick?: () => void;
 }
 
-export function FeatureCard({
+export function StepCard({
   title,
   desc,
   image,
