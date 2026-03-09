@@ -1,5 +1,6 @@
 import { NotificationProvider } from "../components/notification/notificationProvider";
 import { ThemeProvider } from "../components/theme-provider";
+import { AuthProvider } from "../context/authContext";
 import "./globals.css";
 import { Lexend } from "next/font/google";
 const lexend = Lexend({
@@ -26,7 +27,11 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <NotificationProvider>{children}</NotificationProvider>
+            <AuthProvider>
+              <NotificationProvider>
+                {children}
+              </NotificationProvider>
+            </AuthProvider>
           </ThemeProvider>
         </body>
       </html>

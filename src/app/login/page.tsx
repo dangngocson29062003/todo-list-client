@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { ArrowLeft, Lock, Mail } from "lucide-react";
 import { login } from "../../service/api";
 import { useRouter } from "next/navigation";
 import { useNotify } from "@/src/components/notification/notificationProvider";
 import { getErrorMessage } from "@/src/utils/helpers";
+import { useAuth } from "@/src/context/authContext";
 
 export default function LoginPage() {
   const router = useRouter();
   const notify = useNotify();
+  const { authLogin } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ export default function LoginPage() {
       const res = await login(email, password, rememberMe);
       console.log("Login successful:", res);
       notify("success", "Login successful");
-      localStorage.setItem("token", res.data);
+      authLogin(res.data);
       router.push("/landing");
     } catch (err) {
       console.error("Login failed:", err);
