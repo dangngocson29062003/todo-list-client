@@ -1,4 +1,4 @@
-import { ArrowRightCircle, Clock, File, FilePlus } from "lucide-react";
+import { ArrowRightCircle, Clock, File, FilePlus, PlusCircle } from "lucide-react";
 import { Card, CardHeader } from "../shadcn/card";
 
 export default function RecentlyItem({user, date, title, category, isCreate} : {user?: string, date?: string, title?: string, category?: string, isCreate?: boolean}) {
@@ -24,7 +24,7 @@ export default function RecentlyItem({user, date, title, category, isCreate} : {
                     </div>
                     
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 absolute bottom-3 right-3 text-green-600 transition"><ArrowRightCircle className="h-5 w-5"/></div>
+                <div className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 absolute bottom-3 right-3 text-green-600 transition"><PlusCircle className="h-5 w-5"/></div>
             </div>
         );
     }
