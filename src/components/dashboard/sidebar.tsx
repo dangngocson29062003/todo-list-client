@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   AudioWaveform,
   Blocks,
@@ -55,13 +56,12 @@ const data = {
     },
     {
       title: "Home",
-      url: "#",
+      url: "/home",
       icon: Home,
-      isActive: true,
     },
     {
       title: "Calendar",
-      url: "#",
+      url: "/calendar",
       icon: Calendar,
     },
 
@@ -167,12 +167,19 @@ const data = {
   ],
 };
 
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  //This section will check pathname and set "isActive" for items in navMain sidebar
+  const pathname = usePathname();
+  const navMainItemsActive = data.navMain.map((item) => ({
+    ...item,
+    isActive: pathname === item.url
+  }));
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
-        <NavMain items={data.navMain} />
+        <NavMain items={navMainItemsActive} />
       </SidebarHeader>
       <SidebarContent>
         <NavProjects projects={data.projects} />
