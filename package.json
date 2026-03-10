@@ -24,6 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
+    "embla-carousel-react": "^8.6.0",
     "flowbite": "^3.1.2",
     "framer-motion": "^12.35.1",
     "lucide-react": "^0.577.0",
