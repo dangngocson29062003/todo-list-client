@@ -29,22 +29,22 @@ export default function LoginPage() {
     } catch (err) {
       console.error("Login failed:", err);
       notify("error", "Login failed", getErrorMessage(err));
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   }
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center
-    bg-gray-100 dark:bg-zinc-900 transition-colors">
-
-      <div className="flex flex-col gap-4 relative w-100 mx-auto
+    <div
+      className="min-h-screen flex items-center justify-center
+    bg-gray-100 dark:bg-zinc-900 transition-colors"
+    >
+      <div
+        className="flex flex-col gap-4 relative w-100 mx-auto
       border border-gray-200 dark:border-zinc-700
       bg-white dark:bg-zinc-800
-      shadow-2xl py-8 px-10 rounded-xl">
-
+      shadow-2xl py-8 px-10 rounded-xl"
+      >
         {/* Back button */}
         <div className="absolute top-3 left-3">
           <ArrowLeft
@@ -65,7 +65,6 @@ export default function LoginPage() {
 
         {/* Inputs */}
         <div className="flex flex-col gap-3 pt-2">
-
           {/* Email */}
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -114,7 +113,6 @@ export default function LoginPage() {
               Forgot password?
             </a>
           </div>
-
         </div>
 
         {/* Login button */}
@@ -154,8 +152,8 @@ export default function LoginPage() {
         <div className="flex justify-center">
           <button
             onClick={() =>
-            (window.location.href =
-              "http://localhost:8080/oauth2/authorization/google")
+              (window.location.href =
+                "http://localhost:8080/oauth2/authorization/google")
             }
             className="flex items-center justify-center w-full h-9 text-sm gap-2
             text-gray-600 dark:text-gray-200
@@ -173,7 +171,6 @@ export default function LoginPage() {
             Google
           </button>
         </div>
-
       </div>
     </div>
   );

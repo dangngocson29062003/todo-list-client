@@ -1,13 +1,12 @@
 "use client";
 
-<<<<<<< Updated upstream:src/app/home/page.tsx
-import { CalendarCheck, Clock, FolderKanban } from "lucide-react";
-import DashboardLayout from "../dashboard/layout";
-=======
+
 import { ArrowRightCircle, CalendarCheck, Clock, FolderKanban } from "lucide-react";
 import DashboardLayout from "../layout";
->>>>>>> Stashed changes:src/app/(dashboard)/home/page.tsx
 import RecentlyItem from "@/src/components/home/recentlyItem";
+import Link from "next/link";
+import ProjectHomeCard from "@/src/components/project/projectHomeCard";
+import { Carousel, CarouselContent, CarouselItem } from "@/src/components/shadcn/carousel";
 
 export default function HomePage() {
 
@@ -31,14 +30,21 @@ export default function HomePage() {
             
             {/* Project Management Area */}
             <section>
-                <div className="text-sm text-gray-400 flex items-center gap-2">
-                    <FolderKanban className="h-5 w-5"></FolderKanban>
-                    <span>Project Management</span>
-                </div>
-                <div className="flex flex-wrap gap-4">
-                    <RecentlyItem isCreate />
-                    <RecentlyItem user="Son Dang" date="09/03/2026" title="First Project" category="Project workspace"/>
-                </div>
+                <Link href="/projects" className="group">
+                    <div className="text-sm text-gray-400 group-hover:text-blue-500 flex items-center gap-2">
+                        <FolderKanban className="h-5 w-5"></FolderKanban>
+                        <span>Project Management</span>
+                        <ArrowRightCircle className="h-4 w-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition" />
+                    </div>
+                </Link>
+                    <ProjectHomeCard
+                        user="Son Dang"
+                        priority="URGENT"
+                        date="09/03/2026"
+                        title="Project Management Application"
+                        category="Project workspace"
+                        href={`/project/1/board`}
+                    />
             </section>
 
             {/* Task Tracking Area */}
@@ -49,7 +55,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex flex-wrap gap-4">
                     <RecentlyItem isCreate />
-                    <RecentlyItem user="Son Dang" date="09/03/2026" title="First Project" category="Project workspace"/>
+                    <RecentlyItem user="Son Dang" date="09/03/2026" title="First Task" category="Task Tracking"/>
                 </div>
             </section>
         </div>
