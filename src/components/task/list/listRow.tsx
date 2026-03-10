@@ -30,7 +30,7 @@ export function ListRow({
       isOver: !!monitor.isOver(),
     }),
   }));
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const statusColor: any = {
     TODO: "#2563EB",
     IN_PROGRESS: "#d5d906",

@@ -5,6 +5,11 @@ export interface Task {
   tags: string;
   priority: string;
   status: TaskStatus;
+  startDate: string;
+  endDate: string;
+  type: string;
+  progress: number;
+  isDisabled: boolean;
 }
 export enum TaskStatus {
   TODO = "TODO",

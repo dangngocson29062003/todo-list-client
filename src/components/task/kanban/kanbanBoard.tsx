@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { KanbanColumn } from "./kanbanColumn";
-const taskStatus = ["TODO", "IN_PROGRESS", "REVIEW", "DONE"];
 const initialTasks: Task[] = [
   {
     id: 1,
@@ -14,6 +13,11 @@ const initialTasks: Task[] = [
     tags: "frontend,ui",
     priority: "HIGH",
     status: TaskStatus.TODO,
+    type: "task",
+    progress: 45,
+    isDisabled: true,
+    startDate: "2026-03-10",
+    endDate: "2026-03-14",
   },
   {
     id: 2,
@@ -22,6 +26,11 @@ const initialTasks: Task[] = [
     tags: "backend,api",
     priority: "HIGH",
     status: TaskStatus.IN_PROGRESS,
+    type: "task",
+    progress: 45,
+    isDisabled: true,
+    startDate: "2026-03-09",
+    endDate: "2026-03-15",
   },
   {
     id: 3,
@@ -30,14 +39,24 @@ const initialTasks: Task[] = [
     tags: "backend",
     priority: "MEDIUM",
     status: TaskStatus.REVIEW,
+    type: "task",
+    progress: 45,
+    isDisabled: true,
+    startDate: "2026-03-11",
+    endDate: "2026-03-16",
   },
   {
     id: 4,
-    title: "Connect frontend with APIIIIIIIIIIIIIII",
+    title: "Connect frontend with API",
     description: "Integrate task APIs with Next.js frontend",
     tags: "frontend,api",
     priority: "MEDIUM",
     status: TaskStatus.TODO,
+    type: "task",
+    progress: 45,
+    isDisabled: true,
+    startDate: "2026-03-12",
+    endDate: "2026-03-18",
   },
   {
     id: 5,
@@ -46,6 +65,11 @@ const initialTasks: Task[] = [
     tags: "frontend,kanban",
     priority: "LOW",
     status: TaskStatus.DONE,
+    type: "task",
+    progress: 45,
+    isDisabled: true,
+    startDate: "2026-03-05",
+    endDate: "2026-03-10",
   },
 ];
 export default function KanbanBoard() {

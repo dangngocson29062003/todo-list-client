@@ -37,7 +37,9 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.0",
+    "react-modern-gantt": "^0.8.3",
     "react-type-animation": "^3.2.0",
+    "sass": "^1.97.3",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

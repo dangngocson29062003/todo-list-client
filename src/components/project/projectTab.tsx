@@ -8,7 +8,7 @@ const tabs = [
   { name: "List", href: "list" },
   { name: "Board", href: "board" },
   { name: "Timeline", href: "timeline" },
-  { name: "Dashboard", href: "dashboard" },
+  { name: "Table", href: "table" },
   { name: "Calendar", href: "calendar" },
   { name: "File", href: "file" },
 ];

@@ -1,0 +1,13 @@
+.rmg-task-list {
+  z-index: 3 !important;
+}
+.rmg-timeline-header-higher {
+  z-index: 2 !important;
+}
+.rmg-timeline-header {
+  z-index: 1 !important;
+}
+.rmg-today-marker {
+  background: red !important;
+  width: 2px;
+}
