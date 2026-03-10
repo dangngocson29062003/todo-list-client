@@ -1,8 +1,8 @@
-import { Dot, EllipsisVertical, Plus } from "lucide-react";
-import { DndProvider, useDrag, useDrop } from "react-dnd";
-import { KanbanItem } from "./kanbanItem";
 import { Task, TaskStatus } from "@/src/types/task";
-import { Button } from "../shadcn/button";
+import { Dot, Plus } from "lucide-react";
+import { useDrop } from "react-dnd";
+import { Button } from "../../shadcn/button";
+import { KanbanItem } from "./kanbanItem";
 type KanbanColumnProps = {
   status: TaskStatus;
   tasks: Task[];
