@@ -1,7 +1,12 @@
 "use client";
 
+<<<<<<< Updated upstream:src/app/home/page.tsx
 import { CalendarCheck, Clock, FolderKanban } from "lucide-react";
 import DashboardLayout from "../dashboard/layout";
+=======
+import { ArrowRightCircle, CalendarCheck, Clock, FolderKanban } from "lucide-react";
+import DashboardLayout from "../layout";
+>>>>>>> Stashed changes:src/app/(dashboard)/home/page.tsx
 import RecentlyItem from "@/src/components/home/recentlyItem";
 
 export default function HomePage() {

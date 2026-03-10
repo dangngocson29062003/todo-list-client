@@ -20,7 +20,7 @@ export default function DashboardLayout({
   title
 }: {
   children: React.ReactNode;
-  title: String;
+  title: string;
 }) {
   return (
     <SidebarProvider>
