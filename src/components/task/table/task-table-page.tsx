@@ -51,7 +51,7 @@ export default function TaskTablePage() {
       },
       {
         id: 4,
-        title: "Connect frontend with APIIIIIIIIIIIIIII",
+        title: "Connect frontend with API",
         description: "Integrate task APIs with Next.js frontend",
         tags: "frontend,api",
         priority: "MEDIUM",
