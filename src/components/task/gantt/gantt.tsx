@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { differenceInDays, addDays, format } from "date-fns";
-import {
-  CalendarDays,
-  CalendarRange,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
 import { buildTree, flatten } from "@/src/helpers/ganttHelper";
-import { startOfMonth, addMonths, differenceInMonths } from "date-fns";
 import { Task } from "@/src/types/task";
+import {
+  addDays,
+  addMonths,
+  differenceInDays,
+  differenceInMonths,
+  format,
+  startOfMonth,
+} from "date-fns";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../../shadcn/button";
 import {
   Tooltip,

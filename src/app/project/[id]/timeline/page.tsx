@@ -1,10 +1,6 @@
 "use client";
-// import { Task, TaskStatus } from "@/src/types/task";
 import Gantt from "@/src/components/task/gantt/gantt";
-import "@/src/styles/gantt-custom.css";
 import { Task, TaskStatus } from "@/src/types/task";
-import { useTheme } from "next-themes";
-import "react-modern-gantt/dist/index.css";
 const initialTasks: Task[] = [
   {
     id: 1,
