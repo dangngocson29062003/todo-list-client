@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "../../shadcn/dropdown-menu";
 import { TableCell, TableRow } from "../../shadcn/table";
+import PriorityBadge from "../../common/priority-badge";
 
 interface KanbanItem {
   task: Task;
@@ -36,23 +37,23 @@ export function ListItem({ task }: KanbanItem) {
 
   //   const numberOfComments = (task.comments && task.comments.length) || 0;
 
-  const PriorityTag = ({ priority }: { priority: Task["priority"] }) => (
-    <Badge
-      className={`text-xs ${
-        priority === "URGENT"
-          ? "bg-red-200 text-red-700"
-          : priority === "HIGH"
-            ? "bg-yellow-200 text-yellow-700"
-            : priority === "MEDIUM"
-              ? "bg-green-200 text-green-700"
-              : priority === "LOW"
-                ? "bg-blue-200 text-blue-700"
-                : "bg-gray-200 text-gray-700"
-      }`}
-    >
-      {priority}
-    </Badge>
-  );
+  // const PriorityTag = ({ priority }: { priority: Task["priority"] }) => (
+  //   <Badge
+  //     className={`text-xs ${
+  //       priority === "URGENT"
+  //         ? "bg-red-200 text-red-700"
+  //         : priority === "HIGH"
+  //           ? "bg-yellow-200 text-yellow-700"
+  //           : priority === "MEDIUM"
+  //             ? "bg-green-200 text-green-700"
+  //             : priority === "LOW"
+  //               ? "bg-blue-200 text-blue-700"
+  //               : "bg-gray-200 text-gray-700"
+  //     }`}
+  //   >
+  //     {priority}
+  //   </Badge>
+  // );
 
   return (
     <TableRow
@@ -70,7 +71,7 @@ export function ListItem({ task }: KanbanItem) {
         </h4>
       </TableCell>
       <TableCell>
-        {task.priority && <PriorityTag priority={task.priority} />}
+        {task.priority && <PriorityBadge priority={task.priority} />}
       </TableCell>
       <TableCell>
         <p className="mt-2 text-sm text-gray-600 dark:text-neutral-500">

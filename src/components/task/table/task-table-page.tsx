@@ -11,6 +11,17 @@ export default function TaskTablePage() {
         tags: "frontend,ui",
         priority: "HIGH",
         status: TaskStatus.TODO,
+        startDate: "2026-03-05",
+        endDate: "2026-03-10",
+        type: "",
+        progress: 0,
+        isDisabled: false,
+        assignees: [
+          {name: "John Doe"},
+          { name: "Anna"},
+          { name: "Bob", avatar: "https://i.pravatar.cc/150?img=3" },
+          { name: "Alice", avatar: "https://i.pravatar.cc/150?img=4" },
+        ]
       },
       {
         id: 2,
@@ -19,6 +30,11 @@ export default function TaskTablePage() {
         tags: "backend,api",
         priority: "HIGH",
         status: TaskStatus.IN_PROGRESS,
+        startDate: "2026-03-05",
+        endDate: "2026-03-10",
+        type: "",
+        progress: 0,
+        isDisabled: false
       },
       {
         id: 3,
@@ -27,6 +43,11 @@ export default function TaskTablePage() {
         tags: "backend",
         priority: "MEDIUM",
         status: TaskStatus.REVIEW,
+        startDate: "2026-03-05",
+        endDate: "2026-03-10",
+        type: "",
+        progress: 0,
+        isDisabled: false
       },
       {
         id: 4,
@@ -35,6 +56,11 @@ export default function TaskTablePage() {
         tags: "frontend,api",
         priority: "MEDIUM",
         status: TaskStatus.TODO,
+        startDate: "2026-03-05",
+        endDate: "2026-03-10",
+        type: "",
+        progress: 0,
+        isDisabled: false
       },
       {
         id: 5,
@@ -43,6 +69,11 @@ export default function TaskTablePage() {
         tags: "frontend,kanban",
         priority: "LOW",
         status: TaskStatus.DONE,
+        startDate: "2026-03-05",
+        endDate: "2026-03-10",
+        type: "",
+        progress: 0,
+        isDisabled: false
       },
     ];
     return (

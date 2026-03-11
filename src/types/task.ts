@@ -10,6 +10,7 @@ export interface Task {
   type: string;
   progress: number;
   isDisabled: boolean;
+  assignees?: {name:string, avatar?: string}[];
 }
 export enum TaskStatus {
   TODO = "TODO",
