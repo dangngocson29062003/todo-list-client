@@ -32,7 +32,37 @@ const statusConfig = {
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: "id",
-        header: "ID",
+        header: () => {
+            return (
+                <div className="flex items-center justify-center">
+                    <span>ID</span>
+                </div>
+            );
+        },
+        cell: ({ row }) => {
+            const id = row.original.id;
+            return (
+                <div className="flex justify-center">
+                    <span className="text-sm text-muted-foreground">{id}</span>
+                </div>
+            )
+        }
+    },
+    {
+        accessorKey: "priority",
+        header: () => {
+            return (
+                <div className="text-center">Priority</div>
+            )
+        },
+        cell: ({ row }) => {
+            const title = row.original.title;
+            return (
+                <div className="flex justify-center">
+                    <PriorityBadge priority = {row.original.priority}/>
+                </div>
+            )
+        }
     },
     {
         accessorKey: "title",
@@ -42,7 +72,6 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex flex-col gap-1">
                     <span className="">{title}</span>
-                    <PriorityBadge priority = {row.original.priority}/>
                 </div>
             )
         }
