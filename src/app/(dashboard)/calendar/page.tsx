@@ -1,4 +1,4 @@
-import DashboardLayout from "../dashboard/layout";
+import DashboardLayout from "../layout";
 
 export default function CalendarPage() {
   return (

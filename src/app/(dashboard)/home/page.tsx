@@ -1,7 +1,8 @@
 "use client";
 
+
 import { ArrowRightCircle, CalendarCheck, Clock, FolderKanban } from "lucide-react";
-import DashboardLayout from "../dashboard/layout";
+import DashboardLayout from "../layout";
 import RecentlyItem from "@/src/components/home/recentlyItem";
 import Link from "next/link";
 import ProjectHomeCard from "@/src/components/project/projectHomeCard";

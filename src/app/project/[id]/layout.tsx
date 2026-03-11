@@ -1,5 +1,5 @@
 import ProjectHeader from "@/src/components/project/projectHeader";
-import DashboardLayout from "../../dashboard/layout";
+import DashboardLayout from "../../(dashboard)/layout";
 
 export default function ProjectLayout({
   children,
