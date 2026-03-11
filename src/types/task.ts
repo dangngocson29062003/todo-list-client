@@ -5,12 +5,13 @@ export interface Task {
   tags: string;
   priority: string;
   status: TaskStatus;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
   type: string;
   progress: number;
-  isDisabled: boolean;
-  assignees?: {name:string, avatar?: string}[];
+  parentId: number | null;
+  expanded?: boolean;
+  assignees?: { name: string; avatar?: string }[];
 }
 export enum TaskStatus {
   TODO = "TODO",
