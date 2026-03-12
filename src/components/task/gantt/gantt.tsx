@@ -1,16 +1,24 @@
 "use client";
 
-import { buildTree, flatten } from "@/src/helpers/ganttHelper";
+import {
+  buildTree,
+  flatten,
+  getMonthGroups,
+  getWeekMonthGroups,
+} from "@/src/helpers/ganttHelper";
 import { Task } from "@/src/types/task";
 import {
   addDays,
   addMonths,
   differenceInDays,
   differenceInMonths,
+  differenceInWeeks,
   format,
+  getWeek,
   startOfMonth,
+  startOfWeek,
 } from "date-fns";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../shadcn/button";
 import {
@@ -19,9 +27,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../shadcn/tooltip";
+import { priorityColorMap } from "../../common/priority-badge";
+import GanttToolbar from "./ganttToolbar";
 
 const DAY_WIDTH = 50;
-const WEEK_WIDTH = 120;
+const WEEK_WIDTH = 140;
 const MONTH_WIDTH = 260;
 const MIN_TASK_WIDTH = 300;
 const MAX_TASK_WIDTH = 600;
@@ -45,10 +55,15 @@ export default function Gantt({ tasks }: Props) {
   const [startWidth, setStartWidth] = useState(90);
   const [endWidth, setEndWidth] = useState(90);
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
+  const [range, setRange] = useState({
+    start: new Date(2026, 1, 1), // 01/02/2026
+    end: new Date(2026, 4, 1), // 01/05/2026
+  });
   const timelineRef = useRef<HTMLDivElement>(null);
-  const startMonth = new Date(2026, 0, 1);
-  const startDate = new Date(2026, 1, 1);
-  const totalDays = 90;
+  const startMonth = startOfMonth(range.start);
+  const startDate = range.start;
+  const totalDays = differenceInDays(range.end, range.start) + 1;
+  const firstWeekStart = startOfWeek(startDate);
   const totalMonths = 12;
 
   useEffect(() => {
@@ -69,12 +84,14 @@ export default function Gantt({ tasks }: Props) {
   const dates = Array.from({ length: totalDays }).map((_, i) =>
     addDays(startDate, i),
   );
-  const months = Array.from({ length: totalMonths }).map((_, i) =>
-    addMonths(startOfMonth(startMonth), i),
+
+  // Tính toán lại số tuần dựa trên phạm vi mới
+  const totalWeeks =
+    Math.ceil(differenceInDays(range.end, firstWeekStart) / 7) + 1;
+  const weeks = Array.from({ length: totalWeeks }).map((_, i) =>
+    addDays(firstWeekStart, i * 7),
   );
-  const weeks = Array.from({ length: Math.ceil(totalDays / 7) }).map((_, i) =>
-    addDays(startDate, i * 7),
-  );
+
   const startResize = (e: React.MouseEvent, column: "task" | "start") => {
     const startX = e.clientX;
 
@@ -106,47 +123,14 @@ export default function Gantt({ tasks }: Props) {
     window.addEventListener("mouseup", onUp);
   };
 
-  const tree = buildTree(data);
-
-  const flatTasks = flatten(tree);
-
-  const dragInfo = useRef<DragInfo>(null);
-
-  function getMonthGroups(dates: Date[]) {
-    const groups: { month: string; start: number; end: number }[] = [];
-
-    let currentMonth: string | null = null;
-    let start = 0;
-
-    dates.forEach((date, i) => {
-      const month = format(date, "yyyy-MM");
-
-      if (month !== currentMonth) {
-        if (currentMonth !== null) {
-          groups.push({
-            month: currentMonth,
-            start,
-            end: i - 1,
-          });
-        }
-
-        currentMonth = month;
-        start = i;
-      }
-
-      if (i === dates.length - 1) {
-        groups.push({
-          month,
-          start,
-          end: i,
-        });
-      }
-    });
-
-    return groups;
-  }
-
   const monthGroups = getMonthGroups(dates);
+  const weekMonthGroups = getWeekMonthGroups(weeks);
+  const totalMonthsView =
+    differenceInMonths(range.end, startOfMonth(range.start)) + 1;
+  const months = Array.from({ length: totalMonthsView }).map((_, i) =>
+    addMonths(startOfMonth(range.start), i),
+  );
+  const dragInfo = useRef<DragInfo>(null);
 
   function updateTask(id: number, updater: (t: Task) => Task) {
     setData((prev) => prev.map((t) => (t.id === id ? updater(t) : t)));
@@ -197,86 +181,47 @@ export default function Gantt({ tasks }: Props) {
     window.removeEventListener("mousemove", onDrag);
     window.removeEventListener("mouseup", stopDrag);
   }
+  const tree = buildTree(data);
 
+  const flatTasks = flatten(tree);
   function toggleExpand(id: number) {
     setData((prev) =>
       prev.map((t) => (t.id === id ? { ...t, expanded: !t.expanded } : t)),
     );
   }
 
-  const todayOffset =
-    viewMode === "day"
-      ? differenceInDays(new Date(), startDate) * DAY_WIDTH
-      : differenceInMonths(new Date(), startMonth) * MONTH_WIDTH;
+  let todayOffset = 0;
+
+  if (viewMode === "day") {
+    todayOffset = differenceInDays(new Date(), startDate) * DAY_WIDTH + 25;
+  }
+
+  if (viewMode === "week") {
+    const daysFromWeekStart = differenceInDays(new Date(), firstWeekStart);
+    todayOffset = daysFromWeekStart * (WEEK_WIDTH / 7);
+  }
+
+  if (viewMode === "month") {
+    const monthDiff = differenceInMonths(new Date(), startMonth);
+    const daysInTodayMonth = differenceInDays(
+      addMonths(startOfMonth(new Date()), 1),
+      startOfMonth(new Date()),
+    );
+    const dayRatio = (new Date().getDate() - 1) / daysInTodayMonth;
+
+    todayOffset = (monthDiff + dayRatio) * MONTH_WIDTH + 10;
+  }
+
   return (
     <div className="flex flex-col justify-center border rounded-xl overflow-hidden bg-white dark:bg-muted shadow-sm">
-      <div className="flex justify-between gap-2 border-b p-4">
-        <h2 className="text-2xl font-bold">Project Management</h2>
-        <TooltipProvider>
-          <div className="flex items-center gap-2 bg-muted dark:bg-card p-1 rounded-lg">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => setViewMode("day")}
-                  className={`
-                    transition-all duration-200 hover:bg-transparent
-                    ${
-                      viewMode === "day"
-                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
-                        : "opacity-60 scale-95 dark:opacity-50"
-                    }
-                  `}
-                >
-                  Day
-                </Button>
-              </TooltipTrigger>
+      <GanttToolbar
+        title="Project Management"
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        range={range}
+        setRange={setRange}
+      />
 
-              <TooltipContent>Day view</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => setViewMode("week")}
-                  className={`
-                  transition-all duration-200 hover:bg-transparent
-                  ${
-                    viewMode === "week"
-                      ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
-                      : "opacity-60 scale-95 dark:opacity-50"
-                  }
-                `}
-                >
-                  Week
-                </Button>
-              </TooltipTrigger>
-
-              <TooltipContent>Month view</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => setViewMode("month")}
-                  className={`
-            transition-all duration-200 hover:bg-transparent
-            ${
-              viewMode === "month"
-                ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
-                : "opacity-60 scale-95 dark:opacity-50"
-            }
-          `}
-                >
-                  Month
-                </Button>
-              </TooltipTrigger>
-
-              <TooltipContent>Month view</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      </div>
       <div className="flex flex-col md:flex-row ">
         {/* TASK LIST */}
 
@@ -370,33 +315,62 @@ export default function Gantt({ tasks }: Props) {
               width:
                 viewMode === "day"
                   ? totalDays * DAY_WIDTH
-                  : totalMonths * MONTH_WIDTH,
+                  : viewMode === "week"
+                    ? weeks.length * WEEK_WIDTH
+                    : totalMonths * MONTH_WIDTH,
             }}
           >
-            {/* MONTH HEADER */}
+            {/* HEADER */}
+            {viewMode !== "month" && (
+              <div
+                className="grid border-b bg-gray-50 dark:bg-muted h-(--gantt-height) items-center font-bold"
+                style={{
+                  gridTemplateColumns:
+                    viewMode === "day"
+                      ? `repeat(${totalDays}, ${DAY_WIDTH}px)`
+                      : viewMode === "week"
+                        ? `repeat(${weeks.length}, ${WEEK_WIDTH}px)`
+                        : ``,
+                }}
+              >
+                {/* DAY MODE */}
+                {viewMode === "day" &&
+                  monthGroups.map((m, i) => (
+                    <div
+                      key={i}
+                      className="text-xl text-gray-500 dark:text-gray-100 text-center border-r"
+                      style={{
+                        gridColumn: `${m.start + 1} / ${m.end + 2}`,
+                      }}
+                    >
+                      {format(addDays(startDate, m.start), "MMM yyyy")}
+                    </div>
+                  ))}
 
-            <div
-              className="grid border-b bg-gray-50 dark:bg-muted h-(--gantt-height) items-center font-bold"
-              style={{
-                gridTemplateColumns: `repeat(${totalDays}, ${DAY_WIDTH}px)`,
-              }}
-            >
-              {monthGroups.map((m, i) => (
-                <div
-                  key={i}
-                  className="text-xl text-gray-500 dark:text-gray-100 text-center border-r"
-                  style={{
-                    gridColumn: `${m.start + 1} / ${m.end + 2}`,
-                  }}
-                >
-                  {format(addDays(startDate, m.start), "MMM yyyy")}
-                </div>
-              ))}
-            </div>
+                {/* WEEK MODE */}
+                {viewMode === "week" &&
+                  weekMonthGroups.map((group, i) => (
+                    <div
+                      key={i}
+                      className="text-xl text-gray-500 dark:text-gray-100 text-center border-r bg-gray-100/50 dark:bg-muted/50"
+                      style={{
+                        // gridColumn: start / end. Lưu ý: CSS Grid index bắt đầu từ 1.
+                        // Cần +1 cho start và +2 cho end để bao phủ hết cột cuối cùng.
+                        gridColumn: `${group.start + 1} / ${group.end + 2}`,
+                      }}
+                    >
+                      {group.label}
+                    </div>
+                  ))}
+              </div>
+            )}
 
             {/* DAY HEADER */}
 
-            <div className="grid border-b sticky top-0 bg-gray-50 dark:bg-border z-10  h-(--gantt-height) items-center text-sm text-center">
+            <div
+              className={`grid border-b sticky top-0 bg-gray-50 dark:bg-border z-10 items-center text-sm text-center 
+    ${viewMode === "month" ? "min-h-[calc(var(--gantt-height)*2)]" : "h-[var(--gantt-height)]"}`}
+            >
               {viewMode === "day" ? (
                 <div
                   className="grid border-b sticky top-0 bg-gray-50 dark:bg-border z-10 h-(--gantt-height) items-center text-sm text-center"
@@ -410,15 +384,31 @@ export default function Gantt({ tasks }: Props) {
                     </div>
                   ))}
                 </div>
+              ) : viewMode === "week" ? (
+                <div
+                  className="grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${weeks.length}, ${WEEK_WIDTH}px)`,
+                  }}
+                >
+                  {weeks.map((week, i) => (
+                    <div key={i} className="border-r">
+                      W{getWeek(week)}
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div
-                  className="grid border-b sticky top-0 bg-gray-50 dark:bg-border z-10 h-(--gantt-height)"
+                  className="grid items-center border-b sticky top-0 bg-gray-50 dark:bg-border z-10 min-h-[calc(var(--gantt-height)*2)]"
                   style={{
                     gridTemplateColumns: `repeat(${months.length}, ${MONTH_WIDTH}px)`,
                   }}
                 >
                   {months.map((m, i) => (
-                    <div key={i} className="border-r text-center text-sm">
+                    <div
+                      key={i}
+                      className="border-r text-center text-sm font-bold"
+                    >
                       {format(m, "MMM yyyy")}
                     </div>
                   ))}
@@ -429,17 +419,14 @@ export default function Gantt({ tasks }: Props) {
             {/* TODAY MARKER */}
 
             <div
-              className="absolute top-[calc(var(--gantt-height)*2-10px)] bottom-0 flex flex-col w-[100px] items-center z-20 pointer-events-none"
+              className="absolute top-[calc(var(--gantt-height)*2-10px)] bottom-0 flex flex-col w-[100px] items-center z-20 select-none pointer-events-none"
               style={{
-                left:
-                  todayOffset +
-                  (viewMode === "day" ? DAY_WIDTH : MONTH_WIDTH) / 2 -
-                  50,
+                left: todayOffset - 50,
               }}
             >
               {/* label */}
               <div className="text-[10px] text-white font-semibold p-1 bg-red-500 rounded-sm">
-                {viewMode === "day" ? "Today" : "This Month"}
+                Today
               </div>
 
               {/* line */}
@@ -449,23 +436,73 @@ export default function Gantt({ tasks }: Props) {
             {/* TASK ROWS */}
 
             {flatTasks.map((task) => {
-              const startOffset =
-                viewMode === "day"
-                  ? differenceInDays(task.startDate, startDate) * DAY_WIDTH
-                  : differenceInMonths(task.startDate, startMonth) *
-                    MONTH_WIDTH;
+              let startOffset = 0;
+              let duration = 0;
 
-              const duration =
-                viewMode === "day"
-                  ? (differenceInDays(task.endDate, task.startDate) + 1) *
-                    DAY_WIDTH
-                  : (differenceInMonths(task.endDate, task.startDate) + 1) *
-                    MONTH_WIDTH;
+              if (viewMode === "day") {
+                startOffset =
+                  differenceInDays(task.startDate, startDate) * DAY_WIDTH;
+
+                duration =
+                  (differenceInDays(task.endDate, task.startDate) + 1) *
+                  DAY_WIDTH;
+              }
+
+              if (viewMode === "week") {
+                const weekIndex = differenceInWeeks(
+                  task.startDate,
+                  firstWeekStart,
+                );
+
+                const startOfCurrentWeek = addDays(
+                  firstWeekStart,
+                  weekIndex * 7,
+                );
+
+                const offsetDays = differenceInDays(
+                  task.startDate,
+                  startOfCurrentWeek,
+                );
+
+                startOffset =
+                  weekIndex * WEEK_WIDTH +
+                  offsetDays * (WEEK_WIDTH / 7) -
+                  WEEK_WIDTH / 7;
+
+                duration =
+                  (differenceInDays(task.endDate, task.startDate) + 1) *
+                  (WEEK_WIDTH / 7);
+              }
+
+              if (viewMode === "month") {
+                // Tính xem task bắt đầu cách mốc startMonth bao nhiêu tháng (số thực)
+                // Ví dụ: 1.5 tháng = 1 tháng + 15 ngày
+                const daysInStartMonth = differenceInDays(
+                  addMonths(startOfMonth(task.startDate), 1),
+                  startOfMonth(task.startDate),
+                );
+
+                const monthDiff = differenceInMonths(
+                  task.startDate,
+                  startMonth,
+                );
+                const dayOffsetInMonth =
+                  (task.startDate.getDate() - 1) / daysInStartMonth;
+
+                startOffset = (monthDiff + dayOffsetInMonth) * MONTH_WIDTH;
+
+                // Tính duration dựa trên tổng số ngày
+                const taskDays =
+                  differenceInDays(task.endDate, task.startDate) + 1;
+                // Giả định trung bình 30 ngày/tháng để tính độ dài tương đối trong mode Month
+                duration = (taskDays / 30) * MONTH_WIDTH;
+              }
 
               return (
                 <div key={task.id} className="relative min-h-16 border-b">
                   <div
-                    className="absolute h-12 rounded-lg shadow-sm bg-indigo-500 hover:bg-indigo-600 flex items-center px-2 text-xs text-white cursor-move transition"
+                    className={`absolute h-12 rounded-lg shadow-sm flex items-center px-4 text-xs truncate select-none cursor-move transition
+                              ${priorityColorMap[task.priority] || "bg-indigo-500 hover:bg-indigo-600"}`}
                     style={{
                       left: startOffset,
                       width: duration,
@@ -479,7 +516,7 @@ export default function Gantt({ tasks }: Props) {
                         e.stopPropagation();
                         startDrag(e, task.id, "resize-left");
                       }}
-                      className="absolute left-0 top-0 w-2 h-full cursor-ew-resize"
+                      className="absolute left-0 top-0 w-2 h-full rounded-l-lg bg-muted-foreground/30 dark:bg-muted/50 cursor-ew-resize"
                     />
 
                     <div
@@ -487,7 +524,7 @@ export default function Gantt({ tasks }: Props) {
                         e.stopPropagation();
                         startDrag(e, task.id, "resize-right");
                       }}
-                      className="absolute right-0 top-0 w-2 h-full cursor-ew-resize"
+                      className="absolute right-0 top-0 w-2 h-full rounded-r-lg bg-muted-foreground/30 dark:bg-muted/50 cursor-ew-resize"
                     />
                   </div>
                 </div>

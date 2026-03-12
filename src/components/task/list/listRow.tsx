@@ -1,5 +1,5 @@
 import { Task, TaskStatus } from "@/src/types/task";
-import { ChevronDown, Dot, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Dot, Plus } from "lucide-react";
 import { useState } from "react";
 import { useDrop } from "react-dnd";
 import { Button } from "../../shadcn/button";
@@ -30,7 +30,7 @@ export function ListRow({
       isOver: !!monitor.isOver(),
     }),
   }));
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const statusColor: any = {
     TODO: "#2563EB",
     IN_PROGRESS: "#d5d906",
@@ -43,9 +43,12 @@ export function ListRow({
       ref={(instance) => {
         drop(instance);
       }}
-      className={`sl:py-4 rounded-lg py-2 xl:px-2 ${isOver ? "bg-blue-100 dark:bg-neutral-950" : ""}`}
+      className={`sl:py-4 rounded-lg py-2 xl:px-2  ${isOver ? "bg-blue-100 dark:bg-neutral-950" : ""}`}
     >
-      <div className=" flex w-full">
+      <div
+        onClick={() => setOpen(!open)}
+        className="flex w-full cursor-pointer"
+      >
         <div
           className={`w-2 !bg-[${statusColor[status]}] rounded-s-lg`}
           style={{ backgroundColor: statusColor[status] }}
@@ -66,9 +69,15 @@ export function ListRow({
             >
               <Plus size={16} />
             </Button>
-            <Button size="icon-xs" onClick={() => setOpen(!open)}>
-              <ChevronDown size={16} strokeWidth={3} />
-            </Button>
+            {open ? (
+              <Button size="icon-xs" onClick={() => setOpen(!open)}>
+                <ChevronUp size={16} strokeWidth={3} />
+              </Button>
+            ) : (
+              <Button size="icon-xs" onClick={() => setOpen(!open)}>
+                <ChevronDown size={16} strokeWidth={3} />
+              </Button>
+            )}
           </div>
         </div>
       </div>
