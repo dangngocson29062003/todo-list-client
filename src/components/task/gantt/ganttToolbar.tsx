@@ -54,7 +54,6 @@ export default function GanttToolbar({
           />
         </div>
 
-        {/* Nút Reset nhanh về mặc định nếu cần */}
         <Button
           variant="outline"
           size="sm"

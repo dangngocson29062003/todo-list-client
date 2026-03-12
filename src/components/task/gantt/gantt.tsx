@@ -84,8 +84,6 @@ export default function Gantt({ tasks }: Props) {
   const dates = Array.from({ length: totalDays }).map((_, i) =>
     addDays(startDate, i),
   );
-
-  // Tính toán lại số tuần dựa trên phạm vi mới
   const totalWeeks =
     Math.ceil(differenceInDays(range.end, firstWeekStart) / 7) + 1;
   const weeks = Array.from({ length: totalWeeks }).map((_, i) =>
@@ -354,8 +352,6 @@ export default function Gantt({ tasks }: Props) {
                       key={i}
                       className="text-xl text-gray-500 dark:text-gray-100 text-center border-r bg-gray-100/50 dark:bg-muted/50"
                       style={{
-                        // gridColumn: start / end. Lưu ý: CSS Grid index bắt đầu từ 1.
-                        // Cần +1 cho start và +2 cho end để bao phủ hết cột cuối cùng.
                         gridColumn: `${group.start + 1} / ${group.end + 2}`,
                       }}
                     >
@@ -475,8 +471,6 @@ export default function Gantt({ tasks }: Props) {
               }
 
               if (viewMode === "month") {
-                // Tính xem task bắt đầu cách mốc startMonth bao nhiêu tháng (số thực)
-                // Ví dụ: 1.5 tháng = 1 tháng + 15 ngày
                 const daysInStartMonth = differenceInDays(
                   addMonths(startOfMonth(task.startDate), 1),
                   startOfMonth(task.startDate),
@@ -491,10 +485,8 @@ export default function Gantt({ tasks }: Props) {
 
                 startOffset = (monthDiff + dayOffsetInMonth) * MONTH_WIDTH;
 
-                // Tính duration dựa trên tổng số ngày
                 const taskDays =
                   differenceInDays(task.endDate, task.startDate) + 1;
-                // Giả định trung bình 30 ngày/tháng để tính độ dài tương đối trong mode Month
                 duration = (taskDays / 30) * MONTH_WIDTH;
               }
 

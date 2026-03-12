@@ -95,12 +95,9 @@ export function getMonthGroups(dates: Date[]) {
 
   return groups;
 }
-// Trong file ganttHelper.ts hoặc ngay trong component
 export function getWeekMonthGroups(weeks: Date[]) {
   const groups: { label: string; start: number; end: number }[] = [];
   if (weeks.length === 0) return groups;
-
-  // Sử dụng ngày giữa tuần (add thêm 3 ngày) để xác định tháng chính xác hơn
   const getLabel = (date: Date) => format(addDays(date, 3), "MMMM yyyy");
 
   let currentMonthLabel = getLabel(weeks[0]);
