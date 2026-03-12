@@ -8,7 +8,7 @@ const tabs = [
   { name: "List", href: "list" },
   { name: "Board", href: "board" },
   { name: "Timeline", href: "timeline" },
-  { name: "Dashboard", href: "dashboard" },
+  { name: "Table", href: "table" },
   { name: "Calendar", href: "calendar" },
   { name: "File", href: "file" },
 ];
@@ -18,7 +18,7 @@ export default function ProjectTabs({ projectId }: { projectId: string }) {
 
   return (
     <div className="border-b border-border mt-4">
-      <div className="flex gap-6 pr-6 overflow-x-auto whitespace-nowrap no-scrollbar">
+      <div className="flex gap-6">
         {tabs.map((tab) => {
           const href = `/project/${projectId}/${tab.href}`;
           const active = pathname === href;

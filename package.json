@@ -21,8 +21,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
     "embla-carousel-react": "^8.6.0",
     "flowbite": "^3.1.2",
@@ -38,6 +40,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.0",
     "react-type-animation": "^3.2.0",
+    "sass": "^1.97.3",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

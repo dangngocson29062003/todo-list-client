@@ -1,10 +1,6 @@
 "use client";
-
+import Gantt from "@/src/components/task/gantt/gantt";
 import { Task, TaskStatus } from "@/src/types/task";
-import { useEffect, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { KanbanColumn } from "./kanbanColumn";
 const initialTasks: Task[] = [
   {
     id: 1,
@@ -16,6 +12,7 @@ const initialTasks: Task[] = [
     type: "task",
     progress: 45,
     parentId: null,
+    expanded: true,
     startDate: new Date(2026, 2, 10),
     endDate: new Date(2026, 2, 14),
   },
@@ -29,6 +26,7 @@ const initialTasks: Task[] = [
     type: "task",
     progress: 45,
     parentId: 1,
+    expanded: true,
     startDate: new Date(2026, 2, 9),
     endDate: new Date(2026, 2, 15),
   },
@@ -42,6 +40,7 @@ const initialTasks: Task[] = [
     type: "task",
     progress: 45,
     parentId: 1,
+    expanded: true,
     startDate: new Date(2026, 2, 11),
     endDate: new Date(2026, 2, 16),
   },
@@ -55,6 +54,7 @@ const initialTasks: Task[] = [
     type: "task",
     progress: 45,
     parentId: null,
+    expanded: true,
     startDate: new Date(2026, 2, 12),
     endDate: new Date(2026, 2, 18),
   },
@@ -68,34 +68,17 @@ const initialTasks: Task[] = [
     type: "task",
     progress: 45,
     parentId: 2,
+    expanded: true,
     startDate: new Date(2026, 2, 5),
     endDate: new Date(2026, 2, 10),
   },
 ];
-export default function KanbanBoard() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  useEffect(() => {
-    console.log(tasks);
-  }, [tasks]);
+export default function TimeLine() {
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-4">
-        {Object.values(TaskStatus).map((status) => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            tasks={tasks || []}
-            moveTask={(taskId, toStatus) => {
-              setTasks((prev) =>
-                prev.map((task) =>
-                  task.id === taskId ? { ...task, status: toStatus } : task,
-                ),
-              );
-            }}
-            setIsModalNewTaskOpen={() => console.log("open modal")}
-          />
-        ))}
+    <div className="p-4">
+      <div className="w-full h-[90rem]">
+        <Gantt tasks={initialTasks} />
       </div>
-    </DndProvider>
+    </div>
   );
 }
