@@ -27,9 +27,11 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {/* <AuthProvider> */}
-            <NotificationProvider>{children}</NotificationProvider>
-            {/*    */}
+            <AuthProvider>
+              <NotificationProvider>
+                {children}
+              </NotificationProvider>
+            </AuthProvider>
           </ThemeProvider>
         </body>
       </html>
