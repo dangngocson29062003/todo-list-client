@@ -1,42 +1,61 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
+import { getMe } from "../service/api";
+
+
 interface User {
   id: string;
   email: string;
+  fullName: string;
+  nickname: string;
+  phone: string;
+  address: string;
+  avatarUrl: string;
   exp: number;
 }
 
 interface AuthContextType {
   authUser: User | null;
   authToken: string | null;
-  authLogin: (newToken: string) => void;
+  authLogin: (newToken: string, user: User) => void;
   authLogout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-function parseJwt(token: string): User {
-  const payload = token.split(".")[1];
-  const decodedPayload = window.atob(payload);
-  return JSON.parse(decodedPayload);
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
+
     if (storedToken) {
-      const parsed = parseJwt(storedToken);
       setAuthToken(storedToken);
-      setAuthUser(parsed);
+      fetchUserData();
+    } else {
+      setLoading(false);
     }
   }, []);
 
-  function authLogin(newToken: string) {
+  async function fetchUserData() {
+    try {
+      const user = await getMe();
+      // console.log(user)
+      setAuthUser(user);
+    } catch {
+      setAuthUser(null);
+      setAuthToken(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function authLogin(newToken: string, user: User) {
     setAuthToken(newToken);
-    setAuthUser(parseJwt(newToken));
+    setAuthUser(user);
     localStorage.setItem("token", newToken);
   }
 
@@ -45,6 +64,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthUser(null);
     localStorage.removeItem("token");
   }
+
+  if (loading) return null;
 
   return (
     <AuthContext.Provider

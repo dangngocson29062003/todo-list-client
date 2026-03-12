@@ -20,9 +20,8 @@ export default function SignupPage() {
     validate();
     try {
       setLoading(true);
-      const res = await register(email, password);
-      console.log("Registration successful:", res);
-      localStorage.setItem("token", res.data);
+      const data = await register(email, password);
+      console.log("Registration successful:", data);
       router.push("/landing");
     } catch (err) {
       notify("error", "Registration failed", getErrorMessage(err));
