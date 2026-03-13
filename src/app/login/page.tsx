@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { ArrowLeft, Lock, Mail } from "lucide-react";
 import { login } from "../../service/api";
 import { useRouter } from "next/navigation";
@@ -11,20 +11,24 @@ import { useAuth } from "@/src/context/authContext";
 export default function LoginPage() {
   const router = useRouter();
   const notify = useNotify();
-  const { authLogin } = useAuth();
+  const { authLogin, authLogout } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
+  useEffect(() => {
+    authLogout();
+  }, [])
+
   async function handleLogin() {
     try {
       setLoading(true);
-      const res = await login(email, password, rememberMe);
-      console.log("Login successful:", res);
+      const data = await login(email, password, rememberMe);
+      console.log("Login successful:", data);
       notify("success", "Login successful");
-      authLogin(res.data);
+      authLogin(data.accessToken, data.user);
       router.push("/landing");
     } catch (err) {
       console.error("Login failed:", err);
@@ -152,8 +156,8 @@ export default function LoginPage() {
         <div className="flex justify-center">
           <button
             onClick={() =>
-              (window.location.href =
-                "http://localhost:8080/oauth2/authorization/google")
+            (window.location.href =
+              "http://localhost:8080/oauth2/authorization/google")
             }
             className="flex items-center justify-center w-full h-9 text-sm gap-2
             text-gray-600 dark:text-gray-200
