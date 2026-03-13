@@ -5,7 +5,6 @@ import { buildTree, flatten } from "@/src/helpers/ganttHelper";
 
 type Props = {
   data: Task[];
-
   taskWidth: number;
   startWidth: number;
   endWidth: number;

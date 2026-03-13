@@ -10,9 +10,9 @@ import {
 } from "date-fns";
 import { Task } from "../types/task";
 
-const DAY_WIDTH = 50;
-const WEEK_WIDTH = 140;
-const MONTH_WIDTH = 260;
+export const DAY_WIDTH = 50;
+export const WEEK_WIDTH = 140;
+export const MONTH_WIDTH = 260;
 
 export function buildTree(tasks: Task[]) {
   const map = new Map<number, any>();
@@ -59,9 +59,6 @@ export function getDepth(taskId: number, tasks: Task[]): number {
   return depth;
 }
 
-export function getDuration(start: Date, end: Date) {
-  return differenceInDays(end, start) + 1;
-}
 export function getMonthGroups(dates: Date[]) {
   const groups: { month: string; start: number; end: number }[] = [];
 
@@ -128,42 +125,8 @@ export function getWeekMonthGroups(weeks: Date[]) {
   return groups;
 }
 
-export function getYearGroups(months: Date[]) {
-  const groups: { label: string; start: number; end: number }[] = [];
-
-  let currentYear: string | null = null;
-  let start = 0;
-
-  months.forEach((month, i) => {
-    const year = format(month, "yyyy");
-
-    if (year !== currentYear) {
-      if (currentYear !== null) {
-        groups.push({
-          label: currentYear,
-          start,
-          end: i - 1,
-        });
-      }
-
-      currentYear = year;
-      start = i;
-    }
-
-    if (i === months.length - 1) {
-      groups.push({
-        label: year,
-        start,
-        end: i,
-      });
-    }
-  });
-
-  return groups;
-}
-
 export const calculateTaskLayout = (
-  task: any,
+  task: Task,
   viewMode: string,
   startDate: Date,
   firstWeekStart: Date,
@@ -171,6 +134,7 @@ export const calculateTaskLayout = (
 ) => {
   let startOffset = 0;
   let duration = 0;
+
   if (viewMode === "day") {
     startOffset = differenceInDays(task.startDate, startDate) * DAY_WIDTH;
 
@@ -207,4 +171,33 @@ export const calculateTaskLayout = (
   }
 
   return { startOffset, duration };
+};
+export const calculateTodayMarker = (
+  viewMode: string,
+  startDate: Date,
+  firstWeekStart: Date,
+  startMonth: Date,
+) => {
+  let todayOffset = 0;
+
+  if (viewMode === "day") {
+    todayOffset = differenceInDays(new Date(), startDate) * DAY_WIDTH + 25;
+  }
+
+  if (viewMode === "week") {
+    const daysFromWeekStart = differenceInDays(new Date(), firstWeekStart);
+    todayOffset = daysFromWeekStart * (WEEK_WIDTH / 7);
+  }
+
+  if (viewMode === "month") {
+    const monthDiff = differenceInMonths(new Date(), startMonth);
+    const daysInTodayMonth = differenceInDays(
+      addMonths(startOfMonth(new Date()), 1),
+      startOfMonth(new Date()),
+    );
+    const dayRatio = (new Date().getDate() - 1) / daysInTodayMonth;
+
+    todayOffset = (monthDiff + dayRatio) * MONTH_WIDTH + 10;
+  }
+  return { todayOffset };
 };

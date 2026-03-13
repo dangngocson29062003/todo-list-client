@@ -1,6 +1,6 @@
 // src/components/gantt/GanttToolbar.tsx
 import { Button } from "@/src/components/shadcn/button";
-import { subDays, addMonths, format, subMonths } from "date-fns";
+import { subDays, addMonths, format, subMonths, startOfDay } from "date-fns";
 import {
   Tooltip,
   TooltipContent,
@@ -34,7 +34,7 @@ export default function GanttToolbar({
             onChange={(e) =>
               setRange({
                 ...range,
-                start: new Date(e.target.value),
+                start: startOfDay(new Date(e.target.value)),
               })
             }
           />
@@ -48,7 +48,7 @@ export default function GanttToolbar({
             onChange={(e) =>
               setRange({
                 ...range,
-                end: new Date(e.target.value),
+                end: startOfDay(new Date(e.target.value)),
               })
             }
           />
@@ -59,8 +59,8 @@ export default function GanttToolbar({
           size="sm"
           onClick={() =>
             setRange({
-              start: subMonths(new Date(), 1),
-              end: addMonths(new Date(), 1),
+              start: startOfDay(subMonths(new Date(), 1)),
+              end: startOfDay(addMonths(new Date(), 1)),
             })
           }
         >

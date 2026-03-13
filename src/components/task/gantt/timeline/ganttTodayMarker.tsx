@@ -1,4 +1,8 @@
-export default function GanttTodayMarker({ todayOffset }: any) {
+export default function GanttTodayMarker({
+  todayOffset,
+}: {
+  todayOffset: number;
+}) {
   return (
     <div
       className="absolute top-[calc(var(--gantt-height)*2-10px)] bottom-0 flex flex-col w-[100px] items-center z-20 select-none pointer-events-none"
