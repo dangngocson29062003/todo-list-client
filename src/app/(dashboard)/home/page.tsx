@@ -12,7 +12,6 @@ export default function HomePage() {
 
  
   return (
-    <DashboardLayout title="Project Management & Task Tracking">
       <div className="flex flex-1 flex-col gap-4 px-20 py-10">
         <div className="text-center text-2xl mb-12">Welcome back! Ready to get things done?</div>
         <div className="flex flex-col gap-10 mx-30">
@@ -60,6 +59,5 @@ export default function HomePage() {
             </section>
         </div>
       </div>
-    </DashboardLayout>
   );
 }
