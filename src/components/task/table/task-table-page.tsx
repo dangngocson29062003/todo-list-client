@@ -71,7 +71,7 @@ export default function TaskTablePage() {
     },
   ];
   return (
-    <div className="container mx-auto py-10">
+    <div className="container w-full px-4">
       <DataTable columns={columns} data={initialTasks} />
     </div>
   );

@@ -60,7 +60,7 @@ export function ListItem({ task }: KanbanItem) {
       ref={(instance) => {
         drag(instance);
       }}
-      className={`mb-4 rounded-md cursor-grab active:cursor-grabbing shadow ${
+      className={`mb-4 rounded-md cursor-grab active:cursor-grabbing hover:bg-gray-100 hover:dark:bg-gray-900 shadow ${
         isDragging ? "opacity-50" : "opacity-100"
       }`}
     >

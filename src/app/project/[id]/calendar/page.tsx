@@ -116,7 +116,7 @@ export default function CalendarPage() {
     }
   };
   return (
-    <div className="h-full w-full rounded-xl p-4 bg-muted">
+    <div className="px-4 pb-4">
       <Calendar
         localizer={localizer}
         date={value}
@@ -125,7 +125,7 @@ export default function CalendarPage() {
         defaultView="month"
         toolbar
         showAllEvents
-        className="h-full"
+        className="h-full bg-muted dark:bg-muted/50 p-4 rounded-md"
         max={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}
         formats={{
           weekdayFormat: (date, culture, localizer) =>

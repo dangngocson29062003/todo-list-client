@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../shadcn/tooltip";
+import { RotateCcw } from "lucide-react";
 interface GanttToolbarType {
   title: string;
   viewMode: "day" | "week" | "month";
@@ -29,7 +30,7 @@ export default function GanttToolbar({
           <span className="text-sm font-medium">From:</span>
           <input
             type="date"
-            className="border rounded px-2 py-1 text-sm bg-white dark:bg-card"
+            className="border rounded-md px-2 py-1 text-sm bg-muted dark:bg-muted/50"
             value={format(range.start, "yyyy-MM-dd")}
             onChange={(e) =>
               setRange({
@@ -43,7 +44,7 @@ export default function GanttToolbar({
           <span className="text-sm font-medium">To:</span>
           <input
             type="date"
-            className="border rounded px-2 py-1 text-sm bg-white dark:bg-card"
+            className="border  rounded-md px-2 py-1 text-sm bg-muted dark:bg-muted/50"
             value={format(range.end, "yyyy-MM-dd")}
             onChange={(e) =>
               setRange({
@@ -56,7 +57,7 @@ export default function GanttToolbar({
 
         <Button
           variant="outline"
-          size="sm"
+          size="icon-sm"
           onClick={() =>
             setRange({
               start: startOfDay(subMonths(new Date(), 1)),
@@ -64,11 +65,11 @@ export default function GanttToolbar({
             })
           }
         >
-          Reset
+          <RotateCcw />
         </Button>
       </div>
       <TooltipProvider>
-        <div className="flex items-center gap-2 bg-muted dark:bg-card p-1 rounded-lg">
+        <div className="flex items-center gap-2 bg-muted-foreground/10 p-1 rounded-lg">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

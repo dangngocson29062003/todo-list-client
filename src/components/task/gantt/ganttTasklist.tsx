@@ -25,7 +25,7 @@ export default function GanttTaskList({
 
   const flatTasks = flatten(tree);
   return (
-    <div className="min-w-[500px] border-r bg-gray-50 dark:bg-muted">
+    <div className="min-w-[500px] border-r bg-muted dark:bg-muted/50">
       {/* HEADER */}
 
       <div

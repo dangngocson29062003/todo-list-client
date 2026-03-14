@@ -1,22 +1,37 @@
-"use client"
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+"use client";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { columns } from "./columns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../shadcn/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../shadcn/table";
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-    const table = useReactTable({
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
+  const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
- 
+  });
+
   return (
-    <div className="overflow-hidden rounded-md border">
-      <Table>
+    <div className="w-full overflow-hidden rounded-md border bg-muted dark:bg-muted/50">
+      <Table className="w-full">
         <TableHeader className="shadow-md">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -27,10 +42,10 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -59,5 +74,5 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

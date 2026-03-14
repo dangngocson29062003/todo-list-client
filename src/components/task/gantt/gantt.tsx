@@ -18,6 +18,7 @@ import {
   startOfDay,
   startOfMonth,
   startOfWeek,
+  subMonths,
 } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { priorityColorMap } from "../../common/priority-badge";
@@ -51,8 +52,8 @@ export default function Gantt({ tasks }: Props) {
   const [endWidth, setEndWidth] = useState(90);
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
   const [range, setRange] = useState({
-    start: startOfDay(new Date(2026, 1, 1)), // 01/02/2026
-    end: startOfDay(new Date(2026, 4, 1)), // 01/05/2026
+    start: subMonths(new Date(), 1), // 01/02/2026
+    end: addMonths(new Date(), 1), // 01/05/2026
   });
   const timelineRef = useRef<HTMLDivElement>(null);
   const startMonth = startOfMonth(range.start);
@@ -170,7 +171,7 @@ export default function Gantt({ tasks }: Props) {
   }
 
   return (
-    <div className="flex flex-col justify-center border rounded-xl overflow-hidden bg-white dark:bg-muted shadow-sm">
+    <div className="flex flex-col justify-center border rounded-xl overflow-hidden bg-muted dark:bg-muted/50 shadow-sm">
       <GanttToolbar
         title="Project Management"
         viewMode={viewMode}
