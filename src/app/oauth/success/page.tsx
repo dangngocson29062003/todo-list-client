@@ -12,9 +12,9 @@ export default function OAuthSuccessPage() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await refresh();
-                const token = res.data;
-                localStorage.setItem("token", token);
+                const token = await refresh();
+                localStorage.setItem("token",token);
+                
                 router.push("/");
             } catch (err) {
                 notify(
