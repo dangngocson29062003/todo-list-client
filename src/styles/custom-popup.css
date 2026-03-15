@@ -1,0 +1,6 @@
+@reference "../app/globals.css";
+@layer utilities {
+  .fill-popover {
+    fill: white;
+  }
+}
