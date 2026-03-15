@@ -1,3 +1,4 @@
+import { Calendar, Clock } from "lucide-react";
 import { Badge } from "../shadcn/badge";
 
 interface EventCardProps {
@@ -18,16 +19,34 @@ export const EventCard = ({
 }: EventCardProps) => {
   return (
     <div className="px-2 py-2">
-      <div className="py-1.5 px-1.5 bg-green-200 text-green-700 rounded-md flex flex-col justify-center items-center gap-2 cursor-pointer hover:opacity-75 transition">
-        <div className="font-bold leading-tight text-center">{title}</div>
-        <div>
-          <Badge className="bg-yellow-200 text-yellow-700">
-            {startHour} - {endHour}
-          </Badge>
+      <div
+        className="
+        bg-green-100 text-green-700
+        border-l-4 border-green-500
+        rounded-lg p-3
+        flex flex-col gap-2
+        cursor-pointer
+        hover:shadow-md hover:scale-[1.02]
+        transition-all
+        "
+      >
+        {/* Title */}
+        <div className="flex items-center gap-2 font-semibold text-sm">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <Calendar size={14} />
+          {title}
         </div>
-        <div className="w-full h-12 text-start font-normal text-muted-foreground text-xs text-wrap truncate">
+
+        {/* Time */}
+        <Badge className="w-fit flex items-center gap-1 bg-yellow-200 text-yellow-700 rounded-full px-3 py-0.5">
+          <Clock size={12} />
+          {startHour} - {endHour}
+        </Badge>
+
+        {/* Description */}
+        <p className="text-xs text-muted-foreground line-clamp-2">
           {description}
-        </div>
+        </p>
       </div>
     </div>
   );
