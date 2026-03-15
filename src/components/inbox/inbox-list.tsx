@@ -20,7 +20,6 @@ export function InboxList() {
       {/* email list */}
       <div className="flex-1 overflow-auto">
         <InboxItem
-          id={1}
           title="Project Management"
           name="William Smith"
           preview="Hi team, just a reminder about our meeting..."
