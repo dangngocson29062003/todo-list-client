@@ -1,1 +1,3 @@
-export default function FilePage() {}
+export default function FilePage() {
+  <div></div>;
+}

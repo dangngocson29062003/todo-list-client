@@ -9,7 +9,6 @@ export default function ProjectLayout({
   return (
     <DashboardLayout title="Projects">
       <ProjectHeader />
-
       {children}
     </DashboardLayout>
   );
