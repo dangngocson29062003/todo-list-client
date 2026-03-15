@@ -17,6 +17,10 @@ export function InboxList() {
       <div className="flex-1 overflow-auto">
 
         <InboxItem
+<<<<<<< Updated upstream
+=======
+          title="Project Management"
+>>>>>>> Stashed changes
           name="William Smith"
           title="Meeting Tomorrow"
           preview="Hi team, just a reminder about our meeting..."
