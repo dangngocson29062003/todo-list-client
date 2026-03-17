@@ -9,7 +9,7 @@ export default function ProjectLayout({
   return (
     <div>
       <ProjectHeader />
-      {children}
+      <div className="p-4">{children}</div>
     </div>
   );
 }

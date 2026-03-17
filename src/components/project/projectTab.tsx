@@ -17,7 +17,7 @@ export default function ProjectTabs({ projectId }: { projectId: string }) {
   const pathname = usePathname();
 
   return (
-    <div className="border-b border-border mt-4">
+    <div className="border-b border-border mt-4 overflow-x-auto snap-x scroll-ps-6">
       <div className="flex gap-6">
         {tabs.map((tab) => {
           const href = `/project/${projectId}/${tab.href}`;

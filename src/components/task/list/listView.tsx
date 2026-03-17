@@ -80,23 +80,21 @@ export default function ListView() {
   }, [tasks]);
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="gap-4 p-4">
-        {Object.values(TaskStatus).map((status) => (
-          <ListRow
-            key={status}
-            status={status}
-            tasks={tasks || []}
-            moveTask={(taskId, toStatus) => {
-              setTasks((prev) =>
-                prev.map((task) =>
-                  task.id === taskId ? { ...task, status: toStatus } : task,
-                ),
-              );
-            }}
-            setIsModalNewTaskOpen={() => console.log("open modal")}
-          />
-        ))}
-      </div>
+      {Object.values(TaskStatus).map((status) => (
+        <ListRow
+          key={status}
+          status={status}
+          tasks={tasks || []}
+          moveTask={(taskId, toStatus) => {
+            setTasks((prev) =>
+              prev.map((task) =>
+                task.id === taskId ? { ...task, status: toStatus } : task,
+              ),
+            );
+          }}
+          setIsModalNewTaskOpen={() => console.log("open modal")}
+        />
+      ))}
     </DndProvider>
   );
 }

@@ -5,7 +5,7 @@ import ProjectTabs from "./projectTab";
 
 export default function ProjectHeader() {
   return (
-    <div className="px-4 md:px-6 py-4">
+    <div className="px-4 md:px-6 pt-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-600/20">

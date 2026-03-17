@@ -116,7 +116,7 @@ export default function CalendarPage() {
     }
   };
   return (
-    <div className="px-4 pb-4">
+    <div className="">
       <Calendar
         localizer={localizer}
         date={value}

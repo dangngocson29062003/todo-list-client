@@ -1,23 +1,15 @@
 "use client";
 
-import * as React from "react";
 import {
-  ArrowDown,
-  ArrowUp,
   Bell,
-  Copy,
-  CornerUpLeft,
-  CornerUpRight,
-  FileText,
-  GalleryVerticalEnd,
-  LineChart,
-  Link,
+  LogOut,
+  Moon,
   MoreHorizontal,
-  Settings2,
+  Settings,
   Star,
-  Trash,
-  Trash2,
+  Sun,
 } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/src/components/shadcn/button";
 import {
@@ -34,84 +26,44 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/src/components/shadcn/sidebar";
+import { useTheme } from "next-themes";
 
 const data = [
   [
     {
-      label: "Customize Page",
-      icon: Settings2,
-    },
-    {
-      label: "Turn into wiki",
-      icon: FileText,
+      label: "Setting",
+      icon: Settings,
     },
   ],
   [
     {
-      label: "Copy Link",
-      icon: Link,
-    },
-    {
-      label: "Duplicate",
-      icon: Copy,
-    },
-    {
-      label: "Move to",
-      icon: CornerUpRight,
-    },
-    {
-      label: "Move to Trash",
-      icon: Trash2,
-    },
-  ],
-  [
-    {
-      label: "Undo",
-      icon: CornerUpLeft,
-    },
-    {
-      label: "View analytics",
-      icon: LineChart,
-    },
-    {
-      label: "Version History",
-      icon: GalleryVerticalEnd,
-    },
-    {
-      label: "Show delete pages",
-      icon: Trash,
-    },
-    {
-      label: "Notifications",
-      icon: Bell,
-    },
-  ],
-  [
-    {
-      label: "Import",
-      icon: ArrowUp,
-    },
-    {
-      label: "Export",
-      icon: ArrowDown,
+      label: "Logout",
+      icon: LogOut,
     },
   ],
 ];
 
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsOpen(true);
-  }, []);
+  const { setTheme, theme } = useTheme();
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <div className="hidden font-medium text-muted-foreground md:inline-block">
-        Edit Oct 08
+      <div className="font-medium text-muted-foreground md:inline-block">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+        >
+          <Sun className="h-[1.5rem] w-[1.3rem] dark:hidden" />
+          <Moon className="hidden h-[1.5rem] w-[1.3rem] dark:block" />
+        </Button>
       </div>
-      <Button variant="ghost" size="icon" className="h-7 w-7">
-        <Star />
+      <Button variant="ghost" size="icon-lg" className="relative">
+        <div className="absolute size-3 top-2 right-2 absolute bg-red-500  rounded-full flex items-center justify-center text-white text-xs">
+          1
+        </div>
+        <Bell />
       </Button>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>

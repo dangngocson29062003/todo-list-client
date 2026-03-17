@@ -22,7 +22,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="pb-10">
         <header className="flex h-14 shrink-0 items-center gap-2 border-bx">
           <div className="flex flex-1 items-center gap-2 px-3">
             <SidebarTrigger />

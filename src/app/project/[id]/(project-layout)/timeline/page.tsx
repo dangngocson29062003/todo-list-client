@@ -75,10 +75,8 @@ const initialTasks: Task[] = [
 ];
 export default function TimeLine() {
   return (
-    <div className="p-4">
-      <div className="w-full">
-        <Gantt tasks={initialTasks} />
-      </div>
+    <div className="w-full">
+      <Gantt tasks={initialTasks} />
     </div>
   );
 }
