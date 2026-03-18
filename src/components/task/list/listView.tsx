@@ -4,6 +4,7 @@ import { Task, TaskStatus } from "@/src/types/task";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import CreateTaskModal from "../create-task-modal";
 import { ListRow } from "./listRow";
 const taskStatus = ["TODO", "IN_PROGRESS", "REVIEW", "DONE"];
 const initialTasks: Task[] = [
@@ -74,27 +75,37 @@ const initialTasks: Task[] = [
   },
 ];
 export default function ListView() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [status, setStatus] = useState<TaskStatus>(TaskStatus.TODO);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   useEffect(() => {
     console.log(tasks);
   }, [tasks]);
   return (
-    <DndProvider backend={HTML5Backend}>
-      {Object.values(TaskStatus).map((status) => (
-        <ListRow
-          key={status}
-          status={status}
-          tasks={tasks || []}
-          moveTask={(taskId, toStatus) => {
-            setTasks((prev) =>
-              prev.map((task) =>
-                task.id === taskId ? { ...task, status: toStatus } : task,
-              ),
-            );
-          }}
-          setIsModalNewTaskOpen={() => console.log("open modal")}
-        />
-      ))}
-    </DndProvider>
+    <>
+      <CreateTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        defaultStatus={status}
+      />
+      <DndProvider backend={HTML5Backend}>
+        {Object.values(TaskStatus).map((status) => (
+          <ListRow
+            key={status}
+            status={status}
+            tasks={tasks || []}
+            moveTask={(taskId, toStatus) => {
+              setTasks((prev) =>
+                prev.map((task) =>
+                  task.id === taskId ? { ...task, status: toStatus } : task,
+                ),
+              );
+            }}
+            setIsModalNewTaskOpen={setIsModalOpen}
+            setStatus={setStatus}
+          />
+        ))}
+      </DndProvider>
+    </>
   );
 }

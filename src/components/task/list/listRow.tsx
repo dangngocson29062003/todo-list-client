@@ -16,12 +16,14 @@ type KanbanColumnProps = {
   tasks: Task[];
   moveTask: (taskId: number, toStatus: TaskStatus) => void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
+  setStatus: (status: TaskStatus) => void;
 };
 export function ListRow({
   status,
   tasks,
   moveTask,
   setIsModalNewTaskOpen,
+  setStatus,
 }: KanbanColumnProps) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
@@ -45,27 +47,30 @@ export function ListRow({
       }}
       className={`sl:py-4 rounded-lg py-2 xl:px-2  ${isOver ? "bg-blue-100 dark:bg-neutral-950" : ""}`}
     >
-      <div
-        onClick={() => setOpen(!open)}
-        className="flex w-full cursor-pointer"
-      >
+      <div className="flex w-full ">
         <div
           className={`w-2 !bg-[${statusColor[status]}] rounded-s-lg`}
           style={{ backgroundColor: statusColor[status] }}
         />
         <div className="flex w-full items-center justify-between rounded-e-lg bg-muted dark:bg-muted/50 px-5 py-2">
-          <div className="flex items-center text-lg font-semibold">
+          <div
+            className="flex flex-1 items-center text-lg font-semibold cursor-pointer"
+            onClick={() => setOpen(!open)}
+          >
             <h3>{status}</h3>
             <Dot className="text-ring" />
             <span className="text-sm leading-none text-ring">
               {tasks.filter((item) => item.status === status).length}
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-none items-center gap-4">
             <Button
               variant="outline"
               size="icon-xs"
-              onClick={() => console.log("open modal")}
+              onClick={() => {
+                setStatus(status);
+                setIsModalNewTaskOpen(true);
+              }}
             >
               <Plus size={16} />
             </Button>

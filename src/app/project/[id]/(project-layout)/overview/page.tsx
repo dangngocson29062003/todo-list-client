@@ -1,238 +1,202 @@
-"use client";
-
-import { Calendar, ClockIcon, PlusCircleIcon, TriangleAlertIcon, User, User2, Users } from "lucide-react";
-import { useParams } from "next/navigation";
+import { Badge } from "@/src/components/shadcn/badge";
 import { Progress } from "@/src/components/shadcn/progress";
+import {
+  BarChart3,
+  Target,
+  Users2,
+  Code2,
+  ExternalLink,
+  Github,
+  Figma,
+  BookOpen,
+  AlertCircle,
+  CheckCircle2,
+  Timer,
+  Ban,
+  TextAlignStart,
+} from "lucide-react";
+export default function ProjectOverview() {
+  // Dữ liệu mẫu (Sau này bạn sẽ thay bằng API)
+  const project = {
+    description:
+      "Thiết lập hệ thống quản lý Task tập trung, hỗ trợ theo dõi tiến độ thời gian thực và quản lý tài nguyên hiệu quả cho các dự án Web Development.",
+    goals: [
+      "Hoàn thiện hệ thống API CRUD trong tháng 4",
+      "Tích hợp AI gợi ý phân bổ công việc",
+      "Đạt 100 người dùng nội bộ trước quý 2",
+    ],
+    techStack: [
+      "Next.js",
+      "Spring Boot",
+      "Prisma",
+      "PostgreSQL",
+      "Tailwind CSS",
+    ],
+    stage: "DEVELOPMENT",
+    stats: {
+      total: 42,
+      completed: 28,
+      overdue: 3,
+      blocked: 2,
+    },
+  };
 
-export default function WorkspacePage() {
-    const params = useParams();
-    const { id } = params;
+  return (
+    <div className="flex flex-col lg:flex-row h-full gap-6 p-6 text-zinc-300">
+      <div className="flex-[2] space-y-6">
+        <section className="space-y-2">
+          <div className="flex gap-2 items-center text-xs font-bold uppercase tracking-wider">
+            <TextAlignStart className="size-4" />
+            Project Description
+          </div>
+          <div className="leading-relaxed">{project.description}</div>
+        </section>
 
-    const project = {
-        name: "Project Name",
-        description: "This is a sample project description. You can replace this with actual project details. It can include information about the project's goals, timeline, and any other relevant details.  This description is meant to give an overview of the project and its objectives.  You can expand this description to include more specific information about the project, such as its scope, deliverables, and any important milestones.  The project description should provide a clear understanding of what the project is about and what it aims to achieve.",
-        id: id,
-        active: true,
-        assignedToMe: true,
-        createdAt: "2025-12-26T00:00:00Z",
-        updatedAt: "2024-01-01T00:00:00Z",
-        finishedAt: "2026-03-25T00:00:00Z",
-        createdBy: "User ID",
-        createdByNickname: "User Nickname",
-        createdByEmail: "user@example.com",
-        createdByAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        priority: "High",
-        label: "Frontend", // Added label for Backlog section
-        members: [{
-            id: "Member ID 1",
-            email: "member1@email.com",
-            avatarUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-        {
-            id: "Member ID 2",
-            email: "member2@email.com",
-            avatarUrl: "https://randomuser.me/api/portraits/women/1.jpg",
-        },
-        {
-            id: "Member ID 3",
-            email: "member3@email.com",
-            avatarUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-        }, {
-            id: "Member ID 4",
-            email: "member4@email.com",
-            avatarUrl: "https://randomuser.me/api/portraits/women/2.jpg",
-        }],
+        {/* Section: Strategic Goals */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+            <Target size={14} /> <span>Key Objectives</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {project.goals.map((goal, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/20 border border-zinc-800/50 text-sm"
+              >
+                <CheckCircle2
+                  size={16}
+                  className="text-emerald-500 mt-0.5 shrink-0"
+                />
+                <span>{goal}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        tasks: [{
-            id: "1",
-            name: "Task 1",
-            description: "Task 1 Description",
-            taskType: "Feature",
-            taskStatus: "To Do",
-            startedAt: "2024-01-01T00:00:00Z",
-            finishedAt: "2024-01-01T00:00:00Z",
-            priority: "Normal",
-            assignees: [{
-                userId: "User ID 1",
-                nickname: "User 1",
-                email: "user1@example.com",
-                avatar: "https://example.com/avatar1.jpg",
-                assignedAt: "2024-01-01T00:00:00Z",
-                assignedBy: "User ID",
-            },
-            {
-                userId: "User ID 2",
-                nickname: "User 2",
-                email: "user2@example.com",
-                avatar: "https://example.com/avatar2.jpg",
-                assignedAt: "2024-01-01T00:00:00Z",
-                assignedBy: "User ID",
-            }]
-        }],
-        messages: [{
-            id: "1",
-            content: "Message content",
-            createdAt: "2024-01-01T00:00:00Z",
-            createdBy: "User ID",
-            createdByNickname: "User Nickname",
-            createdByEmail: "user@example.com",
-            createdByAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-        {
-            id: "2",
-            content: "Message content 2",
-            createdAt: "2024-01-01T00:00:00Z",
-            createdBy: "User ID",
-            createdByNickname: "User Nickname",
-            createdByEmail: "user@example.com",
-            createdByAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        }],
-        files: [{
-            id: "1",
-            name: "project-document.pdf",
-            size: "2.5 MB",
-            uploadedAt: "2024-01-01T00:00:00Z",
-            uploadedBy: "User Nickname",
-            uploadedByAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-        {
-            id: "2",
-            name: "design-mockups.figma",
-            size: "5.2 MB",
-            uploadedAt: "2024-01-02T00:00:00Z",
-            uploadedBy: "User Nickname",
-            uploadedByAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        }]
-    }
+        {/* Section: Tech Stack */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+            <Code2 size={14} /> <span>Technology Stack</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {project.techStack.map((tech) => (
+              <Badge
+                key={tech}
+                variant="secondary"
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-none px-3 py-1"
+              >
+                {tech}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      </div>
 
-    return (
-        <div className="p-1 flex h-full">
-            <div className="px-5 flex-3 border-r-2">
-                <h1 className=" font-semibold">
-                    Description
-                </h1>
-                <p className="p-2 text-gray-500 dark:text-gray-400">
-                    {project.description}
-                </p>
+      {/* CỘT PHẢI: CHỈ SỐ SỨC KHỎE (SIDEBAR) */}
+      <div className="flex-1 min-w-[320px] space-y-6">
+        {/* Card: Project Health */}
+        <div className="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-6">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-2">
+            <BarChart3 size={14} /> Project Health
+          </h3>
+
+          {/* Grid Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800">
+              <p className="text-[10px] uppercase text-zinc-500 mb-1">Total</p>
+              <p className="text-xl font-bold text-white">
+                {project.stats.total}
+              </p>
             </div>
-
-            <div className="flex-1 flex flex-col gap-2 px-5">
-                <div className="flex flex-col gap-2">
-                    <h1 className=" font-semibold">Time</h1>
-
-                    <div className="flex flex-col gap-2 mb-2 text-sm">
-
-                        {project.finishedAt && (
-                            <div className="grid grid-cols-2 gap-5">
-                                <div className="flex gap-2 text-gray-500 dark:text-gray-400 items-center">
-                                    <ClockIcon className="h-4 w-4" />
-                                    <p>Estimate</p>
-                                </div>
-
-                                <p className="text-gray-800 dark:text-gray-200">
-                                    {(() => {
-                                        const diff =
-                                            new Date(project.finishedAt).getTime() -
-                                            new Date(project.createdAt).getTime();
-
-                                        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                                        const months = Math.floor(days / 30);
-                                        const remainingDays = days % 30;
-
-                                        if (months === 0) return `${remainingDays} days`;
-                                        return `${months}m ${remainingDays}d`;
-                                    })()}
-                                </p>
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-5">
-                            <div className="flex gap-2 text-gray-500 dark:text-gray-400 items-center">
-                                <Calendar className="h-4 w-4" />
-                                <p>Due date</p>
-                            </div>
-
-                            <p className="text-gray-800 dark:text-gray-200">
-                                {project.finishedAt
-                                    ? new Date(project.finishedAt).toDateString()
-                                    : "Unknown"}
-                            </p>
-                        </div>
-
-                        {project.finishedAt && (
-                            <div className="mt-2">
-                                <div className="grid grid-cols-2 text-gray-500 dark:text-gray-400 text-sm">
-                                    <p>Day remaining</p>
-
-                                    <p className="text-gray-500 dark:text-gray-400 text-right">
-                                        {(() => {
-                                            const diff =
-                                                new Date(project.finishedAt).getTime() - Date.now();
-
-                                            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                                            const months = Math.floor(days / 30);
-                                            const remainingDays = days % 30;
-
-                                            if (months === 0)
-                                                return days > 0 ? `${remainingDays} days to go` : "Overdue";
-
-                                            if (days > 0)
-                                                return `${months} months ${remainingDays} days to go`;
-
-                                            return "Overdue";
-                                        })()}
-                                    </p>
-                                </div>
-
-                                <Progress
-                                    className="mt-2 bg-gray-200 dark:bg-gray-700"
-                                    value={Math.max(
-                                        0,
-                                        (Date.now() - new Date(project.createdAt).getTime()) /
-                                        (new Date(project.finishedAt).getTime() -
-                                            new Date(project.createdAt).getTime())) * 100
-                                    }
-                                />
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <h1 className="font-semibold">Backlog</h1>
-                    <div className="flex flex-col gap-1">
-                        <div className="grid grid-cols-2 gap-5 text-sm">
-                            <div className="flex gap-2 text-gray-500 dark:text-gray-400 items-center">
-                                <User2 className="h-4 w-4 rounded-full border border-white dark:border-gray-900" />
-                                <p>Creator</p>
-                            </div>
-                            <p className="text-gray-800 dark:text-gray-200">
-                                <img src={project.createdByAvatar} alt={project.createdByEmail} className="h-6 w-6 rounded-full border border-white dark:border-gray-900"
-                                    title={project.createdByEmail} />
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-5 text-sm">
-                            <div className="flex gap-2 text-gray-500 dark:text-gray-400 items-center">
-                                <Users className="h-4 w-4" />
-                                <p>Members</p>
-                            </div>
-                            <p className="text-gray-800 dark:text-gray-200 flex ">
-                                {project.members && (project.members.slice(0, 3).map(member =>
-                                    <img src={member.avatarUrl} alt={member.email} className="h-6 w-6 rounded-full border border-white dark:border-gray-900 -ml-2 first:ml-0"
-                                        title={member.email} />
-                                ))}
-                                {project.members && project.members.length > 3 && (
-                                    <div
-                                        className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-[10px] font-medium text-gray-700 dark:text-gray-200 -ml-2 ring-2 ring-white dark:ring-gray-900 select-none"
-                                        title={`${project.members.length - 3} more members`}
-                                    >
-                                        +{project.members.length - 3}
-                                    </div>
-                                )}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+              <p className="text-[10px] uppercase text-emerald-500/70 mb-1">
+                Done
+              </p>
+              <p className="text-xl font-bold text-emerald-400">
+                {project.stats.completed}
+              </p>
             </div>
+            <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+              <p className="text-[10px] uppercase text-red-500/70 mb-1">
+                Overdue
+              </p>
+              <p className="text-xl font-bold text-red-400">
+                {project.stats.overdue}
+              </p>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+              <p className="text-[10px] uppercase text-amber-500/70 mb-1">
+                Blocked
+              </p>
+              <p className="text-xl font-bold text-amber-400">
+                {project.stats.blocked}
+              </p>
+            </div>
+          </div>
+
+          {/* Overall Progress */}
+          <div className="space-y-2 pt-2">
+            <div className="flex justify-between text-xs font-medium">
+              <span className="text-zinc-500 font-bold uppercase tracking-tighter">
+                Overall Progress
+              </span>
+              <span className="text-emerald-400">67%</span>
+            </div>
+            <Progress value={67} className="h-1.5 bg-zinc-800" />
+          </div>
         </div>
-    );
+
+        {/* Card: Stage & Links */}
+        <div className="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-zinc-500">Current Stage</span>
+            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-2 py-0 font-mono text-[10px]">
+              {project.stage}
+            </Badge>
+          </div>
+
+          <hr className="border-zinc-800" />
+
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">
+              Resources
+            </h4>
+            <div className="grid grid-cols-1 gap-2">
+              <ResourceLink icon={<Github size={14} />} label="Repository" />
+              <ResourceLink icon={<Figma size={14} />} label="Figma Design" />
+              <ResourceLink
+                icon={<BookOpen size={14} />}
+                label="Documentation"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Sub-component cho các link tài nguyên
+function ResourceLink({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <a
+      href="#"
+      className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800 transition-colors text-sm text-zinc-400 hover:text-white group"
+    >
+      <div className="flex items-center gap-2">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <ExternalLink
+        size={12}
+        className="opacity-0 group-hover:opacity-100 transition-opacity"
+      />
+    </a>
+  );
 }

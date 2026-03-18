@@ -209,7 +209,7 @@ export const InlineEditAssignees = ({
                           </Avatar>
                           <div className="flex flex-col flex-1">
                             <p className="text-sm font-medium leading-none">
-                              Nguyen Tien Dat
+                              Phung Van Tien Dat
                             </p>
                             <p className="text-[11px] text-muted-foreground mt-1">
                               tiendat@gmail.com

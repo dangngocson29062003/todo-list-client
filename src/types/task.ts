@@ -10,8 +10,14 @@ export interface Task {
   type: string;
   progress: number;
   parentId: number | null;
-  expanded?: boolean;
   assignees?: { name: string; avatar?: string }[];
+  expanded?: boolean;
+}
+export enum Priority {
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
 }
 export enum TaskStatus {
   TODO = "TODO",
