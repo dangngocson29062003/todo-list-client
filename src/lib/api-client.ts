@@ -1,10 +1,25 @@
 const API_URL = "http://localhost:8080";
 let refreshPromise: Promise<void> | null = null;
 
-async function apiFetch(url: string, options: RequestInit, retry = true) {
+export async function api(url: string, options: RequestInit & { params?: Record<string, any> }, retry = true) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(url, {
+  let finalUrl = `${API_URL}${url}`;
+
+  if (options.params) {
+    const filteredParams = Object.fromEntries(
+      Object.entries(options.params).filter(
+        ([_, value]) => value !== undefined && value !== null
+      )
+    );
+
+    if (Object.keys(filteredParams).length > 0) {
+      const queryString = new URLSearchParams(filteredParams).toString();
+      finalUrl += `?${queryString}`;
+    }
+  }
+
+  const response = await fetch(finalUrl, {
     ...options,
     headers: {
       "Content-type": "application/json",
@@ -16,7 +31,7 @@ async function apiFetch(url: string, options: RequestInit, retry = true) {
   if (response.status === 401 && retry) {
     try {
       await refreshLock();
-      return apiFetch(url, options, false);
+      return api(url, options, false);
     } catch {
       localStorage.removeItem("token");
       window.location.href = "/login";
@@ -57,28 +72,3 @@ async function refreshLock(): Promise<void> {
   return refreshPromise;
 }
 
-export function login(email: string, password: string, rememberMe: boolean) {
-  return apiFetch(`${API_URL}/users/login`, {
-    method: "POST",
-    body: JSON.stringify({ email, password, rememberMe }),
-  });
-}
-
-export function register(email: string, password: string) {
-  return apiFetch(`${API_URL}/users/register`, {
-    method: "POST",
-    body: JSON.stringify({ email, password })
-  });
-}
-
-export function refresh() {
-  return apiFetch(`${API_URL}/users/refresh`, {
-    method: "POST"
-  });
-}
-
-export function getMe() {
-  return apiFetch(`${API_URL}/users/getMe`, {
-    method: "GET"
-  });
-}

@@ -1,21 +1,27 @@
 "use client";
 
 import { useEffect } from "react";
-import { refresh } from "../../../service/api";
+import { refresh,getMe } from "../../../service/auth-service";
 import { useRouter } from "next/navigation";
 import { useNotify } from "@/src/components/notification/notificationProvider";
+import { useAuthContext } from "@/src/context/authContext";
 
 export default function OAuthSuccessPage() {
     const router = useRouter();
     const notify = useNotify();
+    const {authLogin}=useAuthContext();
 
     useEffect(() => {
         (async () => {
             try {
                 const token = await refresh();
-                localStorage.setItem("token",token);
+                const user=await getMe();
+
+                // console.log(user)
+
+                authLogin(token,user)
                 
-                router.push("/");
+                router.push("/home");
             } catch (err) {
                 notify(
                     "error",

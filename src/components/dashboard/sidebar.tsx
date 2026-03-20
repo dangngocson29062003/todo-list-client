@@ -182,8 +182,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMainItemsActive} />
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.projects} />
-        <NavTasks tasks={data.tasks} />
+        <NavProjects />
+        <NavTasks/>
         <NavFavorites favorites={data.favorites} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

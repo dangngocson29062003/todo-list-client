@@ -24,29 +24,35 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/src/components/shadcn/sidebar";
+import { useHomeContext } from "@/src/context/homeContext";
 
-export function NavProjects({
-  projects,
-}: {
-  projects: {
-    name: string;
-    url: string;
-    emoji: string;
-  }[];
-}) {
+export function NavProjects() {
   const { isMobile } = useSidebar();
+  const { data } = useHomeContext();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+        {data?.projects.map((project) => (
+          <SidebarMenuItem key={project.id}>
             <SidebarMenuButton asChild>
-              <a href={item.url} title={item.name}>
-                <span>{item.emoji}</span>
-                <span>{item.name}</span>
-              </a>
+              <span className="flex gap-1 items-center cursor">
+                {project?.avatarUrl ? (
+                  <img
+                    src={project.avatarUrl}
+                    className="w-7 h-7 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-7 h-7 shrink-0 flex items-center justify-center rounded-full bg-green-900 text-green-200">
+                    {project?.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+
+                <p className="text-sm font-normal text-foreground truncate">
+                  {project.name}
+                </p>
+              </span>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

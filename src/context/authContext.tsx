@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getMe } from "../service/api";
+import { getMe } from "../service/auth-service";
 
 
 interface User {
@@ -16,7 +16,8 @@ interface User {
 
 interface AuthContextType {
   authUser: User | null;
-  authToken: string | null;
+  authToken:string | null; 
+  authSetToken: (newToken: string) => void;
   authLogin: (newToken: string, user: User) => void;
   authLogout: () => void;
 }
@@ -65,17 +66,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("token");
   }
 
+  function authSetToken(newToken:string){
+    setAuthToken(newToken);
+    localStorage.setItem("token",newToken);
+  }
+
   if (loading) return null;
 
   return (
     <AuthContext.Provider
-      value={{ authUser, authToken, authLogin, authLogout }}
+      value={{ authUser, authToken, authSetToken, authLogin, authLogout }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
-export function useAuth() {
+export function useAuthContext() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
