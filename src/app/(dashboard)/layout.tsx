@@ -11,6 +11,9 @@ import {
 } from "@/src/components/shadcn/breadcrumb";
 import { Separator } from "@/src/components/shadcn/separator";
 import { SidebarTrigger } from "@/src/components/shadcn/sidebar";
+import { useAuth } from "@/src/context/authContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +22,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
   title: string;
 }) {
+  const { authUser, authToken } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (!authUser && !authToken) {
+      router.replace("/landing");
+    }
+  }, [authUser, authToken, router]);
   return (
     <SidebarProvider>
       <AppSidebar />

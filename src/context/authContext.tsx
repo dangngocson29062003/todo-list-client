@@ -2,7 +2,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getMe } from "../service/api";
 
-
 interface User {
   id: string;
   email: string;
@@ -23,7 +22,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -31,7 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-
     if (storedToken) {
       setAuthToken(storedToken);
       fetchUserData();

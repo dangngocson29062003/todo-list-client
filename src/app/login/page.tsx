@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     authLogout();
-  }, [])
+  }, []);
 
   async function handleLogin() {
     try {
@@ -29,7 +29,7 @@ export default function LoginPage() {
       console.log("Login successful:", data);
       notify("success", "Login successful");
       authLogin(data.accessToken, data.user);
-      router.push("/landing");
+      router.push("/home");
     } catch (err) {
       console.error("Login failed:", err);
       notify("error", "Login failed", getErrorMessage(err));
@@ -156,8 +156,8 @@ export default function LoginPage() {
         <div className="flex justify-center">
           <button
             onClick={() =>
-            (window.location.href =
-              "http://localhost:8080/oauth2/authorization/google")
+              (window.location.href =
+                "http://localhost:8080/oauth2/authorization/google")
             }
             className="flex items-center justify-center w-full h-9 text-sm gap-2
             text-gray-600 dark:text-gray-200
