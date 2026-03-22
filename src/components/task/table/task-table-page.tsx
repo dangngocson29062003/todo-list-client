@@ -1,6 +1,7 @@
-import { Task, TaskStatus } from "@/src/types/task";
+import { Task } from "@/src/types/task";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { TaskStatus } from "@/src/types/enum";
 
 export default function TaskTablePage() {
   const initialTasks: Task[] = [

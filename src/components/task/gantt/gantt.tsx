@@ -12,15 +12,12 @@ import {
   addMonths,
   differenceInDays,
   differenceInMonths,
-  differenceInWeeks,
-  format,
-  getWeek,
   startOfDay,
   startOfMonth,
   startOfWeek,
   subMonths,
 } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { priorityColorMap } from "../../common/priority-badge";
 import GanttTaskList from "./ganttTasklist";
 import GanttToolbar from "./ganttToolbar";

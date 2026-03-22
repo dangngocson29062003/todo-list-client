@@ -1,7 +1,6 @@
 import { Task } from "@/src/types/task";
 import { EllipsisVertical, MessageSquareMore } from "lucide-react";
 import { useDrag } from "react-dnd";
-import { Badge } from "../../shadcn/badge";
 import PriorityBadge from "../../common/priority-badge";
 
 interface KanbanItem {

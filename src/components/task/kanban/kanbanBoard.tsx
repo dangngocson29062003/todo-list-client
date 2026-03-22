@@ -1,10 +1,11 @@
 "use client";
 
-import { Task, TaskStatus } from "@/src/types/task";
+import { Task } from "@/src/types/task";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { KanbanColumn } from "./kanbanColumn";
+import { TaskStatus } from "@/src/types/enum";
 const initialTasks: Task[] = [
   {
     id: 1,

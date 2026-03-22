@@ -1,22 +1,13 @@
-import {
-  differenceInDays,
-  differenceInWeeks,
-  differenceInMonths,
-  addDays,
-  addMonths,
-  startOfMonth,
-  format,
-} from "date-fns";
+import { format } from "date-fns";
 
-import { Task } from "@/src/types/task";
-import { calculateTaskLayout } from "@/src/helpers/ganttHelper";
+import { Badge } from "@/src/components/shadcn/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/src/components/shadcn/tooltip";
-import { Badge } from "@/src/components/shadcn/badge";
-import { Calendar } from "lucide-react";
+import { calculateTaskLayout } from "@/src/helpers/ganttHelper";
+import { Task } from "@/src/types/task";
 
 type DragType = "move" | "resize-left" | "resize-right";
 

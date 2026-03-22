@@ -1,11 +1,12 @@
 "use client";
 
-import { Task, TaskStatus } from "@/src/types/task";
+import { Task } from "@/src/types/task";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import CreateTaskModal from "../create-task-modal";
 import { ListRow } from "./listRow";
+import { TaskStatus } from "@/src/types/enum";
 const taskStatus = ["TODO", "IN_PROGRESS", "REVIEW", "DONE"];
 const initialTasks: Task[] = [
   {

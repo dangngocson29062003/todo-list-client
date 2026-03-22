@@ -1,5 +1,4 @@
 "use client";
-import { Priority, TaskStatus } from "@/src/types/task";
 import { format } from "date-fns";
 import { CalendarIcon, Check, Plus, X } from "lucide-react";
 import { useState } from "react";
@@ -36,6 +35,7 @@ import {
   SelectValue,
 } from "../shadcn/select";
 import { Textarea } from "../shadcn/textarea";
+import { Priority, TaskStatus } from "@/src/types/enum";
 const taskPriorityLabels: Record<Priority, string> = {
   [Priority.LOW]: "Low",
   [Priority.NORMAL]: "Normal",
@@ -151,8 +151,8 @@ export default function CreateTaskModal({
                     <SelectGroup>
                       <SelectLabel>Priority</SelectLabel>
                       {Object.values(Priority).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {taskPriorityLabels[status]}
+                        <SelectItem key={status} value={status as string}>
+                          {taskPriorityLabels[status as Priority]}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -161,7 +161,7 @@ export default function CreateTaskModal({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-2">Status</p>
-                <Select defaultValue={defaultStatus}>
+                <Select>
                   <SelectTrigger className="w-full max-w-48">
                     <SelectValue placeholder="Choose status" />
                   </SelectTrigger>
@@ -169,8 +169,8 @@ export default function CreateTaskModal({
                     <SelectGroup>
                       <SelectLabel>Status</SelectLabel>
                       {Object.values(TaskStatus).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {taskStatusLabels[status]}
+                        <SelectItem key={status} value={status as string}>
+                          {taskStatusLabels[status as TaskStatus]}
                         </SelectItem>
                       ))}
                     </SelectGroup>
