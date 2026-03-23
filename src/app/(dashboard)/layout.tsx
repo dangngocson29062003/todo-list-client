@@ -11,9 +11,10 @@ import {
 } from "@/src/components/shadcn/breadcrumb";
 import { Separator } from "@/src/components/shadcn/separator";
 import { SidebarTrigger } from "@/src/components/shadcn/sidebar";
-import { useAuth } from "@/src/context/authContext";
+import { useAuthContext } from "@/src/context/authContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { HomeProvider } from "@/src/context/homeContext";
 
 export default function DashboardLayout({
   children,
@@ -22,7 +23,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
   title: string;
 }) {
-  const { authUser, authToken } = useAuth();
+  const { authUser, authToken } = useAuthContext();
   const router = useRouter();
   useEffect(() => {
     if (!authUser && !authToken) {
@@ -30,32 +31,34 @@ export default function DashboardLayout({
     }
   }, [authUser, authToken, router]);
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="pb-10">
-        <header className="flex h-14 shrink-0 items-center gap-2 border-bx">
-          <div className="flex flex-1 items-center gap-2 px-3">
-            <SidebarTrigger />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
+    <HomeProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="pb-10">
+          <header className="flex h-14 shrink-0 items-center gap-2 border-bx">
+            <div className="flex flex-1 items-center gap-2 px-3">
+              <SidebarTrigger />
+              <Separator
+                orientation="vertical"
+                className="mr-2 data-[orientation=vertical]:h-4"
+              />
 
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{title}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
 
-          <div className="ml-auto px-3">
-            <NavActions />
-          </div>
-        </header>
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+            <div className="ml-auto px-3">
+              <NavActions />
+            </div>
+          </header>
+          {children}
+        </SidebarInset>
+      </SidebarProvider>
+    </HomeProvider>
   );
 }

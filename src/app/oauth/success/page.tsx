@@ -1,33 +1,37 @@
 "use client";
 
 import { useEffect } from "react";
+import { refresh,getMe } from "../../../service/auth-service";
 import { useRouter } from "next/navigation";
-import { useNotify } from "@/src/components/notification/notificationProvider";
-import { useAuth } from "@/src/context/authContext";
-import { getMe, refresh } from "../../api/auth/login/route";
+import { useNotifyContext } from "@/src/components/notification/notificationProvider";
+import { useAuthContext } from "@/src/context/authContext";
 
 export default function OAuthSuccessPage() {
-  const router = useRouter();
-  const notify = useNotify();
-  const { authLogin } = useAuth();
+    const router = useRouter();
+    const notify = useNotifyContext();
+    const {authLogin}=useAuthContext();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = await refresh();
-        const user = await getMe();
-        authLogin(token, user);
-        router.push("/home");
-      } catch (err) {
-        notify(
-          "error",
-          "OAuth Login Failed",
-          "Unable to refresh session. Please try logging in again.",
-        );
-        router.push("/login");
-      }
-    })();
-  }, []);
+    useEffect(() => {
+        (async () => {
+            try {
+                const token = await refresh();
+                const user=await getMe();
+
+                // console.log(user)
+
+                authLogin(token,user)
+                
+                router.push("/home");
+            } catch (err) {
+                notify(
+                    "error",
+                    "OAuth Login Failed",
+                    "Unable to refresh session. Please try logging in again."
+                );
+                router.push("/login");
+            }
+        })();
+    }, []);
 
   return (
     <div

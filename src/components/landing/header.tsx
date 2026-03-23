@@ -4,12 +4,12 @@ import { Button } from "../shadcn/button";
 import { Moon, Sun } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/src/context/authContext";
+import { useAuthContext } from "@/src/context/authContext";
 
 export default function Header() {
   const { setTheme, theme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
-  const { authUser } = useAuth();
+  const { authUser } = useAuthContext();
 
   useEffect(() => {
     const handleScroll = () => {

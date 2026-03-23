@@ -26,6 +26,8 @@ import {
   SidebarMenuItem,
 } from "@/src/components/shadcn/sidebar";
 import { Button } from "../shadcn/button";
+import { useAuthContext } from "@/src/context/authContext";
+import { useRouter } from "next/navigation";
 
 export function TeamSwitcher({
   teams,
@@ -37,22 +39,32 @@ export function TeamSwitcher({
   }[];
 }) {
   const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const { authUser, authLogout } = useAuthContext();
+  const router = useRouter();
 
   if (!activeTeam) {
     return null;
   }
+
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton className="w-full px-1.5">
-              <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                D
-              </div>
+            <SidebarMenuButton className="flex gap-2 items-center">
+              {authUser?.avatarUrl ? (
+                <img
+                  src={authUser.avatarUrl}
+                  className="w-7 h-7 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-7 h-7 shrink-0 flex items-center justify-center rounded-full bg-blue-500 text-white">
+                  {authUser?.email.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="truncate font-medium w-full">
-                dangngocson29062003@gmail.com
+                {authUser?.email}
               </span>
               <ChevronDown className="opacity-50" />
             </SidebarMenuButton>
@@ -63,12 +75,19 @@ export function TeamSwitcher({
             side="bottom"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground flex gap-2 items-center">
-              <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                D
-              </div>
+            <DropdownMenuLabel className=" text-muted-foreground flex gap-2 items-center">
+              {authUser?.avatarUrl ? (
+                <img
+                  src={authUser.avatarUrl}
+                  className="w-7 h-7 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-7 h-7 shrink-0 flex items-center justify-center rounded-full bg-blue-500 text-white">
+                  {authUser?.email.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="truncate font-medium w-full">
-                dangngocson29062003@gmail.com
+                {authUser?.email}
               </span>
             </DropdownMenuLabel>
             <DropdownMenuLabel
@@ -93,7 +112,12 @@ export function TeamSwitcher({
               </Button>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem
+              className="gap-2 p-2"
+              onClick={() => {
+                authLogout();
+                router.push('/login')
+              }}>
               <div className="text-xs text-muted-foreground">Log out</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
