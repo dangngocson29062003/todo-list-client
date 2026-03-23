@@ -25,9 +25,11 @@ import {
   SidebarContent,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@/src/components/shadcn/sidebar";
 import { NavProjects } from "./nav-project";
 import { NavTasks } from "./nav-tasks";
+import { useEffect } from "react";
 
 // This is sample data.
 const data = {
@@ -175,6 +177,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ...item,
     isActive: pathname === item.url
   }));
+
+  const { isMobile, state } = useSidebar();
+  useEffect(() => {
+    const active = document.activeElement as HTMLElement | null;
+
+    if (active?.closest("[data-sidebar]")) {
+      active.blur();
+    }
+  }, [isMobile, state]);
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -182,8 +193,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMainItemsActive} />
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.projects} />
-        <NavTasks tasks={data.tasks} />
+        <NavProjects />
+        <NavTasks />
         <NavFavorites favorites={data.favorites} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

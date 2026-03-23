@@ -23,25 +23,25 @@ export default function Notification({
     success: {
       icon: CheckCircle2,
       iconColor: "text-green-600",
-      alertColor: "border-green-500 bg-green-50",
+      alertColor: "border-green-500 bg-green-50 text-gray-800 ",
       variant: "default" as const,
     },
     error: {
       icon: AlertCircle,
       iconColor: "text-red-600",
-      alertColor: "border-red-500 bg-red-50",
+      alertColor: "border-red-500 bg-red-50 text-gray-800",
       variant: "destructive" as const,
     },
     info: {
       icon: Info,
       iconColor: "text-blue-600",
-      alertColor: "border-blue-500 bg-blue-50",
+      alertColor: "border-blue-500 bg-blue-50 text-gray-800",
       variant: "default" as const,
     },
     warning: {
       icon: AlertTriangle,
       iconColor: "text-yellow-600",
-      alertColor: "border-yellow-500 bg-yellow-50",
+      alertColor: "border-yellow-500 bg-yellow-50 text-gray-800",
       variant: "default" as const,
     },
   };

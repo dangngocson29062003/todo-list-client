@@ -178,3 +178,24 @@
     @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
   }
 }
+
+
+/* Sidebar scroller for projects and tasks*/
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.4);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.custom-scrollbar:hover {
+  scrollbar-color: rgba(120,120,120,0.4) transparent;
+}
