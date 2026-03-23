@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Lock, LockIcon, LockKeyhole, Mail } from "lucide-react";
 import { register } from "@/src/service/auth-service";
 import { useRouter } from "next/navigation";
-import { useNotify } from "@/src/components/notification/notificationProvider";
+import { useNotifyContext } from "@/src/components/notification/notificationProvider";
 import { getErrorMessage } from "@/src/utils/helpers";
 
 export default function SignupPage() {
   const router = useRouter();
-  const notify = useNotify();
+  const notify = useNotifyContext();
 
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");

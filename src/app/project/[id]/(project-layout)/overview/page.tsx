@@ -1,67 +1,86 @@
+import { ProjectProgressArea } from "@/src/components/project/chart/area-chart";
+import { MemberChart } from "@/src/components/project/chart/bar-chart";
+import { TasksChart } from "@/src/components/project/chart/pie-chart";
 import { Badge } from "@/src/components/shadcn/badge";
 import { Progress } from "@/src/components/shadcn/progress";
+import { format } from "date-fns";
 import {
+  ArrowRight,
   BarChart3,
-  Target,
-  Users2,
+  BookOpen,
+  CalendarIcon,
+  CheckCircle2,
   Code2,
   ExternalLink,
-  Github,
   Figma,
-  BookOpen,
-  AlertCircle,
-  CheckCircle2,
-  Timer,
-  Ban,
+  Github,
+  Target,
   TextAlignStart,
 } from "lucide-react";
 export default function ProjectOverview() {
-  // Dữ liệu mẫu (Sau này bạn sẽ thay bằng API)
   const project = {
     description:
-      "Thiết lập hệ thống quản lý Task tập trung, hỗ trợ theo dõi tiến độ thời gian thực và quản lý tài nguyên hiệu quả cho các dự án Web Development.",
+      "Establish a centralized Task Management system supporting real-time progress tracking and efficient resource management for Web Development projects.",
     goals: [
-      "Hoàn thiện hệ thống API CRUD trong tháng 4",
-      "Tích hợp AI gợi ý phân bổ công việc",
-      "Đạt 100 người dùng nội bộ trước quý 2",
+      "Complete the full suite of CRUD APIs by April",
+      "Integrate AI-driven task allocation suggestions",
+      "Reach 100 internal active users by the end of Q2",
     ],
-    techStack: [
-      "Next.js",
-      "Spring Boot",
-      "Prisma",
-      "PostgreSQL",
-      "Tailwind CSS",
+    techStack: ["Spring Boot", "Prisma", "PostgreSQL"],
+    startDate: "2026-01-10",
+    endDate: "2026-06-15",
+    creator: {
+      name: "Dang Ngoc Son",
+      avatar: "https://github.com/shadcn.png",
+      email: "dangngocson@example.com",
+    },
+    members: [
+      {
+        email: "dangngocson29062003@gmail.com",
+        name: "Dang Ngoc Son",
+        avatar: "",
+      },
+      {
+        email: "phungvantiendat@gmail.com",
+        name: "Phung Van Tien Dat",
+        avatar: "",
+      },
+      {
+        email: "ngueynminhkhang@gmail.com",
+        name: "Nguyen Minh Khang",
+        avatar: "",
+      },
     ],
     stage: "DEVELOPMENT",
     stats: {
       total: 42,
-      completed: 28,
-      overdue: 3,
-      blocked: 2,
+      todo: 24,
+      in_progress: 7,
+      done: 11,
+      block: 0,
     },
   };
-
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6 p-6 text-zinc-300">
+    <div className="flex flex-col lg:flex-row h-full gap-6 p-6">
       <div className="flex-[2] space-y-6">
         <section className="space-y-2">
           <div className="flex gap-2 items-center text-xs font-bold uppercase tracking-wider">
             <TextAlignStart className="size-4" />
             Project Description
           </div>
-          <div className="leading-relaxed">{project.description}</div>
+          <div className="rounded-md text-sm p-4 bg-muted-foreground/10 shadow  leading-relaxed">
+            {project.description}
+          </div>
         </section>
-
-        {/* Section: Strategic Goals */}
         <section className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
             <Target size={14} /> <span>Key Objectives</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {project.goals.map((goal, i) => (
               <div
                 key={i}
-                className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/20 border border-zinc-800/50 text-sm"
+                className="flex items-start gap-3 p-3 rounded-xl shadow bg-muted-foreground/10 text-sm"
               >
                 <CheckCircle2
                   size={16}
@@ -72,95 +91,99 @@ export default function ProjectOverview() {
             ))}
           </div>
         </section>
-
-        {/* Section: Tech Stack */}
         <section className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
             <Code2 size={14} /> <span>Technology Stack</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {project.techStack.map((tech) => (
-              <Badge
-                key={tech}
-                variant="secondary"
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-none px-3 py-1"
-              >
-                {tech}
-              </Badge>
+              <Badge key={tech}>{tech}</Badge>
             ))}
           </div>
         </section>
-      </div>
-
-      {/* CỘT PHẢI: CHỈ SỐ SỨC KHỎE (SIDEBAR) */}
-      <div className="flex-1 min-w-[320px] space-y-6">
-        {/* Card: Project Health */}
-        <div className="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-6">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-2">
-            <BarChart3 size={14} /> Project Health
-          </h3>
-
-          {/* Grid Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800">
-              <p className="text-[10px] uppercase text-zinc-500 mb-1">Total</p>
-              <p className="text-xl font-bold text-white">
-                {project.stats.total}
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-              <p className="text-[10px] uppercase text-emerald-500/70 mb-1">
-                Done
-              </p>
-              <p className="text-xl font-bold text-emerald-400">
-                {project.stats.completed}
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-red-500/5 border border-red-500/20">
-              <p className="text-[10px] uppercase text-red-500/70 mb-1">
-                Overdue
-              </p>
-              <p className="text-xl font-bold text-red-400">
-                {project.stats.overdue}
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-              <p className="text-[10px] uppercase text-amber-500/70 mb-1">
-                Blocked
-              </p>
-              <p className="text-xl font-bold text-amber-400">
-                {project.stats.blocked}
-              </p>
-            </div>
+        <section className="space-y-4">
+          <div className="flex gap-2 items-center text-xs font-bold uppercase tracking-wider">
+            <BarChart3 size={14} /> Analytics Overview
           </div>
 
-          {/* Overall Progress */}
-          <div className="space-y-2 pt-2">
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-zinc-500 font-bold uppercase tracking-tighter">
-                Overall Progress
-              </span>
-              <span className="text-emerald-400">67%</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 p-5 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow">
+              <div className="mb-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Growth & Progress
+                </h4>
+              </div>
+              <ProjectProgressArea />
             </div>
-            <Progress value={67} className="h-1.5 bg-zinc-800" />
+            <div className="p-5 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow flex flex-col justify-center">
+              <div className="mb-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Tasks Analytics
+                </h4>
+              </div>
+              <TasksChart stats={project.stats} />
+            </div>
+          </div>
+          <div className="p-5 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <div className="mb-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Team Capacity
+              </h4>
+            </div>
+            <MemberChart members={project.members} />
+          </div>
+        </section>
+      </div>
+      <div className="flex-1 min-w-[320px] space-y-6">
+        <div className="p-6 rounded-2xl bg-muted shadow space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+              Timeline
+            </h3>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg ">
+                  <CalendarIcon size={14} />
+                </div>
+                <div>
+                  <p className="text-[10px] text-zinc-500 uppercase font-bold">
+                    Start Date
+                  </p>
+                  <p className="font-medium text-zinc-900 dark:text-zinc-200">
+                    {format(project.startDate, "LLLL dd,yyyy")}
+                  </p>
+                </div>
+              </div>
+              <ArrowRight size={14} />
+              <div className="text-right">
+                <p className="text-[10px] text-zinc-500 uppercase font-bold">
+                  End Date
+                </p>
+                <p className="font-medium text-zinc-900 dark:text-zinc-200">
+                  {format(project.endDate, "LLLL dd,yyyy")}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 space-y-2">
+              <div className="flex justify-between text-[11px] font-bold uppercase">
+                <span className="text-emerald-500">Completion</span>
+                <span className="text-zinc-500">67%</span>
+              </div>
+              <Progress value={67} className="h-1.5 bg-zinc-800" />
+            </div>
           </div>
         </div>
-
-        {/* Card: Stage & Links */}
-        <div className="p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
+        <div className="p-5 rounded-2xl bg-muted shadow space-y-4">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-zinc-500">Current Stage</span>
-            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-2 py-0 font-mono text-[10px]">
-              {project.stage}
-            </Badge>
-          </div>
-
-          <hr className="border-zinc-800" />
-
-          <div className="space-y-3">
-            <h4 className="text-[10px] font-bold uppercase text-zinc-500 tracking-widest">
+            <h4 className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
               Resources
             </h4>
+          </div>
+          <div className="space-y-3">
             <div className="grid grid-cols-1 gap-2">
               <ResourceLink icon={<Github size={14} />} label="Repository" />
               <ResourceLink icon={<Figma size={14} />} label="Figma Design" />
@@ -175,8 +198,6 @@ export default function ProjectOverview() {
     </div>
   );
 }
-
-// Sub-component cho các link tài nguyên
 function ResourceLink({
   icon,
   label,

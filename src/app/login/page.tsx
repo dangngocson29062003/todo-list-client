@@ -4,13 +4,13 @@ import { use, useEffect, useState } from "react";
 import { ArrowLeft, Lock, Mail } from "lucide-react";
 import { login } from "@/src/service/auth-service";
 import { useRouter } from "next/navigation";
-import { useNotify } from "@/src/components/notification/notificationProvider";
+import { useNotifyContext } from "@/src/components/notification/notificationProvider";
 import { getErrorMessage } from "@/src/utils/helpers";
 import { useAuthContext } from "@/src/context/authContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const notify = useNotify();
+  const notify = useNotifyContext();
   const { authLogin, authLogout } = useAuthContext();
 
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     authLogout();
-  }, [])
+  }, []);
 
   async function handleLogin() {
     try {
@@ -156,8 +156,8 @@ export default function LoginPage() {
         <div className="flex justify-center">
           <button
             onClick={() =>
-            (window.location.href =
-              "http://localhost:8080/oauth2/authorization/google")
+              (window.location.href =
+                "http://localhost:8080/oauth2/authorization/google")
             }
             className="flex items-center justify-center w-full h-9 text-sm gap-2
             text-gray-600 dark:text-gray-200

@@ -17,20 +17,22 @@ export default function ProjectHeader() {
               <h2 className="text-xl md:text-2xl font-semibold leading-tight">
                 Project Management Application
               </h2>
-
-              <Badge>Spring Boot</Badge>
-              <Badge>Backend</Badge>
+              <Badge className="bg-orange-200 text-orange-500">Backend</Badge>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>
-                <strong className="text-foreground mr-1">ID:</strong> #1
+                <strong className="text-foreground mr-1">ID:</strong>{" "}
+                be2bd489-1bec-45da-a5d8-45dc24f53d0c
               </span>
-
               <span className="flex items-center">
                 <strong className="text-foreground mr-1">Priority:</strong>
-                <Badge variant="destructive" className="ml-1">
-                  URGENT
+                <Badge className="ml-1 bg-red-200 text-red-500">Urgent</Badge>
+              </span>
+              <span className="flex items-center">
+                <strong className="text-foreground mr-1">Stage:</strong>
+                <Badge className="ml-1 bg-blue-200 text-blue-500">
+                  Development
                 </Badge>
               </span>
             </div>
@@ -46,7 +48,6 @@ export default function ProjectHeader() {
           </Button>
         </div>
       </div>
-
       <ProjectTabs projectId="1" />
     </div>
   );

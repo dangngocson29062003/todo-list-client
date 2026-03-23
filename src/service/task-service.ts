@@ -1,15 +1,15 @@
 import { api } from "../lib/api-client";
 
-export function getProjects(
+export function getTasks(
   lastAccessCursor: Date | null,
-  createdAtCursor: Date | null,
+  idCursor: number | null,
   limit?: number) {
   
-  return api(`/projects/simple`, {
+  return api(`/tasks/simple`, {
     method: "GET",
     params: {
       lastAccessCursor,
-      createdAtCursor,
+      idCursor,
       limit
     }
   });

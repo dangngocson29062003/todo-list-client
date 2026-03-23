@@ -1,7 +1,10 @@
 import { api } from "../lib/api-client";
 
-export function getHomeData() {
+export function getHomeData(limit?:number) {
     return api("/home", {
-        method: "GET"
+        method: "GET",
+        params:{
+            limit
+        }
     })
 }
