@@ -27,32 +27,59 @@ export enum Stage {
   CANCELLED,
 }
 export enum TechStack {
-  // Frontend
-  NEXTJS,
-  REACT,
-  TYPESCRIPT,
-  TAILWIND_CSS,
-  SHADCN_UI,
-  REDUX,
-  ZUSTAND,
+  // --- Frontend ---
+  NEXTJS = "NEXTJS",
+  REACT = "REACT",
+  TYPESCRIPT = "TYPESCRIPT",
+  JAVASCRIPT = "JAVASCRIPT",
+  TAILWIND_CSS = "TAILWIND_CSS",
+  SHADCN_UI = "SHADCN_UI",
+  REDUX = "REDUX",
+  ZUSTAND = "ZUSTAND",
+  VUE = "VUE",
+  ANGULAR = "ANGULAR",
+  SVELTE = "SVELTE",
+  THREE_JS = "THREE_JS",
 
-  // Backend
-  SPRING_BOOT,
-  NODEJS,
-  EXPRESS,
-  NESTJS,
-  JAVA,
+  // --- Backend ---
+  SPRING_BOOT = "SPRING_BOOT",
+  JAVA = "JAVA",
+  NODEJS = "NODEJS",
+  EXPRESS = "EXPRESS",
+  NESTJS = "NESTJS",
+  PYTHON = "PYTHON",
+  DJANGO = "DJANGO",
+  FLASK = "FLASK",
+  GO = "GO",
+  PHP = "PHP",
+  LARAVEL = "LARAVEL",
 
-  // Database & ORM
-  POSTGRESQL,
-  MONGODB,
-  MYSQL,
-  PRISMA,
-  REDIS,
+  // --- Database & ORM ---
+  POSTGRESQL = "POSTGRESQL",
+  MONGODB = "MONGODB",
+  MYSQL = "MYSQL",
+  SQLITE = "SQLITE",
+  REDIS = "REDIS",
+  PRISMA = "PRISMA",
+  DRIZZLE = "DRIZZLE",
+  FIREBASE = "FIREBASE",
+  SUPABASE = "SUPABASE",
 
-  // DevOps & Tools
-  DOCKER,
-  AWS,
-  VERCEL,
-  GIT,
+  // --- DevOps & Tools ---
+  DOCKER = "DOCKER",
+  KUBERNETES = "KUBERNETES",
+  AWS = "AWS",
+  AZURE = "AZURE",
+  GOOGLE_CLOUD = "GOOGLE_CLOUD",
+  VERCEL = "VERCEL",
+  NETLIFY = "NETLIFY",
+  GIT = "GIT",
+  GITHUB_ACTIONS = "GITHUB_ACTIONS",
+  NGINX = "NGINX",
+
+  // --- Mobile & Others ---
+  REACT_NATIVE = "REACT_NATIVE",
+  FLUTTER = "FLUTTER",
+  SWIFT = "SWIFT",
+  KOTLIN = "KOTLIN",
 }

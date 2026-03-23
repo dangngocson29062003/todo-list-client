@@ -1,13 +1,13 @@
 "use client";
 
-import { Pie, PieChart, Cell, Label } from "recharts";
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "@/src/components/shadcn/chart";
+import { Cell, Label, Pie, PieChart } from "recharts";
 
 export function TasksChart({ stats }: { stats: any }) {
   const chartData = [
@@ -72,7 +72,7 @@ export function TasksChart({ stats }: { stats: any }) {
                         y={(viewBox.cy || 0) + 5}
                         className="fill-foreground text-3xl font-bold"
                       >
-                        42
+                        {stats.total}
                       </tspan>
                     </text>
                   );

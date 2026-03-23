@@ -26,7 +26,7 @@ const StageLabels: Record<Stage, string> = {
   [Stage.CANCELLED]: "Cancelled",
 };
 
-export const TechStackLabels: Record<TechStack, string> = {
+export const TechStackLabels: Record<string, string> = {
   [TechStack.NEXTJS]: "Next.js",
   [TechStack.REACT]: "React",
   [TechStack.TYPESCRIPT]: "TypeScript",

@@ -1,18 +1,11 @@
 "use client";
 
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-} from "recharts";
-import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/src/components/shadcn/chart";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 const timelineData = [
   { date: "2026-03-15", tasks: 5 },
   { date: "2026-03-16", tasks: 3 },

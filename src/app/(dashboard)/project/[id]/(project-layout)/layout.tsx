@@ -1,5 +1,8 @@
+"use client";
 import ProjectHeader from "@/src/components/project/projectHeader";
-import DashboardLayout from "../../../(dashboard)/layout";
+import { ProjectProvider } from "@/src/context/projectContext";
+import { useParams } from "next/navigation";
+import { createContext, useContext, useState } from "react";
 
 export default function ProjectLayout({
   children,
@@ -7,9 +10,11 @@ export default function ProjectLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <ProjectHeader />
-      <div className="p-4">{children}</div>
-    </div>
+    <ProjectProvider>
+      <div>
+        <ProjectHeader />
+        <main className="p-6">{children}</main>
+      </div>
+    </ProjectProvider>
   );
 }

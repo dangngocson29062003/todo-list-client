@@ -1,9 +1,15 @@
+"use client";
 import { Badge } from "../shadcn/badge";
 import { Button } from "../shadcn/button";
 import { Star, MoreHorizontal, Leaf } from "lucide-react";
 import ProjectTabs from "./projectTab";
+import { useProject } from "@/src/context/projectContext";
+import { PriorityBadge } from "../priority-badge";
+import { StageBadge } from "../stage-bade";
 
 export default function ProjectHeader() {
+  const { project, loading } = useProject();
+  if (loading) return <div>Loading project details...</div>;
   return (
     <div className="px-4 md:px-6 pt-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -11,29 +17,28 @@ export default function ProjectHeader() {
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-600/20">
             <Leaf size={20} className="text-green-400" />
           </div>
-
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl md:text-2xl font-semibold leading-tight">
-                Project Management Application
+                {project.name}
               </h2>
-              <Badge className="bg-orange-200 text-orange-500">Backend</Badge>
+              {project.tags?.split(",").map((tag) => (
+                <Badge key={tag}>{tag.trim()}</Badge>
+              ))}
             </div>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>
                 <strong className="text-foreground mr-1">ID:</strong>{" "}
-                be2bd489-1bec-45da-a5d8-45dc24f53d0c
+                {project.id}
               </span>
               <span className="flex items-center">
                 <strong className="text-foreground mr-1">Priority:</strong>
-                <Badge className="ml-1 bg-red-200 text-red-500">Urgent</Badge>
+                <PriorityBadge priority={project.priority} />
               </span>
               <span className="flex items-center">
                 <strong className="text-foreground mr-1">Stage:</strong>
-                <Badge className="ml-1 bg-blue-200 text-blue-500">
-                  Development
-                </Badge>
+                <StageBadge stage={project.stage} />
               </span>
             </div>
           </div>
@@ -48,7 +53,7 @@ export default function ProjectHeader() {
           </Button>
         </div>
       </div>
-      <ProjectTabs projectId="1" />
+      <ProjectTabs projectId={project.id} />
     </div>
   );
 }

@@ -3,10 +3,12 @@ import { Project } from "./project";
 
 export interface ProjectMember {
   id: string;
-  name: string;
+  userId: string;
+  email: string;
+  fullName: string;
+  nickname: string;
+  avatarUrl: string;
   role: Role;
-  user: User;
   projectId: string;
   createdAt: string;
-  updatedAt: string;
 }

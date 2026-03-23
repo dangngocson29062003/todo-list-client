@@ -21,6 +21,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@icons-pack/react-simple-icons": "^13.13.0",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,6 +46,7 @@
     "react-type-animation": "^3.2.0",
     "recharts": "^2.15.4",
     "sass": "^1.97.3",
+    "simple-icons": "^16.13.0",
     "tailwind-merge": "^3.5.0",
     "vaul": "^1.1.2"
   },

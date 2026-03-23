@@ -1,6 +1,6 @@
 "use client";
+import { PriorityBadge } from "@/src/components/priority-badge";
 import CustomFilter from "@/src/components/project/custom-filter";
-
 import {
   Avatar,
   AvatarFallback,
@@ -20,42 +20,37 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/src/components/shadcn/tooltip";
+import { StageBadge } from "@/src/components/stage-bade";
+import { TechBadge } from "@/src/components/tech-bage";
+
 import { Priority } from "@/src/types/enum";
 import { Project } from "@/src/types/project";
 import { format } from "date-fns";
 import {
-  AlertCircle,
-  Beaker,
   Calendar,
-  CheckCircle2,
-  Clock,
-  FileText,
   MoreVertical,
-  Palette,
   Plus,
-  Rocket,
   SearchIcon,
-  Settings,
   TriangleAlert,
-  XCircle,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const fetchProjects = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/project`, {
+      const res = await fetch(`/api/projects`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(res);
       if (!res.ok) {
         throw new Error(`Failed to fetch projects: ${res.statusText}`);
       }
@@ -98,16 +93,16 @@ export default function ProjectList() {
           </InputGroupAddon>
         </InputGroup>
       </div>
-      {/* Grid List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects?.map((project) => (
           <div
             key={project.id}
+            onClick={() => router.push(`/project/${project.id}/overview`)}
             className="group w-full relative flex flex-col bg-card border rounded-2xl p-6 hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer"
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex gap-4 items-center">
-                <StatusBadge status={project.stage} />
+                <StageBadge stage={project.stage} />
                 <PriorityBadge priority={project.priority} />
               </div>
               <button className="text-muted-foreground hover:text-foreground p-1">
@@ -115,7 +110,7 @@ export default function ProjectList() {
               </button>
             </div>
 
-            <div className="mb-6 flex-1">
+            <div className="mb-4 flex-1">
               <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
                 {project.name}
               </h3>
@@ -125,15 +120,13 @@ export default function ProjectList() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 mb-6">
-              {project.techStack.map((tech) => (
-                <Badge key={tech} className="text-[10px] font-bold uppercase">
-                  {tech}
-                </Badge>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {project.techStack.map((tech, index) => (
+                <TechBadge tech={tech} key={index} />
               ))}
             </div>
 
-            <div className="space-y-3 mb-6">
+            <div className="space-y-2 mb-4">
               <div className="flex justify-between text-xs font-bold uppercase tracking-tighter">
                 <span className="text-muted-foreground">Progress</span>
                 <span>
@@ -206,97 +199,5 @@ export default function ProjectList() {
         ))}
       </div>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const config: any = {
-    PLANNING: {
-      color: "bg-slate-500/10 text-slate-500",
-      icon: <FileText size={12} />,
-      label: "Planning",
-    },
-    DESIGN: {
-      color: "bg-pink-500/10 text-pink-500",
-      icon: <Palette size={12} />,
-      label: "Design",
-    },
-    DEVELOPMENT: {
-      color: "bg-blue-500/10 text-blue-500",
-      icon: <Clock size={12} />,
-      label: "Development",
-    },
-    TESTING: {
-      color: "bg-purple-500/10 text-purple-500",
-      icon: <Beaker size={12} />,
-      label: "Testing",
-    },
-    DEPLOYMENT: {
-      color: "bg-cyan-500/10 text-cyan-500",
-      icon: <Rocket size={12} />,
-      label: "Deployment",
-    },
-    MAINTENANCE: {
-      color: "bg-indigo-500/10 text-indigo-500",
-      icon: <Settings size={12} />,
-      label: "Maintenance",
-    },
-    COMPLETED: {
-      color: "bg-emerald-500/10 text-emerald-500",
-      icon: <CheckCircle2 size={12} />,
-      label: "Completed",
-    },
-    ON_HOLD: {
-      color: "bg-orange-500/10 text-orange-500",
-      icon: <AlertCircle size={12} />,
-      label: "On Hold",
-    },
-    CANCELLED: {
-      color: "bg-red-500/10 text-red-500",
-      icon: <XCircle size={12} />,
-      label: "Cancelled",
-    },
-  };
-
-  // Fallback về PLANNING nếu status không tồn tại
-  const { color, icon, label } = config[status] || config.PLANNING;
-
-  return (
-    <Badge
-      className={`text-[10px] gap-2 shadow items-center rounded-full font-bold uppercase whitespace-nowrap ${color}`}
-    >
-      {icon} {label}
-    </Badge>
-  );
-}
-function PriorityBadge({ priority }: { priority: Priority }) {
-  const config: any = {
-    LOW: {
-      color: "bg-slate-500/10 text-slate-500",
-      label: "Low",
-    },
-    NORMAL: {
-      color: "bg-blue-500/10 text-blue-500",
-      label: "Normal",
-    },
-    HIGH: {
-      color: "bg-orange-500/10 text-orange-500",
-      label: "High",
-    },
-    URGENT: {
-      color: "bg-red-500/10 text-red-500",
-      label: "Urgent",
-    },
-  };
-
-  const { color, label } = config[priority] || config.NORMAL;
-
-  return (
-    <Badge
-      className={`text-[10px] gap-2 shrink-none shadow font-bold ${color}`}
-    >
-      <TriangleAlert className="size-4" />
-      {label}
-    </Badge>
   );
 }

@@ -1,8 +1,19 @@
+"use client";
 import { ProjectProgressArea } from "@/src/components/project/chart/area-chart";
 import { MemberChart } from "@/src/components/project/chart/bar-chart";
 import { TasksChart } from "@/src/components/project/chart/pie-chart";
+import { InviteMemberModal } from "@/src/components/project/invite-modal";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/components/shadcn/avatar";
 import { Badge } from "@/src/components/shadcn/badge";
 import { Progress } from "@/src/components/shadcn/progress";
+import { TechBadge } from "@/src/components/tech-bage";
+import { useProject } from "@/src/context/projectContext";
+import { calculateProgress } from "@/src/helpers/helpter";
+import { cn } from "@/src/lib/utils";
 import { format } from "date-fns";
 import {
   ArrowRight,
@@ -18,48 +29,11 @@ import {
   TextAlignStart,
 } from "lucide-react";
 export default function ProjectOverview() {
-  const project = {
-    description:
-      "Establish a centralized Task Management system supporting real-time progress tracking and efficient resource management for Web Development projects.",
-    goals: [
-      "Complete the full suite of CRUD APIs by April",
-      "Integrate AI-driven task allocation suggestions",
-      "Reach 100 internal active users by the end of Q2",
-    ],
-    techStack: ["Spring Boot", "Prisma", "PostgreSQL"],
-    startDate: "2026-01-10",
-    endDate: "2026-06-15",
-    creator: {
-      name: "Dang Ngoc Son",
-      avatar: "https://github.com/shadcn.png",
-      email: "dangngocson@example.com",
-    },
-    members: [
-      {
-        email: "dangngocson29062003@gmail.com",
-        name: "Dang Ngoc Son",
-        avatar: "",
-      },
-      {
-        email: "phungvantiendat@gmail.com",
-        name: "Phung Van Tien Dat",
-        avatar: "",
-      },
-      {
-        email: "ngueynminhkhang@gmail.com",
-        name: "Nguyen Minh Khang",
-        avatar: "",
-      },
-    ],
-    stage: "DEVELOPMENT",
-    stats: {
-      total: 42,
-      todo: 24,
-      in_progress: 7,
-      done: 11,
-      block: 0,
-    },
-  };
+  const { project, loading } = useProject();
+
+  if (loading) return <div>Loading project details...</div>;
+
+  const progressValue = calculateProgress(project.startDate, project.endDate);
   return (
     <div className="flex flex-col lg:flex-row h-full gap-6 p-6">
       <div className="flex-[2] space-y-6">
@@ -77,7 +51,7 @@ export default function ProjectOverview() {
             <Target size={14} /> <span>Key Objectives</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {project.goals.map((goal, i) => (
+            {project.goals?.map((goal, i) => (
               <div
                 key={i}
                 className="flex items-start gap-3 p-3 rounded-xl shadow bg-muted-foreground/10 text-sm"
@@ -96,8 +70,8 @@ export default function ProjectOverview() {
             <Code2 size={14} /> <span>Technology Stack</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {project.techStack.map((tech) => (
-              <Badge key={tech}>{tech}</Badge>
+            {project.techStack.map((tech, index) => (
+              <TechBadge tech={tech} key={index} />
             ))}
           </div>
         </section>
@@ -137,7 +111,7 @@ export default function ProjectOverview() {
       <div className="flex-1 min-w-[320px] space-y-6">
         <div className="p-6 rounded-2xl bg-muted shadow space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+            <h3 className="text-[10px] font-bold uppercase text-zinc-500">
               Timeline
             </h3>
           </div>
@@ -153,7 +127,7 @@ export default function ProjectOverview() {
                     Start Date
                   </p>
                   <p className="font-medium text-zinc-900 dark:text-zinc-200">
-                    {format(project.startDate, "LLLL dd,yyyy")}
+                    {format(new Date(project.startDate), "LLLL dd,yyyy")}
                   </p>
                 </div>
               </div>
@@ -163,7 +137,7 @@ export default function ProjectOverview() {
                   End Date
                 </p>
                 <p className="font-medium text-zinc-900 dark:text-zinc-200">
-                  {format(project.endDate, "LLLL dd,yyyy")}
+                  {format(project.endDate, "LLLL dd, yyyy")}
                 </p>
               </div>
             </div>
@@ -171,15 +145,99 @@ export default function ProjectOverview() {
             <div className="pt-2 space-y-2">
               <div className="flex justify-between text-[11px] font-bold uppercase">
                 <span className="text-emerald-500">Completion</span>
-                <span className="text-zinc-500">67%</span>
+                <span className="text-zinc-500">{progressValue}%</span>
               </div>
-              <Progress value={67} className="h-1.5 bg-zinc-800" />
+              <Progress
+                value={progressValue}
+                className="h-1.5 bg-zinc-200 dark:bg-zinc-800"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="p-5 rounded-2xl bg-muted shadow space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-[10px] font-bold uppercase text-muted-foreground">
+                  Members
+                </h4>
+                <Badge
+                  variant="secondary"
+                  className="flex justify-center items-center h-5 px-1.5 text-[10px] font-bold bg-emerald-500 text-emerald-100 dark:bg-emerald-100 dark:text-emerald-500"
+                >
+                  {project.members.length}
+                </Badge>
+              </div>
+
+              <InviteMemberModal members={project.members} />
+            </div>
+
+            <div className="space-y-1">
+              {project.members.map((item, index) => {
+                // Logic định nghĩa màu sắc theo Role
+                const isOwner =
+                  item.role.toString().toUpperCase() === "MANAGER";
+
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2 group transition-all duration-300 rounded-xl hover:bg-background hover:shadow-sm hover:translate-x-1 border border-transparent hover:border-border/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Avatar className="size-9 ring-offset-background group-hover:ring-2 ring-emerald-500/30 transition-all duration-500">
+                          <AvatarImage
+                            src={item.avatarUrl ?? ""}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="text-xs bg-muted-foreground/50 text-white font-bold">
+                            {item.email.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="absolute bottom-0 right-0 size-2.5 bg-emerald-500 border-2 border-muted rounded-full" />
+                      </div>
+
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-foreground/90 group-hover:text-emerald-500 transition-colors duration-300">
+                            {item.nickname ?? item.fullName}
+                          </span>
+                          <div className="w-1 h-1 bg-muted-foreground rounded-full" />
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold uppercase",
+                              isOwner
+                                ? "text-amber-500/80"
+                                : "text-muted-foreground/70",
+                            )}
+                          >
+                            {item.role}
+                          </span>
+                        </div>
+
+                        <span className="text-xs text-muted-foreground">
+                          {item.email}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Hiển thị Badge hoặc Action tùy ý */}
+                    <div className="flex items-center gap-2">
+                      <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                        <button className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors">
+                          <ExternalLink size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
         <div className="p-5 rounded-2xl bg-muted shadow space-y-4">
           <div className="flex justify-between items-center text-sm">
-            <h4 className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+            <h4 className="text-[10px] font-bold uppercase text-zinc-500">
               Resources
             </h4>
           </div>
