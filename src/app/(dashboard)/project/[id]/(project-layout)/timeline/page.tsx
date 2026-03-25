@@ -1,6 +1,7 @@
 "use client";
 import Gantt from "@/src/components/task/gantt/gantt";
-import { Task, TaskStatus } from "@/src/types/task";
+import { TaskStatus } from "@/src/types/enum";
+import { Task } from "@/src/types/task";
 const initialTasks: Task[] = [
   {
     id: 1,

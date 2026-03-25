@@ -4,10 +4,10 @@ export enum Role {
   VIEWER,
 }
 export enum TaskStatus {
-  TODO,
-  IN_PROGRESS,
-  REVIEW,
-  DONE,
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  REVIEW = "REVIEW",
+  DONE = "DONE",
 }
 export enum Priority {
   LOW,
@@ -68,8 +68,6 @@ export enum TechStack {
   // --- DevOps & Tools ---
   DOCKER = "DOCKER",
   KUBERNETES = "KUBERNETES",
-  AWS = "AWS",
-  AZURE = "AZURE",
   GOOGLE_CLOUD = "GOOGLE_CLOUD",
   VERCEL = "VERCEL",
   NETLIFY = "NETLIFY",

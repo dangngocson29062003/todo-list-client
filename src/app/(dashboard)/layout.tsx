@@ -1,8 +1,7 @@
 "use client";
 
-import { AppSidebar } from "@/src/components/dashboard/sidebar";
-import { SidebarInset, SidebarProvider } from "@/src/components/shadcn/sidebar";
 import { NavActions } from "@/src/components/dashboard/nav-actions";
+import { AppSidebar } from "@/src/components/dashboard/sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,11 +9,15 @@ import {
   BreadcrumbPage,
 } from "@/src/components/shadcn/breadcrumb";
 import { Separator } from "@/src/components/shadcn/separator";
-import { SidebarTrigger } from "@/src/components/shadcn/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/src/components/shadcn/sidebar";
 import { useAuthContext } from "@/src/context/authContext";
+import { HomeProvider } from "@/src/context/homeContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { HomeProvider } from "@/src/context/homeContext";
 
 export default function DashboardLayout({
   children,
@@ -30,9 +33,10 @@ export default function DashboardLayout({
       router.replace("/landing");
     }
   }, [authUser, authToken, router]);
+
   return (
-    <HomeProvider>
-      <SidebarProvider>
+    <SidebarProvider>
+      <HomeProvider>
         <AppSidebar />
         <SidebarInset className="pb-10">
           <header className="flex h-14 shrink-0 items-center gap-2 border-bx">
@@ -58,7 +62,7 @@ export default function DashboardLayout({
           </header>
           {children}
         </SidebarInset>
-      </SidebarProvider>
-    </HomeProvider>
+      </HomeProvider>
+    </SidebarProvider>
   );
 }

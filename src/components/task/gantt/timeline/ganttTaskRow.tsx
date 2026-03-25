@@ -77,7 +77,7 @@ export default function GanttTaskRows({
               <TooltipContent
                 side="right"
                 sideOffset={10}
-                className="w-64 flex flex-col gap-1 "
+                className="flex shadow flex-col gap-1 p-2"
               >
                 <div className="flex items-center gap-2">
                   <h2 className="font-bold truncate">{task.title}</h2>

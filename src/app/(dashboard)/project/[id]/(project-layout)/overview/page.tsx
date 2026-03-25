@@ -70,7 +70,7 @@ export default function ProjectOverview() {
             <Code2 size={14} /> <span>Technology Stack</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {project.techStack.map((tech, index) => (
+            {project.techStack?.map((tech, index) => (
               <TechBadge tech={tech} key={index} />
             ))}
           </div>

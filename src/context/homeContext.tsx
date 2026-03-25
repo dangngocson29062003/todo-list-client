@@ -1,170 +1,118 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { getHomeData } from "../service/main-service";
-import { getProjects } from "../service/project-service";
-import { useNotifyContext } from "../components/notification/notificationProvider";
-import { updateProjectPinStatus } from "../service/project-member-service";
-import { getTasks } from "../service/task-service";
-import { updateTaskPinStatus } from "../service/task-assignment-service";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import { useAuthContext } from "./authContext";
+import { Project } from "@/src/types/project";
 
 interface HomeContextType {
-  projects: any[];
-  projectLastAccessCursor: Date | null;
-  projectCreatedAtCursor: Date | null;
-  projectHasNext: boolean;
-  fetchProjects: () => Promise<void>;
-  pinProject: (projectId: string, userId: string) => void;
-
-  tasks: any[]
-  taskLastAccessCursor: Date | null;
-  taskIdCursor: number | null;
-  taskHasNext: boolean;
-  fetchTasks: () => Promise<void>;
-  pinTask: (taskId: number, userId: string) => void;
-
-  refetch: () => void;
+  projects: Project[];
+  loading: boolean;
+  hasNext: boolean;
+  currentPage: number;
+  currentSort: string;
+  searchTerm: string;
+  limit: number;
+  setLimit: (val: number) => void;
+  setSearchTerm: (val: string) => void;
+  setCurrentSort: (val: "recent" | "alphabetical" | "created") => void;
+  loadMore: () => void;
+  refresh: () => void;
 }
 
-const HomeContext = createContext<HomeContextType | null>(null);
+const HomeContext = createContext<HomeContextType | undefined>(undefined);
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
-  const [projects, setProjects] = useState<any[]>([])
-  const [projectLastAccessCursor, setProjectLastAccessCursor] = useState<Date | null>(null);
-  const [projectCreatedAtCursor, setProjectCreatedAtCursor] = useState<Date | null>(null);
-  const [projectHasNext, setProjectHasNext] = useState(true);
+  const { authToken } = useAuthContext();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasNext, setHasNext] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [currentSort, setCurrentSort] = useState("recent");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [limit, setLimit] = useState(10);
 
-  const [tasks, setTasks] = useState<any[]>([])
-  const [taskLastAccessCursor, setTaskLastAccessCursor] = useState<Date | null>(null);
-  const [taskIdCursor, setTaskIdCursor] = useState<number | null>(null);
-  const [taskHasNext, setTaskHasNext] = useState(true);
+  const fetchProjects = useCallback(
+    async (pageToFetch: number, isAppending: boolean) => {
+      if (!authToken) return;
 
-  const notify = useNotifyContext();
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: pageToFetch.toString(),
+          limit: limit.toString(),
+          sortBy: currentSort,
+          ...(searchTerm && { name: searchTerm }),
+        });
 
-  const LIMIT = 6;
+        const res = await fetch(`/api/projects?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
 
-  const fetchData = async () => {
-    try {
-      const res = await getHomeData(LIMIT);
-      console.log(res)
-      const projectsData = res.projectsData;
-      const tasksData = res.tasksData;
+        if (res.ok) {
+          const result = await res.json();
+          const {
+            projects,
+            currentPage: respPage,
+            hasNext: respHasNext,
+          } = result.data;
 
-      setProjects(projectsData.projects);
-      setProjectLastAccessCursor(projectsData.lastAccessCursor);
-      setProjectCreatedAtCursor(projectsData.createdAtCursor);
-      setProjectHasNext(projectsData.hasNext)
-
-      setTasks(tasksData.tasks);
-      setTaskLastAccessCursor(tasksData.lastAccessCursor);
-      setTaskIdCursor(tasksData.idCursor);
-      setTaskHasNext(tasksData.hasNext)
-    } catch (err) {
-      console.error("Failed to fetch home data", err);
-      notify("error", "Failed to fetch data")
-      setProjectHasNext(false);
-    }
-  };
-
-  const fetchProjects = async ():Promise<void> => {
-    try {
-      if (!projectHasNext)
-        return;
-
-      const res = await getProjects(projectLastAccessCursor, projectCreatedAtCursor, LIMIT);
-      console.log(res)
-      setProjects((prev) => prev ? prev.concat(res.projects) : res.projects);
-      setProjectLastAccessCursor(res.lastAccessCursor);
-      setProjectCreatedAtCursor(res.createdAtCursor);
-      setProjectHasNext(res.hasNext);
-
-    } catch (err) {
-      console.error("Failed to fetch projects data", err);
-      notify("error", "Failed to fetch data");
-      setProjectHasNext(false);
-    }
-  };
-
-  const pinProject = (projectId: string, userId: string) => {
-    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, isPinned: !p.isPinned } : p)
-      .sort((a, b) => {
-        if (a.isPinned !== b.isPinned) {
-          return Number(b.isPinned) - Number(a.isPinned)
+          setProjects((prev) =>
+            isAppending ? [...prev, ...projects] : projects,
+          );
+          setCurrentPage(respPage);
+          setHasNext(respHasNext);
         }
-        return 0;
-      }));
-    try {
-      updateProjectPinStatus(projectId, userId);
-    } catch {
-      setProjects(prev => prev.map(p => p.id === projectId ? { ...p, isPinned: !p.isPinned } : p)
-        .sort((a, b) => {
-          if (a.isPinned !== b.isPinned) {
-            return Number(b.isPinned) - Number(a.isPinned)
-          }
-          return 0;
-        }))
-    }
-  };
-
-  const fetchTasks = async ():Promise<void> => {
-    try {
-      if (!taskHasNext)
-        return;
-
-      const res = await getTasks(taskLastAccessCursor, taskIdCursor, LIMIT);
-      console.log(res)
-      setTasks((prev) => prev ? prev.concat(res.tasks) : res.tasks);
-      setTaskLastAccessCursor(res.lastAccessCursor);
-      setTaskIdCursor(res.idCursor);
-      setTaskHasNext(res.hasNext);
-
-    } catch (err) {
-      console.error("Failed to fetch tasks data", err);
-      notify("error", "Failed to fetch data");
-      setTaskHasNext(false);
-    }
-  };
-
-  const pinTask = (taskId: number, userId: string) => {
-    setTasks(prev => prev.map(p => p.id === taskId ? { ...p, isPinned: !p.isPinned } : p)
-      .sort((a, b) => {
-        if (a.isPinned !== b.isPinned) {
-          return Number(b.isPinned) - Number(a.isPinned)
-        }
-        return 0;
-      }));
-    try {
-      updateTaskPinStatus(taskId, userId);
-    } catch {
-      setTasks(prev => prev.map(p => p.id === taskId ? { ...p, isPinned: !p.isPinned } : p)
-        .sort((a, b) => {
-          if (a.isPinned !== b.isPinned) {
-            return Number(b.isPinned) - Number(a.isPinned)
-          }
-          return 0;
-        }))
-    }
-  };
-
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [authToken, currentSort, searchTerm, limit],
+  );
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchProjects(0, false);
+  }, [currentSort, searchTerm, limit, fetchProjects]);
+
+  const loadMore = () => {
+    if (!loading && hasNext) {
+      fetchProjects(currentPage + 1, true);
+    }
+  };
+
+  const refresh = () => fetchProjects(0, false);
 
   return (
-    <HomeContext.Provider value={{
-      projects, projectLastAccessCursor, projectCreatedAtCursor, projectHasNext, fetchProjects, pinProject,
-      tasks, taskLastAccessCursor, taskIdCursor, taskHasNext, fetchTasks, pinTask,
-      refetch: fetchData
-    }}>
+    <HomeContext.Provider
+      value={{
+        projects,
+        loading,
+        hasNext,
+        currentPage,
+        currentSort,
+        searchTerm,
+        limit,
+        setLimit,
+        setSearchTerm,
+        setCurrentSort,
+        loadMore,
+        refresh,
+      }}
+    >
       {children}
     </HomeContext.Provider>
   );
 }
 
-export function useHomeContext() {
+export const useProjects = () => {
   const context = useContext(HomeContext);
-  if (!context) {
-    throw new Error("useHome must be used within HomeProvider");
-  }
+  if (!context)
+    throw new Error("useProjects must be used within ProjectProvider");
   return context;
-}
+};

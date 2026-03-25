@@ -1,15 +1,19 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080";
+
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
-
     if (!authHeader) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const response = await fetch(`${API_BASE_URL}/projects`, {
+
+    const { searchParams } = new URL(request.url);
+    const backendUrl = `${API_BASE_URL}/projects?${searchParams.toString()}`;
+
+    const response = await fetch(backendUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -18,17 +22,22 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: "Get projects failed" }));
+      const errorText = await response.text();
+      let errorMessage = "Get projects failed";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+
       return NextResponse.json(
-        { error: errorData.message },
+        { error: errorMessage },
         { status: response.status },
       );
     }
 
     const data = await response.json();
-    console.log(data);
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Get projects error:", error);

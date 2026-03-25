@@ -2,10 +2,13 @@
 
 import {
   ArrowUpRight,
-  Link,
+  Check,
+  ExternalLink,
+  Hash,
+  ListFilter,
   MoreHorizontal,
-  Pin,
-  PinOff,
+  Plus,
+  Link as LinkIcon,
   StarOff,
   Trash2,
 } from "lucide-react";
@@ -14,7 +17,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/src/components/shadcn/dropdown-menu";
 import {
@@ -26,114 +33,151 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/src/components/shadcn/sidebar";
-import { useHomeContext } from "@/src/context/homeContext";
-import { useEffect, useRef, useState } from "react";
-import { useAuthContext } from "@/src/context/authContext";
+import { useProjects } from "@/src/context/homeContext";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "../shadcn/button";
+import { Dialog, DialogContent, DialogTrigger } from "../shadcn/dialog";
+import { CreateProjectModal } from "../project/create-project-modal";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
-  const { projects, projectHasNext, fetchProjects, pinProject } = useHomeContext();
-  const { authUser } = useAuthContext()
-  const [loading, setLoading] = useState(false);
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-  const loadingRef = useRef(false);
-  const scrollRef = useRef(null);
-
-  function handleUpdateProjectPinStatus(projectId: string) {
-    if (authUser == null) return;
-    pinProject(projectId, authUser.id);
-  }
-
-  useEffect(() => {
-    if (projects.length === 0 || !loaderRef.current || !scrollRef.current) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-
-        if (first.isIntersecting && projectHasNext && !loadingRef.current) {
-          loadingRef.current = true;
-          setLoading(true);
-
-          fetchProjects().finally(() => {
-            loadingRef.current = false;
-            setLoading(false);
-          });
-        }
-      },
-      {
-        root: scrollRef.current,
-        rootMargin: "50px",
-      }
-    );
-
-    observer.observe(loaderRef.current);
-
-    return () => observer.disconnect();
-  }, [projectHasNext, fetchProjects]);
-
+  const [open, setOpen] = useState(false);
+  const { projects, limit, setLimit, currentSort, setCurrentSort } =
+    useProjects();
+  const getSortLabel = (val: string) => {
+    if (val === "recent") return "Recents";
+    if (val === "alphabetical") return "Alphabetical";
+    if (val === "created") return "Date Created";
+    return val;
+  };
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
-      <SidebarMenu ref={scrollRef} className="custom-scrollbar max-h-45 overflow-y-auto overflow-x-hidden pr-2 scroll-smooth">
-        {projects.map((project) => (
-          <SidebarMenuItem key={project.id}>
-            <SidebarMenuButton asChild>
-              <span className="flex gap-1 items-center cursor">
-                {project?.avatarUrl ? (
-                  <img
-                    src={project.avatarUrl}
-                    className="w-7 h-7 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-7 h-7 shrink-0 flex items-center justify-center rounded-full bg-green-900 text-gray-200">
-                    {project?.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
+    <SidebarGroup className=" group-data-[collapsible=icon]:hidden">
+      <SidebarGroupLabel asChild className="group/projects">
+        <div className="flex w-full items-center justify-between">
+          <span>Projects</span>
+          <div className="flex items-center gap-2 -mr-1 opacity-0 group-hover/projects:opacity-100 transition-opacity">
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size={"icon-xs"} variant={"ghost"}>
+                  <Plus className="size-4" />
+                </Button>
+              </DialogTrigger>
 
-                <p className="text-sm font-normal text-foreground truncate">
-                  {project.name}
-                </p>
-              </span>
+              <CreateProjectModal onSuccess={() => setOpen(false)} />
+            </Dialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <MoreHorizontal className="size-4" />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent side="right" align="start" className="w-56">
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Hash className="size-4" />
+                    <div className="flex flex-1 items-center justify-between">
+                      <span>Show</span>
+                      <span className="text-xs text-muted-foreground">
+                        {limit}
+                      </span>
+                    </div>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent className="w-56">
+                      {[5, 10, 15, 20].map((value) => (
+                        <DropdownMenuItem
+                          key={value}
+                          onClick={() => setLimit(value)}
+                          className="flex items-center justify-between"
+                        >
+                          <span>{value} items</span>
+                          {limit === value && (
+                            <Check className="ml-2 h-4 w-4 text-primary" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <ListFilter className="size-4" />
+                    <div className="flex flex-1 items-center justify-between">
+                      <span>Sort by</span>
+                      <span className="text-xs text-muted-foreground">
+                        {getSortLabel(currentSort)}
+                      </span>
+                    </div>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent className="w-56">
+                      {(["recent", "alphabetical", "created"] as const).map(
+                        (value) => (
+                          <DropdownMenuItem
+                            key={value}
+                            onClick={() => setCurrentSort(value)}
+                            className="flex items-center justify-between cursor-pointer"
+                          >
+                            <span>{getSortLabel(value)}</span>
+                            {currentSort === value && (
+                              <Check className="size-4 text-primary" />
+                            )}
+                          </DropdownMenuItem>
+                        ),
+                      )}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link href="/project" className="flex items-centẻ gap-2">
+                    <ExternalLink className="size-4" />
+                    <span>Open all</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </SidebarGroupLabel>
+      <SidebarMenu>
+        {projects.map((item) => (
+          <SidebarMenuItem key={item.name}>
+            <SidebarMenuButton asChild>
+              <Link
+                href={`/project/${item.id}`}
+                className="flex items-center gap-3"
+              >
+                {/* Icon Placeholder - Trông xịn hơn Folder mặc định */}
+                <div className="flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-background text-[10px] font-bold shadow-sm group-hover/item:border-primary/50 transition-colors">
+                  {item.name.charAt(0).toUpperCase()}
+                </div>
+
+                <span className="truncate text-xs font-medium text-sidebar-foreground/90">
+                  {item.name}
+                </span>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuAction
-                  onClick={(e) => e.currentTarget.blur()}
-                  className="group/action peer focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                  <div className="relative w-6 h-6 flex items-center justify-center">
-                    {project.isPinned && (
-                      <Pin className="w-4 h-4 text-muted-foreground transition-all duration-200 absolute group-hover/action:-translate-x-6" />
-                    )}
-
-                    <MoreHorizontal className="w-5 h-5 text-muted-foreground transition-all duration-200 absolute opacity-0 translate-x-6 group-hover/action:opacity-100 group-hover/action:translate-x-0" />
-                  </div>
+                <SidebarMenuAction showOnHover>
+                  <MoreHorizontal />
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                sideOffset={6}
-                alignOffset={4}
                 className="w-56 rounded-lg"
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem onClick={() => handleUpdateProjectPinStatus(project.id)}>
-                  {!project.isPinned ? (
-                    <>
-                      <Pin className="text-muted-foreground" />
-                      <span>Pin project</span>
-                    </>) : (
-                    <>
-                      <PinOff className="text-muted-foreground" />
-                      <span>Remove pin</span>
-                    </>
-                  )}
-
+                <DropdownMenuItem>
+                  <StarOff className="text-muted-foreground" />
+                  <span>Remove from Favorites</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Link className="text-muted-foreground" />
+                  <LinkIcon className="text-muted-foreground" />
                   <span>Copy Link</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
@@ -149,16 +193,6 @@ export function NavProjects() {
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        {projectHasNext && (
-          <div
-            ref={loaderRef}
-            className="h-10 flex items-center justify-center"
-          >
-            <span className="text-xs text-muted-foreground">
-              {loading ? "Loading..." : "Scroll to load more"}
-            </span>
-          </div>
-        )}
       </SidebarMenu>
     </SidebarGroup>
   );
