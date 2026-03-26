@@ -3,6 +3,7 @@ import { ProjectMember } from "./project-member";
 
 export interface Project {
   id: string;
+  createdAt: Date;
   createdBy: User;
   name: string;
   description?: string;

@@ -1,11 +1,13 @@
 "use client";
 import { PriorityBadge } from "@/src/components/priority-badge";
+import { CreateProjectModal } from "@/src/components/project/create-project-modal";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/shadcn/avatar";
 import { Button } from "@/src/components/shadcn/button";
+import { Dialog, DialogTrigger } from "@/src/components/shadcn/dialog";
 import {
   InputGroup,
   InputGroupAddon,
@@ -22,7 +24,7 @@ import { StageBadge } from "@/src/components/stage-bade";
 import { TechBadge } from "@/src/components/tech-bage";
 
 import { Project } from "@/src/types/project";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import {
   ArrowDownAZ,
   Calendar,
@@ -39,6 +41,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export default function ProjectList() {
+  const [open, setOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasNext, setHasNext] = useState(false);
@@ -107,6 +110,10 @@ export default function ProjectList() {
   const handleLoadMore = () => {
     fetchProjects(true, currentSearch, currentSort, currentPage + 1);
   };
+  const handleSuccess = useCallback(() => {
+    setOpen(false);
+    fetchProjects(false, currentSearch, currentSort, 0);
+  }, [currentSearch, currentSort, fetchProjects]);
   return (
     <div className="w-full p-4 mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -116,10 +123,19 @@ export default function ProjectList() {
             Manage, track, and collaborate on your active workspaces.
           </p>
         </div>
-        <Button className="gap-2 shadow-sm">
-          <Plus size={16} />
-          New Project
-        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              size={"icon-xs"}
+              variant={"ghost"}
+              className="cursor-pointer"
+            >
+              <Plus className="size-4" />
+            </Button>
+          </DialogTrigger>
+
+          <CreateProjectModal onSuccess={handleSuccess} />
+        </Dialog>
       </div>
       <div className="flex items-center gap-4 bg-muted/30 p-2 rounded-xl shadow border border-border/50 mt-4">
         <InputGroup className="bg-transparent! border-none! shadow-none! has-[[data-slot=input-group-control]:focus-visible]:ring-0!">
@@ -212,15 +228,31 @@ export default function ProjectList() {
                 <StageBadge stage={project.stage} />
                 <PriorityBadge priority={project.priority} />
               </div>
-              <button className="text-muted-foreground hover:text-foreground p-1">
-                <MoreVertical size={16} />
-              </button>
+              <div className="flex items-center gap-4">
+                <div className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                  <Clock9 size={12} />
+                  <span>
+                    Created{" "}
+                    {formatDistanceToNow(new Date(project.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </div>
+                <button className="text-muted-foreground hover:text-foreground p-1">
+                  <MoreVertical size={16} />
+                </button>
+              </div>
             </div>
 
             <div className="mb-4 flex-1">
-              <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                {project.name}
-              </h3>
+              <div className="flex items-center gap-2">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-[4px] border border-border bg-background text-sm font-bold shadow-sm group-hover/item:border-primary/50 transition-colors">
+                  {project.name.charAt(0).toUpperCase()}
+                </div>
+                <h3 className="text-xl font-bold group-hover:text-primary transition-colors truncate">
+                  {project.name}
+                </h3>
+              </div>
 
               <p className="mt-2 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                 {project.description ||
@@ -264,6 +296,7 @@ export default function ProjectList() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar size={12} />{" "}
+                  {format(project.startDate || new Date(), "LLL dd")} -{" "}
                   {format(project.endDate || new Date(), "LLL dd, yyyy")}
                 </span>
               </div>

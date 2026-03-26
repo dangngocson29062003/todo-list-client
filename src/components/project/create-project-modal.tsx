@@ -22,7 +22,7 @@ export function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
   };
 
   return (
-    <DialogContent className="sm:max-w-[600px] p-6">
+    <DialogContent className="sm:max-w-[800px] p-6">
       {step === "select" ? (
         <>
           <DialogHeader>
@@ -33,7 +33,6 @@ export function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-4 mt-6">
-            {/* CARD: QUICK START */}
             <button
               onClick={() => handleSelectMode("quick")}
               className="group relative flex flex-col items-start p-5 rounded-xl border-2 border-muted bg-popover hover:border-primary hover:bg-accent transition-all text-left"
@@ -48,8 +47,6 @@ export function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
               </p>
               <ArrowRight className="absolute bottom-5 right-5 size-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </button>
-
-            {/* CARD: MANUAL SETUP */}
             <button
               onClick={() => handleSelectMode("manual")}
               className="group relative flex flex-col items-start p-5 rounded-xl border-2 border-muted bg-popover hover:border-primary hover:bg-accent transition-all text-left"
@@ -67,7 +64,11 @@ export function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
           </div>
         </>
       ) : (
-        <ProjectFormView mode={mode} onBack={() => setStep("select")} />
+        <ProjectFormView
+          mode={mode}
+          onBack={() => setStep("select")}
+          onSuccess={onSuccess}
+        />
       )}
     </DialogContent>
   );

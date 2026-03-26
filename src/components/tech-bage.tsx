@@ -250,7 +250,10 @@ export function TechBadge({ tech, className }: TechTagProps) {
   const config = TECH_MAP[tech];
   if (!config) {
     return (
-      <Badge variant="secondary" className="text-[10px]">
+      <Badge
+        variant="outline"
+        className="flex items-center gap-2 text-[10px] font-bold uppercase transition-all duration-300"
+      >
         {tech}
       </Badge>
     );

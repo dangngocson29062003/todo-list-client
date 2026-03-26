@@ -1,7 +1,12 @@
 export enum Role {
-  MANAGER,
-  CONTRIBUTOR,
-  VIEWER,
+  MANAGER = "MANAGER",
+  CONTRIBUTOR = "CONTRIBUTOR",
+  VIEWER = "VIEWER",
+}
+export enum MemberStatus {
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  DEACTIVATED = "DEACTIVATED",
 }
 export enum TaskStatus {
   TODO = "TODO",
@@ -10,21 +15,21 @@ export enum TaskStatus {
   DONE = "DONE",
 }
 export enum Priority {
-  LOW,
-  NORMAL,
-  HIGH,
-  URGENT,
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
 }
 export enum Stage {
-  PLANNING,
-  DESIGN,
-  DEVELOPMENT,
-  TESTING,
-  DEPLOYMENT,
-  MAINTENANCE,
-  COMPLETED,
-  ON_HOLD,
-  CANCELLED,
+  PLANNING = "PLANNING",
+  DESIGN = "DESIGN",
+  DEVELOPMENT = "DEVELOPMENT",
+  TESTING = "TESTING",
+  DEPLOYMENT = "DEPLOYMENT",
+  MAINTENANCE = "MAINTENANCE",
+  COMPLETED = "COMPLETED",
+  ON_HOLD = "ON_HOLD",
+  CANCELLED = "CANCELLED",
 }
 export enum TechStack {
   // --- Frontend ---

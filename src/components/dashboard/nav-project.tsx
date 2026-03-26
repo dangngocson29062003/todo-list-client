@@ -3,12 +3,13 @@
 import {
   ArrowUpRight,
   Check,
+  ChevronRight,
   ExternalLink,
   Hash,
+  Link as LinkIcon,
   ListFilter,
   MoreHorizontal,
   Plus,
-  Link as LinkIcon,
   StarOff,
   Trash2,
 } from "lucide-react";
@@ -34,42 +35,76 @@ import {
   useSidebar,
 } from "@/src/components/shadcn/sidebar";
 import { useProjects } from "@/src/context/homeContext";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import Link from "next/link";
-import { Button } from "../shadcn/button";
-import { Dialog, DialogContent, DialogTrigger } from "../shadcn/dialog";
+import { useState } from "react";
 import { CreateProjectModal } from "../project/create-project-modal";
+import { Button } from "../shadcn/button";
+import { Dialog, DialogTrigger } from "../shadcn/dialog";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
   const [open, setOpen] = useState(false);
-  const { projects, limit, setLimit, currentSort, setCurrentSort } =
+  const { projects, limit, setLimit, currentSort, setCurrentSort, refresh } =
     useProjects();
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const getSortLabel = (val: string) => {
     if (val === "recent") return "Recents";
     if (val === "alphabetical") return "Alphabetical";
     if (val === "created") return "Date Created";
     return val;
   };
+  const handleSuccess = () => {
+    setOpen(false);
+    if (refresh) {
+      refresh();
+    }
+  };
   return (
-    <SidebarGroup className=" group-data-[collapsible=icon]:hidden">
+    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel asChild className="group/projects">
-        <div className="flex w-full items-center justify-between">
-          <span>Projects</span>
-          <div className="flex items-center gap-2 -mr-1 opacity-0 group-hover/projects:opacity-100 transition-opacity">
+        <div
+          className="group/label flex w-full items-center justify-between cursor-pointer hover:bg-muted-foreground/10 hover:text-foreground"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-2 transition-colors">
+            <span className="font-semibold">Projects</span>
+            <div className=" opacity-0 group-hover/projects:opacity-100 group-has-[[data-state=open]]/label:opacity-100 transition-all duration-200">
+              <ChevronRight
+                className={`size-3.5 transition-transform duration-200 ${
+                  isExpanded ? "rotate-90" : "rotate-0"
+                }`}
+              />
+            </div>
+          </div>
+          <div
+            className="flex items-center gap-2 -mr-1 opacity-0 group-hover/projects:opacity-100 transition-opacity group-has-[[data-state=open]]/label:opacity-100 transition-opacity"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+            }}
+          >
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button size={"icon-xs"} variant={"ghost"}>
+                <Button
+                  size={"icon-xs"}
+                  variant={"ghost"}
+                  className="cursor-pointer"
+                >
                   <Plus className="size-4" />
                 </Button>
               </DialogTrigger>
 
-              <CreateProjectModal onSuccess={() => setOpen(false)} />
+              <CreateProjectModal onSuccess={handleSuccess} />
             </Dialog>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <MoreHorizontal className="size-4" />
+                <Button
+                  size={"icon-xs"}
+                  variant={"ghost"}
+                  className="cursor-pointer"
+                >
+                  <MoreHorizontal className="size-4" />
+                </Button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent side="right" align="start" className="w-56">
@@ -131,7 +166,7 @@ export function NavProjects() {
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Link href="/project" className="flex items-centẻ gap-2">
+                  <Link href="/project" className="flex items-center gap-2">
                     <ExternalLink className="size-4" />
                     <span>Open all</span>
                   </Link>
@@ -141,59 +176,60 @@ export function NavProjects() {
           </div>
         </div>
       </SidebarGroupLabel>
-      <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <Link
-                href={`/project/${item.id}`}
-                className="flex items-center gap-3"
-              >
-                {/* Icon Placeholder - Trông xịn hơn Folder mặc định */}
-                <div className="flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-background text-[10px] font-bold shadow-sm group-hover/item:border-primary/50 transition-colors">
-                  {item.name.charAt(0).toUpperCase()}
-                </div>
+      {isExpanded && (
+        <SidebarMenu>
+          {projects.map((item) => (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton asChild>
+                <Link
+                  href={`/project/${item.id}`}
+                  className="flex items-center gap-3"
+                >
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-background text-[10px] font-bold shadow-sm group-hover/item:border-primary/50 transition-colors">
+                    {item.name.charAt(0).toUpperCase()}
+                  </div>
 
-                <span className="truncate text-xs font-medium text-sidebar-foreground/90">
-                  {item.name}
-                </span>
-              </Link>
-            </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-56 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
-              >
-                <DropdownMenuItem>
-                  <StarOff className="text-muted-foreground" />
-                  <span>Remove from Favorites</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LinkIcon className="text-muted-foreground" />
-                  <span>Copy Link</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <ArrowUpRight className="text-muted-foreground" />
-                  <span>Open in New Tab</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
+                  <span className="truncate text-xs font-medium text-sidebar-foreground/90">
+                    {item.name}
+                  </span>
+                </Link>
+              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuAction showOnHover>
+                    <MoreHorizontal />
+                    <span className="sr-only">More</span>
+                  </SidebarMenuAction>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 rounded-lg"
+                  side={isMobile ? "bottom" : "right"}
+                  align={isMobile ? "end" : "start"}
+                >
+                  <DropdownMenuItem>
+                    <StarOff className="text-muted-foreground" />
+                    <span>Remove from Favorites</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <LinkIcon className="text-muted-foreground" />
+                    <span>Copy Link</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <ArrowUpRight className="text-muted-foreground" />
+                    <span>Open in New Tab</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Trash2 className="text-muted-foreground" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      )}
     </SidebarGroup>
   );
 }

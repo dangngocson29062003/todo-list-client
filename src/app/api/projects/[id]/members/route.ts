@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080";
-export async function GET(
+export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
@@ -13,29 +13,31 @@ export async function GET(
     if (!authHeader) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-      method: "GET",
+    const body = await request.json();
+    const response = await fetch(`${API_BASE_URL}/projects/${id}/members`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: authHeader,
       },
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       const errorData = await response
         .json()
-        .catch(() => ({ message: "Get project failed" }));
+        .catch(() => ({ message: "Add member failed" }));
+
       return NextResponse.json(
-        { error: errorData.message },
+        { error: errorData.message || "Failed to add member" },
         { status: response.status },
       );
     }
 
     const data = await response.json();
-    console.log(data);
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Get project error:", error);
+    console.error("Add member error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -59,7 +59,7 @@ export function FancyTechInput({
       onKeyDown={handleKeyDown}
       className="overflow-visible bg-transparent"
     >
-      <div className="relative mt-2">
+      <div className="relative">
         {open && (filtered.length > 0 || inputValue.length > 0) && (
           <div className="absolute bottom-0 mb-2 left-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in slide-in-from-top-2">
             <CommandList className="max-h-[450px] overflow-auto p-1 custom-scrollbar">
@@ -109,7 +109,7 @@ export function FancyTechInput({
           </div>
         )}
       </div>
-      <div className="group rounded-md border border-input px-2 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 bg-input/30">
+      <div className="group rounded-md border border-input px-2 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 bg-transparent dark:bg-input/30">
         <div className="flex flex-wrap gap-1">
           {selected.map((tech) => (
             <div

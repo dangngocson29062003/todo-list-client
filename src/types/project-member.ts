@@ -1,4 +1,4 @@
-import { Role } from "./enum";
+import { MemberStatus, Role } from "./enum";
 import { Project } from "./project";
 
 export interface ProjectMember {
@@ -9,6 +9,7 @@ export interface ProjectMember {
   nickname: string;
   avatarUrl: string;
   role: Role;
+  status: MemberStatus;
   projectId: string;
   createdAt: string;
 }

@@ -9,11 +9,14 @@ import {
   AvatarImage,
 } from "@/src/components/shadcn/avatar";
 import { Badge } from "@/src/components/shadcn/badge";
+import { Button } from "@/src/components/shadcn/button";
+import { Dialog, DialogTrigger } from "@/src/components/shadcn/dialog";
 import { Progress } from "@/src/components/shadcn/progress";
 import { TechBadge } from "@/src/components/tech-bage";
 import { useProject } from "@/src/context/projectContext";
 import { calculateProgress } from "@/src/helpers/helpter";
 import { cn } from "@/src/lib/utils";
+import { ProjectMember } from "@/src/types/project-member";
 import { format } from "date-fns";
 import {
   ArrowRight,
@@ -27,10 +30,29 @@ import {
   Github,
   Target,
   TextAlignStart,
+  UserPlus2,
 } from "lucide-react";
 export default function ProjectOverview() {
-  const { project, loading } = useProject();
+  const { project, setProject, loading } = useProject();
+  const handleAddMember = (newMember: ProjectMember) => {
+    setProject((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        members: [...prev.members, newMember],
+      };
+    });
+  };
 
+  const handleRemoveMember = async (memberId: string) => {
+    setProject((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        members: prev.members.filter((m) => m.id !== memberId),
+      };
+    });
+  };
   if (loading) return <div>Loading project details...</div>;
 
   const progressValue = calculateProgress(project.startDate, project.endDate);
@@ -48,7 +70,7 @@ export default function ProjectOverview() {
         </section>
         <section className="space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <Target size={14} /> <span>Key Objectives</span>
+            <Target className="size-4" /> <span>Key Objectives</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {project.goals?.map((goal, i) => (
@@ -67,7 +89,7 @@ export default function ProjectOverview() {
         </section>
         <section className="space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <Code2 size={14} /> <span>Technology Stack</span>
+            <Code2 className="size-4" /> <span>Technology Stack</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {project.techStack?.map((tech, index) => (
@@ -77,7 +99,7 @@ export default function ProjectOverview() {
         </section>
         <section className="space-y-4">
           <div className="flex gap-2 items-center text-xs font-bold uppercase tracking-wider">
-            <BarChart3 size={14} /> Analytics Overview
+            <BarChart3 className="size-4" /> Analytics Overview
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -120,7 +142,7 @@ export default function ProjectOverview() {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg ">
-                  <CalendarIcon size={14} />
+                  <CalendarIcon className="size-4" />
                 </div>
                 <div>
                   <p className="text-[10px] text-zinc-500 uppercase font-bold">
@@ -131,7 +153,7 @@ export default function ProjectOverview() {
                   </p>
                 </div>
               </div>
-              <ArrowRight size={14} />
+              <ArrowRight className="size-4" />
               <div className="text-right">
                 <p className="text-[10px] text-zinc-500 uppercase font-bold">
                   End Date
@@ -169,15 +191,30 @@ export default function ProjectOverview() {
                 </Badge>
               </div>
 
-              <InviteMemberModal members={project.members} />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-emerald-500/10 hover:text-emerald-500 transition-all"
+                  >
+                    <UserPlus2 size={14} />
+                    Invite
+                  </Button>
+                </DialogTrigger>
+                <InviteMemberModal
+                  members={project.members}
+                  onAddMember={handleAddMember}
+                  onRemoveMember={handleRemoveMember}
+                  projectId={project.id}
+                />
+              </Dialog>
             </div>
 
             <div className="space-y-1">
               {project.members.map((item, index) => {
-                // Logic định nghĩa màu sắc theo Role
                 const isOwner =
-                  item.role.toString().toUpperCase() === "MANAGER";
-
+                  item.role?.toString().toUpperCase() === "MANAGER";
                 return (
                   <div
                     key={index}
@@ -225,7 +262,7 @@ export default function ProjectOverview() {
                     <div className="flex items-center gap-2">
                       <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                         <button className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors">
-                          <ExternalLink size={14} />
+                          <ExternalLink className="size-4" />
                         </button>
                       </div>
                     </div>
@@ -243,10 +280,16 @@ export default function ProjectOverview() {
           </div>
           <div className="space-y-3">
             <div className="grid grid-cols-1 gap-2">
-              <ResourceLink icon={<Github size={14} />} label="Repository" />
-              <ResourceLink icon={<Figma size={14} />} label="Figma Design" />
               <ResourceLink
-                icon={<BookOpen size={14} />}
+                icon={<Github className="size-4" />}
+                label="Repository"
+              />
+              <ResourceLink
+                icon={<Figma className="size-4" />}
+                label="Figma Design"
+              />
+              <ResourceLink
+                icon={<BookOpen className="size-4" />}
                 label="Documentation"
               />
             </div>

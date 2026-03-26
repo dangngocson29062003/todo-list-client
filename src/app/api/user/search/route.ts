@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const backendUrl = `${API_BASE_URL}/projects?${searchParams.toString()}`;
+    const backendUrl = `${API_BASE_URL}/users/search?${searchParams.toString()}`;
 
     const response = await fetch(backendUrl, {
       method: "GET",
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorMessage = "Get projects failed";
+      let errorMessage = "Get users failed";
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.message || errorMessage;
@@ -41,47 +41,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Get projects error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
-}
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
-  try {
-    const authHeader = request.headers.get("authorization");
-
-    if (!authHeader) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const body = await request.json();
-    const response = await fetch(`${API_BASE_URL}/projects`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: authHeader,
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: "Create project failed" }));
-
-      return NextResponse.json(
-        { error: errorData.message || "Failed to create project" },
-        { status: response.status },
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data, { status: 201 });
-  } catch (error) {
-    console.error("Create project error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

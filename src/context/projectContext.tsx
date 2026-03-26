@@ -5,7 +5,8 @@ import { Project } from "../types/project";
 interface ProjectContextType {
   project: Project;
   loading: boolean;
-  refreshProject: () => Promise<void>; // Thêm hàm này để các con có thể load lại data khi cần
+  refreshProject: () => Promise<void>;
+  setProject: React.Dispatch<React.SetStateAction<Project | undefined>>;
 }
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -46,7 +47,12 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ProjectContext.Provider
-      value={{ project: project!, loading, refreshProject: fetchProject }}
+      value={{
+        project: project!,
+        loading,
+        refreshProject: fetchProject,
+        setProject,
+      }}
     >
       {loading ? (
         <div className="flex items-center justify-center h-screen">
