@@ -38,7 +38,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <HomeProvider>
         <AppSidebar />
-        <SidebarInset className="pb-10">
+        <SidebarInset className="pb-10 justify-center">
           <header className="flex h-14 shrink-0 items-center gap-2 border-bx">
             <div className="flex flex-1 items-center gap-2 px-3">
               <SidebarTrigger />

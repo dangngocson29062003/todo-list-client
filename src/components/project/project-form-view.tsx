@@ -38,11 +38,12 @@ import { GoalInput } from "./goal-input";
 import { InviteMemberForm } from "./invite-modal";
 import { FancyTechInput } from "./tech-stack-input";
 import { useRouter } from "next/navigation";
+import { useProjects } from "@/src/context/homeContext";
 
 interface ProjectFormViewProps {
   mode: "quick" | "manual";
   onBack: () => void;
-  onSuccess?: () => void;
+  onSuccess: () => void;
 }
 
 export function ProjectFormView({
@@ -67,6 +68,7 @@ export function ProjectFormView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"details" | "invite" | "success">("details");
   const [newProjectId, setNewProjectId] = useState<string | null>(null);
+  const { refresh } = useProjects();
   const router = useRouter();
   const projectPriorityLabels: Record<Priority, string> = {
     [Priority.LOW]: "Low",
@@ -112,6 +114,7 @@ export function ProjectFormView({
       const data = result.data;
       setNewProjectId(data.id);
       setStep("success");
+      refresh();
     } catch (error: any) {
       alert(error.message);
     } finally {

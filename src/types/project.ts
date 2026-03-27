@@ -20,6 +20,8 @@ export interface Project {
   memberCount: number;
   taskCount: number;
   doneTaskCount: number;
+  lastAccess: Date;
+  isFavorite: boolean;
   stats?: {
     total: number;
     todo: number;

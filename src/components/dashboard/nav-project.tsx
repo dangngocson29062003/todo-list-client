@@ -10,6 +10,7 @@ import {
   ListFilter,
   MoreHorizontal,
   Plus,
+  Star,
   StarOff,
   Trash2,
 } from "lucide-react";
@@ -40,12 +41,21 @@ import { useState } from "react";
 import { CreateProjectModal } from "../project/create-project-modal";
 import { Button } from "../shadcn/button";
 import { Dialog, DialogTrigger } from "../shadcn/dialog";
+import { useAuthContext } from "@/src/context/authContext";
+import { ProjectActionsDropdown } from "../project/project-actions-dropdown";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
   const [open, setOpen] = useState(false);
-  const { projects, limit, setLimit, currentSort, setCurrentSort, refresh } =
-    useProjects();
+  const {
+    projects,
+    limit,
+    setLimit,
+    currentSort,
+    setCurrentSort,
+    refresh,
+    toggleFavorite,
+  } = useProjects();
   const [isExpanded, setIsExpanded] = useState(true);
 
   const getSortLabel = (val: string) => {
@@ -56,9 +66,6 @@ export function NavProjects() {
   };
   const handleSuccess = () => {
     setOpen(false);
-    if (refresh) {
-      refresh();
-    }
   };
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -112,7 +119,7 @@ export function NavProjects() {
                   <DropdownMenuSubTrigger>
                     <Hash className="size-4" />
                     <div className="flex flex-1 items-center justify-between">
-                      <span>Show</span>
+                      <span className="text-sm">Show</span>
                       <span className="text-xs text-muted-foreground">
                         {limit}
                       </span>
@@ -120,7 +127,7 @@ export function NavProjects() {
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent className="w-56">
-                      {[5, 10, 15, 20].map((value) => (
+                      {[3, 6, 9, 12].map((value) => (
                         <DropdownMenuItem
                           key={value}
                           onClick={() => setLimit(value)}
@@ -139,7 +146,7 @@ export function NavProjects() {
                   <DropdownMenuSubTrigger>
                     <ListFilter className="size-4" />
                     <div className="flex flex-1 items-center justify-between">
-                      <span>Sort by</span>
+                      <span className="text-sm">Sort by</span>
                       <span className="text-xs text-muted-foreground">
                         {getSortLabel(currentSort)}
                       </span>
@@ -168,7 +175,7 @@ export function NavProjects() {
                 <DropdownMenuItem>
                   <Link href="/project" className="flex items-center gap-2">
                     <ExternalLink className="size-4" />
-                    <span>Open all</span>
+                    <span className="text-sm">Expands</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -194,38 +201,12 @@ export function NavProjects() {
                   </span>
                 </Link>
               </SidebarMenuButton>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction showOnHover>
-                    <MoreHorizontal />
-                    <span className="sr-only">More</span>
-                  </SidebarMenuAction>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 rounded-lg"
-                  side={isMobile ? "bottom" : "right"}
-                  align={isMobile ? "end" : "start"}
-                >
-                  <DropdownMenuItem>
-                    <StarOff className="text-muted-foreground" />
-                    <span>Remove from Favorites</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LinkIcon className="text-muted-foreground" />
-                    <span>Copy Link</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <ArrowUpRight className="text-muted-foreground" />
-                    <span>Open in New Tab</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Trash2 className="text-muted-foreground" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ProjectActionsDropdown
+                projectId={item.id}
+                isFavorite={item.isFavorite}
+                onToggleFavorite={toggleFavorite}
+                variant="sidebar"
+              />
             </SidebarMenuItem>
           ))}
         </SidebarMenu>

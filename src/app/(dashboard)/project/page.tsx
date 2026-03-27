@@ -1,6 +1,7 @@
 "use client";
 import { PriorityBadge } from "@/src/components/priority-badge";
 import { CreateProjectModal } from "@/src/components/project/create-project-modal";
+import { ProjectCard } from "@/src/components/project/project-card";
 import {
   Avatar,
   AvatarFallback,
@@ -14,6 +15,7 @@ import {
   InputGroupInput,
 } from "@/src/components/shadcn/input-group";
 import { Progress } from "@/src/components/shadcn/progress";
+import { useSidebar } from "@/src/components/shadcn/sidebar";
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +24,7 @@ import {
 } from "@/src/components/shadcn/tooltip";
 import { StageBadge } from "@/src/components/stage-bade";
 import { TechBadge } from "@/src/components/tech-bage";
+import { useProjects } from "@/src/context/homeContext";
 
 import { Project } from "@/src/types/project";
 import { format, formatDistanceToNow } from "date-fns";
@@ -42,314 +45,363 @@ import { useCallback, useEffect, useState } from "react";
 
 export default function ProjectList() {
   const [open, setOpen] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasNext, setHasNext] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [currentSort, setCurrentSort] = useState<
-    "recent" | "alphabetical" | "created"
-  >("recent");
+  const { isMobile } = useSidebar();
+  const {
+    projects,
+    limit,
+    setLimit,
+    currentSort,
+    setCurrentSort,
+    loading,
+    loadMore,
+    hasNext,
+    searchTerm,
+    setSearchTerm,
+    toggleFavorite,
+  } = useProjects();
   const [currentSearch, setCurrentSearch] = useState<string>();
-  const [searchTerm, setSearchTerm] = useState("");
-  const router = useRouter();
-  const fetchProjects = useCallback(
-    async (
-      isLoadMore = false,
-      searchQuery = "",
-      sortType = "recent",
-      pageToFetch = 0,
-    ) => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
 
-        const params = new URLSearchParams();
-        params.append("page", pageToFetch.toString());
-        params.append("limit", "6");
-        params.append("sortBy", sortType);
-
-        if (searchQuery) {
-          params.append("name", searchQuery);
-        }
-
-        const res = await fetch(`/api/projects?${params.toString()}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch");
-        const result = await res.json();
-        const {
-          projects,
-          currentPage: pageResponse,
-          hasNext: more,
-        } = result.data;
-
-        setProjects((prev) => (isLoadMore ? [...prev, ...projects] : projects));
-        setCurrentPage(pageResponse);
-        setHasNext(more);
-      } catch (error) {
-        console.error("fetch error:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
-  useEffect(() => {
-    fetchProjects(false, currentSearch, currentSort, 0);
-  }, [currentSearch, currentSort, fetchProjects]);
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      setCurrentSearch(searchTerm);
+      setSearchTerm(currentSearch as string);
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
-  const handleLoadMore = () => {
-    fetchProjects(true, currentSearch, currentSort, currentPage + 1);
-  };
+  }, [currentSearch]);
   const handleSuccess = useCallback(() => {
     setOpen(false);
-    fetchProjects(false, currentSearch, currentSort, 0);
-  }, [currentSearch, currentSort, fetchProjects]);
+  }, [currentSearch, currentSort]);
   return (
-    <div className="w-full p-4 mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-bold tracking-tight">Projects</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage, track, and collaborate on your active workspaces.
-          </p>
-        </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size={"icon-xs"}
-              variant={"ghost"}
-              className="cursor-pointer"
-            >
-              <Plus className="size-4" />
-            </Button>
-          </DialogTrigger>
+    <div className="w-full py-4 px-8 mx-auto">
+      <div className="relative w-full overflow-hidden rounded-2xl border border-border/50 bg-gradient-to-br from-background to-muted/40 p-6 sm:p-8 shadow-sm">
+        <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 md:w-2xl rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-2 items-center rounded-full text-xs font-medium text-muted-foreground">
+              Project Management
+            </div>
 
-          <CreateProjectModal onSuccess={handleSuccess} />
-        </Dialog>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Build, track, and deliver your projects with clarity
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+              Organize your work, monitor progress, and collaborate with your
+              team — all in one place.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 shrink-0">
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="w-full sm:w-auto">
+                  <Plus className="size-4" />
+                  <span>New Project</span>
+                </Button>
+              </DialogTrigger>
+
+              <CreateProjectModal onSuccess={handleSuccess} />
+            </Dialog>
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-4 bg-muted/30 p-2 rounded-xl shadow border border-border/50 mt-4">
-        <InputGroup className="bg-transparent! border-none! shadow-none! has-[[data-slot=input-group-control]:focus-visible]:ring-0!">
-          <InputGroupInput
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <InputGroupAddon align="inline-end">
-            <TooltipProvider>
-              <div className="flex items-center gap-2 bg-muted-foreground/10 p-1 rounded-lg">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setCurrentSort("recent")}
-                      className={`
-                    transition-all duration-200 hover:bg-transparent
-                    ${
+
+      <div className="mt-4 rounded-xl border border-border/50 p-1 bg-muted/30 shadow">
+        <div className="flex flex-col lg:flex-row lg:items-center">
+          <InputGroup className="min-w-0 flex-1 bg-transparent! border-none! shadow-none! has-[[data-slot=input-group-control]:focus-visible]:ring-0!">
+            <InputGroupInput
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setCurrentSearch(e.target.value)}
+              className="min-w-0"
+            />
+            <InputGroupAddon>
+              <SearchIcon className="size-4" />
+            </InputGroupAddon>
+          </InputGroup>
+          {!isMobile && (
+            <div className="flex justify-center gap-4">
+              <TooltipProvider>
+                <div className="flex flex-wrap  items-center gap-2 rounded-lg bg-muted-foreground/10 p-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setLimit(3)}
+                        className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                          limit === 3
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        3
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>3 items</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setLimit(6)}
+                        className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                          limit === 6
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        6
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>6 items</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setLimit(9)}
+                        className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                          limit === 9
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        9
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>9 items</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setLimit(12)}
+                        className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                          limit === 12
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        12
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>12 items</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted-foreground/10 p-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() => setCurrentSort("recent")}
+                        className={`transition-all duration-200 hover:bg-transparent ${
+                          currentSort === "recent"
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        <Clock9 className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Recents</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() => setCurrentSort("alphabetical")}
+                        className={`transition-all duration-200 hover:bg-transparent ${
+                          currentSort === "alphabetical"
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        <ArrowDownAZ className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Alphabetical</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() => setCurrentSort("created")}
+                        className={`transition-all duration-200 hover:bg-transparent ${
+                          currentSort === "created"
+                            ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                            : "opacity-60 scale-95 dark:opacity-50"
+                        }`}
+                      >
+                        <ClockPlus className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Created</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
+            </div>
+          )}
+        </div>
+      </div>
+      {isMobile && (
+        <div className="flex justify-between gap-4 px-4 mt-4">
+          <TooltipProvider>
+            <div className="flex flex-wrap  items-center gap-2 rounded-lg bg-muted-foreground/10 p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setLimit(3)}
+                    className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                      limit === 3
+                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                        : "opacity-60 scale-95 dark:opacity-50"
+                    }`}
+                  >
+                    3
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>3 items</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setLimit(6)}
+                    className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                      limit === 6
+                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                        : "opacity-60 scale-95 dark:opacity-50"
+                    }`}
+                  >
+                    6
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>6 items</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setLimit(9)}
+                    className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                      limit === 9
+                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                        : "opacity-60 scale-95 dark:opacity-50"
+                    }`}
+                  >
+                    9
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>9 items</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setLimit(12)}
+                    className={`min-w-10 transition-all duration-200 hover:bg-transparent ${
+                      limit === 12
+                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                        : "opacity-60 scale-95 dark:opacity-50"
+                    }`}
+                  >
+                    12
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>12 items</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted-foreground/10 p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => setCurrentSort("recent")}
+                    className={`transition-all duration-200 hover:bg-transparent ${
                       currentSort === "recent"
                         ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
                         : "opacity-60 scale-95 dark:opacity-50"
-                    }
-                  `}
-                    >
-                      <Clock9 />
-                    </Button>
-                  </TooltipTrigger>
+                    }`}
+                  >
+                    <Clock9 className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Recents</TooltipContent>
+              </Tooltip>
 
-                  <TooltipContent>Recents</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setCurrentSort("alphabetical")}
-                      className={`
-                  transition-all duration-200 hover:bg-transparent
-                  ${
-                    currentSort === "alphabetical"
-                      ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
-                      : "opacity-60 scale-95 dark:opacity-50"
-                  }
-                `}
-                    >
-                      <ArrowDownAZ />
-                    </Button>
-                  </TooltipTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => setCurrentSort("alphabetical")}
+                    className={`transition-all duration-200 hover:bg-transparent ${
+                      currentSort === "alphabetical"
+                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                        : "opacity-60 scale-95 dark:opacity-50"
+                    }`}
+                  >
+                    <ArrowDownAZ className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Alphabetical</TooltipContent>
+              </Tooltip>
 
-                  <TooltipContent>Alphabetical</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setCurrentSort("created")}
-                      className={`
-            transition-all duration-200 hover:bg-transparent
-            ${
-              currentSort === "created"
-                ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
-                : "opacity-60 scale-95 dark:opacity-50"
-            }
-          `}
-                    >
-                      <ClockPlus />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>Created</TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
-          </InputGroupAddon>
-        </InputGroup>
-      </div>
-      <div className="border-b pb-4 mb-2"></div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center p-4 gap-6">
-        {projects?.map((project) => (
-          <div
-            key={project.id}
-            onClick={() => router.push(`/project/${project.id}/overview`)}
-            className="group relative flex flex-col bg-card border rounded-2xl p-6 hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex gap-4 items-center">
-                <StageBadge stage={project.stage} />
-                <PriorityBadge priority={project.priority} />
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
-                  <Clock9 size={12} />
-                  <span>
-                    Created{" "}
-                    {formatDistanceToNow(new Date(project.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </span>
-                </div>
-                <button className="text-muted-foreground hover:text-foreground p-1">
-                  <MoreVertical size={16} />
-                </button>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => setCurrentSort("created")}
+                    className={`transition-all duration-200 hover:bg-transparent ${
+                      currentSort === "created"
+                        ? "bg-green-100 text-green-700 shadow-md dark:bg-green-900 dark:text-green-200 dark:shadow-lg scale-100"
+                        : "opacity-60 scale-95 dark:opacity-50"
+                    }`}
+                  >
+                    <ClockPlus className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Created</TooltipContent>
+              </Tooltip>
             </div>
+          </TooltipProvider>
+        </div>
+      )}
+      <div className="border-b pb-4 mb-4"></div>
 
-            <div className="mb-4 flex-1">
-              <div className="flex items-center gap-2">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-[4px] border border-border bg-background text-sm font-bold shadow-sm group-hover/item:border-primary/50 transition-colors">
-                  {project.name.charAt(0).toUpperCase()}
-                </div>
-                <h3 className="text-xl font-bold group-hover:text-primary transition-colors truncate">
-                  {project.name}
-                </h3>
-              </div>
-
-              <p className="mt-2 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                {project.description ||
-                  "No description provided for this project."}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {project.techStack && project.techStack.length > 0 ? (
-                project.techStack.map((tech, index) => (
-                  <TechBadge tech={tech} key={index} />
-                ))
-              ) : (
-                <span className="text-[10px] text-muted-foreground/50 italic">
-                  No technologies specified
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-2 mb-4">
-              <div className="flex justify-between text-xs font-bold uppercase tracking-tighter">
-                <span className="text-muted-foreground">Progress</span>
-                <span>
-                  {project.taskCount > 0
-                    ? (project.doneTaskCount * 100) / project.taskCount
-                    : 0}
-                  %
-                </span>
-              </div>
-              <Progress
-                value={
-                  project.taskCount > 0
-                    ? (project.doneTaskCount * 100) / project.taskCount
-                    : 0
-                }
-                className="h-1.5"
-              />
-              <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
-                <span>
-                  {project.doneTaskCount} / {project.taskCount} Tasks
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar size={12} />{" "}
-                  {format(project.startDate || new Date(), "LLL dd")} -{" "}
-                  {format(project.endDate || new Date(), "LLL dd, yyyy")}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center pt-4 border-t border-border/50">
-              <div className="flex items-center -space-x-2 hover:space-x-1 transition-all duration-300 ease-in-out">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Avatar className="z-30 w-8 h-8 cursor-pointer hover:scale-110 transition-transform">
-                        <AvatarImage src={project.createdBy.avatarUrl} />
-                        <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-bold">
-                          {project.createdBy.email.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      className="flex shadow flex-col gap-1 p-2"
-                    >
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                        Creator
-                      </p>
-                      <p className="text-sm font-semibold">
-                        {project.createdBy.email}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                {project.memberCount > 1 && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="z-20 flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-muted-foreground/20 text-[10px] font-bold text-muted-foreground cursor-default">
-                          +{project.memberCount - 1}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        <p>
-                          {project.memberCount - 1} other members in this
-                          project
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-              <div className="text-[11px] font-bold text-primary group-hover:translate-x-1 transition-transform">
-                VIEW DETAILS →
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-center gap-6">
+        {projects?.map((project, index) => (
+          <ProjectCard
+            project={project}
+            onToggleFavorite={toggleFavorite}
+            key={index}
+          />
         ))}
       </div>
       <div className="flex flex-col items-center justify-center pt-12 pb-6">
@@ -366,7 +418,7 @@ export default function ProjectList() {
               variant="outline"
               size="sm"
               onClick={() => {
-                handleLoadMore();
+                loadMore();
               }}
               disabled={loading}
               className="relative bg-background px-8 rounded-full border-border/60 hover:border-primary/50 hover:bg-accent transition-all duration-300 shadow-sm gap-2"

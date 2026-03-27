@@ -10,7 +10,7 @@ import {
 import { ProjectFormView } from "./project-form-view";
 
 interface CreateProjectModalProps {
-  onSuccess?: () => void;
+  onSuccess: () => void;
 }
 export function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
   const [step, setStep] = useState<"select" | "form">("select");
