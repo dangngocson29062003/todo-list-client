@@ -2,7 +2,7 @@
 
 import {
   ArrowUpRight,
-  Link,
+  LinkIcon,
   MoreHorizontal,
   StarOff,
   Trash2,
@@ -25,61 +25,46 @@ import {
   useSidebar,
 } from "@/src/components/shadcn/sidebar";
 
-export function NavFavorites({
-  favorites,
-}: {
-  favorites: {
-    name: string;
-    url: string;
-    emoji: string;
-  }[];
-}) {
+import { useEffect, useState } from "react";
+import { useAuthContext } from "@/src/context/authContext";
+import { Project } from "@/src/types/project";
+import Link from "next/link";
+import { useProjects } from "@/src/context/homeContext";
+import { ProjectActionsDropdown } from "../project/project-actions-dropdown";
+
+export function NavFavorites() {
   const { isMobile } = useSidebar();
+
+  const { favoriteProjects, toggleFavorite } = useProjects();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Favorites</SidebarGroupLabel>
+
       <SidebarMenu>
-        {favorites.map((item) => (
-          <SidebarMenuItem key={item.name}>
+        {favoriteProjects.map((item) => (
+          <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
-              <a href={item.url} title={item.name}>
-                <span>{item.emoji}</span>
-                <span>{item.name}</span>
-              </a>
-            </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-56 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
+              <Link
+                href={`/project/${item.id}`}
+                className="flex items-center gap-3"
               >
-                <DropdownMenuItem>
-                  <StarOff className="text-muted-foreground" />
-                  <span>Remove from Favorites</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link className="text-muted-foreground" />
-                  <span>Copy Link</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <ArrowUpRight className="text-muted-foreground" />
-                  <span>Open in New Tab</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <div className="flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-background text-[10px] font-bold shadow-sm transition-colors group-hover/item:border-primary/50">
+                  {item.name.charAt(0).toUpperCase()}
+                </div>
+
+                <span className="truncate text-xs font-medium text-sidebar-foreground/90">
+                  {item.name}
+                </span>
+              </Link>
+            </SidebarMenuButton>
+
+            <ProjectActionsDropdown
+              projectId={item.id}
+              isFavorite={item.isFavorite}
+              onToggleFavorite={toggleFavorite}
+              variant="sidebar"
+            />
           </SidebarMenuItem>
         ))}
       </SidebarMenu>
