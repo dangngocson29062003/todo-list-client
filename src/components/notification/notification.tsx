@@ -51,7 +51,7 @@ export default function Notification({
   return (
     <Alert
       variant={variant}
-      className={`fixed top-4 right-4 z-[100] w-fit max-w-sm flex gap-3 items-start ${alertColor}`}>
+      className={`fixed top-4 right-4 z-[100] w-fit flex gap-3 items-start ${alertColor}`}>
       <Icon className={`h-5 w-5 ${iconColor}`} />
 
       <div className="flex-1">

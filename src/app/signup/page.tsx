@@ -17,31 +17,34 @@ export default function SignupPage() {
   const [rePassword, setRePassword] = useState("");
 
   async function handleRegister() {
-    validate();
+    if (loading || !validate())
+      return;
     try {
       setLoading(true);
       const data = await register(email, password);
       console.log("Registration successful:", data);
-      router.push("/landing");
+      notify("info", data)
+      router.push("/login");
     } catch (err) {
       notify("error", "Registration failed", getErrorMessage(err));
-    }finally {
+    } finally {
       setLoading(false);
     }
   }
   function validate() {
     if (!email || !password) {
       notify("error", "Registration failed", "Email and password cannot be empty");
-      throw new Error("Validation failed");
+      return false;
     }
     if (password !== rePassword) {
       notify("error", "Registration failed", "Passwords do not match");
-      throw new Error("Validation failed");
+      return false;
     }
-    if(password.length < 6) {
+    if (password.length < 6) {
       notify("error", "Registration failed", "Password must be at least 6 characters");
-      throw new Error("Validation failed");
+      return false;
     }
+    return true;
   }
 
 
