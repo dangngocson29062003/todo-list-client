@@ -1,68 +1,49 @@
-import { ArrowRightCircle, File, FilePlus, PlusCircle } from "lucide-react";
+import { Project } from "@/src/types/project";
+import { format, formatDistanceToNow } from "date-fns";
+import { ArrowRight, Clock3 } from "lucide-react";
 import Link from "next/link";
 
-export default function RecentlyItem({user, date, title, category, isCreate, href} : {user?: string, date?: string, title?: string, category?: string, isCreate?: boolean, href?: string}) {
-    if(isCreate) {
-        return (
-            <div className="w-full relative max-w-46 h-40 border-2 border-dashed rounded-sm border-gray-300 mt-4 cursor-pointer group hover:border-green-600 hover:shadow-md transition-all duration-200">
-                {/* Title */}
-                <div className="p-3 flex flex-col gap-2 mt-2">
-                    <div className="flex items-start gap-2">
-                        <div>
-                            <FilePlus className="h-5 w-5 text-gray-500 group-hover:text-green-600 mt-0.5" />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="font-medium truncate group-hover:text-green-600 transition-all">
-                                Create
-                            </span>
+export default function RecentlyItem({ project }: { project: Project }) {
+  return (
+    <Link
+      href={`/project/${project.id}/overview`}
+      className="group block w-56 rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:shadow-lg"
+    >
+      <div className="flex min-h-62 flex-col">
+        <div className="flex flex-1 flex-col items-start gap-2">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-md border border-border bg-background text-xl font-bold shadow-sm transition-colors group-hover:bg-muted-foreground/10">
+            {project.name.charAt(0).toUpperCase()}
+          </div>
 
-                            <span className="text-xs text-gray-400 mt-1">
-                                Create a new project, task, workspace
-                                or anything you want.
-                            </span>
-                        </div>
-                    </div>
-                    
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 absolute bottom-3 right-3 text-green-600 transition"><PlusCircle className="h-5 w-5"/></div>
-            </div>
-        );
-    }
-    return (
-    <Link href={href || "#"} className="w-full relative max-w-46">
-        <div className="w-full relative max-w-46 h-40 border-2 rounded-sm border-gray-300 mt-4 cursor-pointer group hover:border-blue-600 hover:shadow-md transition-all duration-200">
-            <div className="flex border-b text-xs justify-between py-2 px-2 items-center">
-                <div className="flex items-center gap-1 min-w-0">
-                    <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                        D
-                    </div>
-                    <span className="truncate w-full">
-                        {user}
-                    </span>
-                </div>
-                <span className="text-gray-400">{date}</span>
-            </div>
-            {/* Title */}
-            <div className="p-3 flex flex-col gap-2 mt-2">
-                <div className="flex items-start gap-2">
-                    <div>
-                        <File className="h-5 w-5 text-gray-500 mt-0.5" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="font-medium truncate">
-                            {title}
-                        </span>
+          <h3 className="line-clamp-2 text-sm font-semibold leading-snug group-hover:text-primary">
+            {project.name}
+          </h3>
 
-                        <span className="text-xs text-gray-400 mt-1 truncate">
-                            {category}
-                        </span>
-                    </div>
-                </div>
-                
-            </div>
-            <div className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 absolute bottom-3 right-3 text-blue-600 transition"><ArrowRightCircle className="h-5 w-5"/></div>
+          <p className="line-clamp-4 text-xs leading-5 text-muted-foreground">
+            {project.description || "No description provided for this project."}
+          </p>
         </div>
+
+        <div className="mt-4 flex min-h-[30px] items-center justify-between gap-2 text-xs">
+          <div className="flex min-w-0 items-start gap-1 text-muted-foreground">
+            <Clock3 className="mt-0.5 size-3.5 shrink-0" />
+            <div className="flex min-w-0 flex-col leading-tight">
+              <span className="truncate">
+                {formatDistanceToNow(new Date(project.lastAccess), {
+                  addSuffix: true,
+                })}
+              </span>
+              <span className="text-[10px] text-muted-foreground/70 truncate">
+                {format(new Date(project.lastAccess), "HH:mm dd/MM/yyyy")}
+              </span>
+            </div>
+          </div>
+
+          <div className="shrink-0 flex translate-x-1 items-center text-primary opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+            <ArrowRight className="ml-1 size-4" />
+          </div>
+        </div>
+      </div>
     </Link>
-    
-    );
+  );
 }
