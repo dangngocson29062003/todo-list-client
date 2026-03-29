@@ -22,6 +22,9 @@ export interface Project {
   doneTaskCount: number;
   lastAccess: Date;
   isFavorite: boolean;
+  isDeleted: boolean;
+  deletedAt: Date;
+  deletedBy: User;
   stats?: {
     total: number;
     todo: number;

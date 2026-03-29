@@ -32,34 +32,41 @@ export function CreateProjectModal({ onSuccess }: CreateProjectModalProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="flex flex-col gap-4 mt-6">
             <button
               onClick={() => handleSelectMode("quick")}
-              className="group relative flex flex-col items-start p-5 rounded-xl border-2 border-muted bg-popover hover:border-primary hover:bg-accent transition-all text-left"
+              className="group relative flex flex-col items-start p-5 rounded-xl border border-muted bg-popover hover:border-primary/40 hover:bg-accent transition-all text-left"
             >
-              <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-600 mb-4 group-hover:scale-110 transition-transform">
-                <Zap className="size-6 fill-yellow-500" />
+              <div className="p-2 rounded-lg bg-muted text-muted-foreground mb-4 group-hover:bg-accent group-hover:scale-105 group-hover:text-foreground transition-colors">
+                <Zap className="size-6" />
               </div>
-              <h3 className="font-bold text-lg">Quick Start</h3>
-              <p className="text-sm text-muted-foreground mt-2">
+
+              <h3 className="text-lg font-semibold">Quick Start</h3>
+
+              <p className="mt-2 text-xs text-muted-foreground">
                 Create a project in seconds with essential fields and default
                 settings.
               </p>
-              <ArrowRight className="absolute bottom-5 right-5 size-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+
+              <ArrowRight className="absolute bottom-5 right-5 size-5 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
             </button>
+
             <button
               onClick={() => handleSelectMode("manual")}
-              className="group relative flex flex-col items-start p-5 rounded-xl border-2 border-muted bg-popover hover:border-primary hover:bg-accent transition-all text-left"
+              className="group relative flex flex-col items-start p-5 rounded-xl border border-muted bg-popover hover:border-primary/40 hover:bg-accent transition-all text-left"
             >
-              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 mb-4 group-hover:scale-110 transition-transform">
+              <div className="p-2 rounded-lg bg-muted text-muted-foreground mb-4 group-hover:bg-accent group-hover:scale-105 group-hover:text-foreground transition-colors">
                 <Settings2 className="size-6" />
               </div>
-              <h3 className="font-bold text-lg">Manual Setup</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Configure full details including tech stack, GitHub links, figma
-                and goals.
+
+              <h3 className="text-lg font-semibold">Manual Setup</h3>
+
+              <p className="mt-2 text-xs text-muted-foreground">
+                Customize your project with tech stack, GitHub links, Figma,
+                goals, and team members.
               </p>
-              <ArrowRight className="absolute bottom-5 right-5 size-5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+
+              <ArrowRight className="absolute bottom-5 right-5 size-5 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
             </button>
           </div>
         </>

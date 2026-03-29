@@ -86,3 +86,42 @@ export async function PUT(
     );
   }
 }
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await context.params;
+    const authHeader = request.headers.get("authorization");
+
+    if (!authHeader) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: "Delete project failed" }));
+
+      return NextResponse.json(
+        { error: errorData.message || "Failed to delete project" },
+        { status: response.status },
+      );
+    }
+
+    return NextResponse.json(null, { status: 200 });
+  } catch (error) {
+    console.error("Delete project error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

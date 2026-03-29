@@ -4,7 +4,6 @@ import * as React from "react";
 import { usePathname } from "next/navigation";
 import {
   AudioWaveform,
-  Blocks,
   Calendar,
   Command,
   Home,
@@ -12,7 +11,6 @@ import {
   MessageCircleQuestion,
   Search,
   Settings2,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 
@@ -28,8 +26,13 @@ import {
 } from "@/src/components/shadcn/sidebar";
 import { NavProjects } from "./nav-project";
 import { NavTasks } from "./nav-tasks";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/src/components/shadcn/dialog";
 
-// This is sample data.
 const data = {
   teams: [
     {
@@ -64,7 +67,6 @@ const data = {
       url: "/calendar",
       icon: Calendar,
     },
-
     {
       title: "Inbox",
       url: "/inbox",
@@ -80,82 +82,13 @@ const data = {
     },
     {
       title: "Bin",
-      url: "#",
       icon: Trash2,
+      action: "open-bin",
     },
     {
       title: "Help",
       url: "#",
       icon: MessageCircleQuestion,
-    },
-  ],
-  favorites: [
-    {
-      name: "Project Management & Task Tracking",
-      url: "#",
-      emoji: "📊",
-    },
-    {
-      name: "Family Recipe Collection & Meal Planning",
-      url: "#",
-      emoji: "🍳",
-    },
-    {
-      name: "Fitness Tracker & Workout Routines",
-      url: "#",
-      emoji: "💪",
-    },
-  ],
-  projects: [
-    {
-      name: "Project Management & Task Tracking",
-      url: "#",
-      emoji: "📊",
-    },
-    {
-      name: "Family Recipe Collection & Meal Planning",
-      url: "#",
-      emoji: "🍳",
-    },
-    {
-      name: "Fitness Tracker & Workout Routines",
-      url: "#",
-      emoji: "💪",
-    },
-    {
-      name: "Book Notes & Reading List",
-      url: "#",
-      emoji: "📚",
-    },
-    {
-      name: "Sustainable Gardening Tips & Plant Care",
-      url: "#",
-      emoji: "🌱",
-    },
-    {
-      name: "Language Learning Progress & Resources",
-      url: "#",
-      emoji: "🗣️",
-    },
-    {
-      name: "Home Renovation Ideas & Budget Tracker",
-      url: "#",
-      emoji: "🏠",
-    },
-    {
-      name: "Personal Finance & Investment Portfolio",
-      url: "#",
-      emoji: "💰",
-    },
-    {
-      name: "Movie & TV Show Watchlist with Reviews",
-      url: "#",
-      emoji: "🎬",
-    },
-    {
-      name: "Daily Habit Tracker & Goal Setting",
-      url: "#",
-      emoji: "✅",
     },
   ],
   tasks: [
@@ -168,25 +101,48 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  //This section will check pathname and set "isActive" for items in navMain sidebar
   const pathname = usePathname();
+  const [openBinModal, setOpenBinModal] = React.useState(false);
+
   const navMainItemsActive = data.navMain.map((item) => ({
     ...item,
     isActive: pathname === item.url,
   }));
+
+  const navSecondaryItems = data.navSecondary.map((item) => ({
+    ...item,
+    onClick:
+      item.action === "open-bin" ? () => setOpenBinModal(true) : undefined,
+  }));
   return (
-    <Sidebar className="border-r-0" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
-        <NavMain items={navMainItemsActive} />
-      </SidebarHeader>
-      <SidebarContent>
-        <NavProjects projects={data.projects} />
-        <NavTasks tasks={data.tasks} />
-        <NavFavorites favorites={data.favorites} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarRail />
-    </Sidebar>
+    <>
+      <Sidebar className="border-r-0" {...props}>
+        <SidebarHeader>
+          <TeamSwitcher teams={data.teams} />
+          <NavMain items={navMainItemsActive} />
+        </SidebarHeader>
+
+        <SidebarContent>
+          <NavProjects />
+          <NavTasks tasks={data.tasks} />
+          <NavFavorites />
+          <NavSecondary items={navSecondaryItems} className="mt-auto" />
+        </SidebarContent>
+
+        <SidebarRail />
+      </Sidebar>
+
+      <Dialog open={openBinModal} onOpenChange={setOpenBinModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bin</DialogTitle>
+          </DialogHeader>
+
+          <div className="text-sm text-muted-foreground">
+            Nội dung modal của Bin đặt ở đây.
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -9,12 +9,6 @@ export default function ProjectLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { refresh } = useProjects();
-  useEffect(() => {
-    return () => {
-      refresh();
-    };
-  }, []);
   return (
     <ProjectProvider>
       <div>

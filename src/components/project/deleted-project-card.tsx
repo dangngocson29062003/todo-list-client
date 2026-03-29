@@ -3,12 +3,11 @@ import { format, formatDistanceToNow } from "date-fns";
 import { ArrowRight, Clock3 } from "lucide-react";
 import Link from "next/link";
 
-export default function RecentlyItem({ project }: { project: Project }) {
+export default function DeletedProjectCard({ project }: { project: Project }) {
   return (
     <Link
       href={`/project/${project.id}/overview`}
-      draggable={false}
-      className="group block w-48 rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:shadow-lg"
+      className="group block w-56 rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:shadow-lg"
     >
       <div className="flex min-h-62 flex-col">
         <div className="flex flex-1 flex-col items-start gap-2">
@@ -29,13 +28,13 @@ export default function RecentlyItem({ project }: { project: Project }) {
           <div className="flex min-w-0 items-start gap-1 text-muted-foreground">
             <Clock3 className="mt-0.5 size-3.5 shrink-0" />
             <div className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate">
+              {/* <span className="truncate">
                 {formatDistanceToNow(new Date(project.lastAccess), {
                   addSuffix: true,
                 })}
-              </span>
+              </span> */}
               <span className="text-[10px] text-muted-foreground/70 truncate">
-                {format(new Date(project.lastAccess), "HH:mm dd/MM/yyyy")}
+                {format(new Date(project.deletedAt), "HH:mm dd/MM/yyyy")}
               </span>
             </div>
           </div>

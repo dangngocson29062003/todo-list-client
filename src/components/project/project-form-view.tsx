@@ -68,7 +68,7 @@ export function ProjectFormView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"details" | "invite" | "success">("details");
   const [newProjectId, setNewProjectId] = useState<string | null>(null);
-  const { refresh } = useProjects();
+  const { addRecent } = useProjects();
   const router = useRouter();
   const projectPriorityLabels: Record<Priority, string> = {
     [Priority.LOW]: "Low",
@@ -114,7 +114,7 @@ export function ProjectFormView({
       const data = result.data;
       setNewProjectId(data.id);
       setStep("success");
-      refresh();
+      addRecent(data);
     } catch (error: any) {
       alert(error.message);
     } finally {

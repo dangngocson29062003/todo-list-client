@@ -17,6 +17,7 @@ import { Button } from "@/src/components/shadcn/button";
 import { Dialog, DialogTrigger } from "@/src/components/shadcn/dialog";
 import { Progress } from "@/src/components/shadcn/progress";
 import { TechBadge } from "@/src/components/tech-bage";
+import { useProjects } from "@/src/context/homeContext";
 import { useProject } from "@/src/context/projectContext";
 import { calculateProgress } from "@/src/helpers/helpter";
 import { updateProject } from "@/src/lib/api-project";
@@ -37,9 +38,18 @@ import {
   TextAlignStart,
   UserPlus2,
 } from "lucide-react";
+import { useEffect } from "react";
 export default function ProjectOverview() {
   const { project, setProject, loading, refreshProject } = useProject();
+  const { addRecent } = useProjects();
+  useEffect(() => {
+    if (!project) return;
 
+    addRecent({
+      ...project,
+      lastAccess: new Date(),
+    });
+  }, [project]);
   const handleAddMember = (newMember: ProjectMember) => {
     setProject((prev) => {
       if (!prev) return prev;

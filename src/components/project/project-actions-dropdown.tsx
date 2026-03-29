@@ -117,7 +117,7 @@ export function ProjectActionsDropdown({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => onDelete(projectId)}>
               <Trash2 className="text-muted-foreground" />
-              <span>Delete</span>
+              <span>Move to Bin</span>
             </DropdownMenuItem>
           </>
         )}

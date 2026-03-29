@@ -1,18 +1,13 @@
 "use client";
 
 import {
-  ArrowUpRight,
   Check,
   ChevronRight,
   ExternalLink,
   Hash,
-  Link as LinkIcon,
   ListFilter,
   MoreHorizontal,
   Plus,
-  Star,
-  StarOff,
-  Trash2,
 } from "lucide-react";
 
 import {
@@ -30,7 +25,6 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
@@ -39,10 +33,10 @@ import { useProjects } from "@/src/context/homeContext";
 import Link from "next/link";
 import { useState } from "react";
 import { CreateProjectModal } from "../project/create-project-modal";
+import { ProjectActionsDropdown } from "../project/project-actions-dropdown";
 import { Button } from "../shadcn/button";
 import { Dialog, DialogTrigger } from "../shadcn/dialog";
-import { useAuthContext } from "@/src/context/authContext";
-import { ProjectActionsDropdown } from "../project/project-actions-dropdown";
+import { moveToBin } from "@/src/lib/api-project";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
@@ -53,8 +47,8 @@ export function NavProjects() {
     setLimit,
     currentSort,
     setCurrentSort,
-    refresh,
     toggleFavorite,
+    removeProject,
   } = useProjects();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -66,6 +60,13 @@ export function NavProjects() {
   };
   const handleSuccess = () => {
     setOpen(false);
+  };
+  const handleDelete = async (projectId: string) => {
+    const success = await moveToBin(projectId);
+
+    if (success) {
+      removeProject(projectId);
+    }
   };
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -185,7 +186,7 @@ export function NavProjects() {
       </SidebarGroupLabel>
       {isExpanded && (
         <SidebarMenu>
-          {projects.map((item) => (
+          {projects?.map((item) => (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild>
                 <Link
@@ -206,6 +207,7 @@ export function NavProjects() {
                 isFavorite={item.isFavorite}
                 onToggleFavorite={toggleFavorite}
                 variant="sidebar"
+                onDelete={handleDelete}
               />
             </SidebarMenuItem>
           ))}

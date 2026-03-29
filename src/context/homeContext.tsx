@@ -12,6 +12,7 @@ import { Project } from "@/src/types/project";
 
 interface HomeContextType {
   projects: Project[];
+  recentProjects: Project[];
   favoriteProjects: Project[];
   loading: boolean;
   favoriteLoading: boolean;
@@ -24,9 +25,11 @@ interface HomeContextType {
   setSearchTerm: (val: string) => void;
   setCurrentSort: (val: "recent" | "alphabetical" | "created") => void;
   loadMore: () => void;
-  refresh: () => Promise<void>;
-  refreshFavorites: () => Promise<void>;
   toggleFavorite: (projectId: string, isFavorited: boolean) => Promise<void>;
+  refresh: () => Promise<void>;
+  removeProject: (id: string) => void;
+  updateProject: (id: string, updater: (p: Project) => Project) => void;
+  addRecent: (project: Project) => void;
 }
 
 const HomeContext = createContext<HomeContextType | undefined>(undefined);
@@ -35,11 +38,12 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const { authToken, authUser } = useAuthContext();
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [recentProjects, setRecentProjects] = useState<Project[]>([]);
   const [favoriteProjects, setFavoriteProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [favoriteLoading, setFavoriteLoading] = useState(false);
-  const [hasNext, setHasNext] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [favoriteLoading, setFavoriteLoading] = useState<boolean>(false);
+  const [hasNext, setHasNext] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [currentSort, setCurrentSort] = useState<
     "recent" | "alphabetical" | "created"
   >("recent");
@@ -62,6 +66,12 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch(`/api/projects?${params.toString()}`, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
+        if (res.status === 404) {
+          setProjects([]);
+          setCurrentPage(0);
+          setHasNext(false);
+          return;
+        }
 
         if (!res.ok) {
           throw new Error("Failed to fetch projects");
@@ -114,28 +124,67 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       setFavoriteLoading(false);
     }
   }, [authToken]);
+  const fetchRecentProjects = useCallback(async () => {
+    if (!authToken) return;
 
+    try {
+      const res = await fetch(`/api/projects?sortBy=recent&limit=6`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch recent projects");
+
+      const result = await res.json();
+      setRecentProjects(result.data.projects || []);
+    } catch (error) {
+      console.error("Failed to fetch recent projects:", error);
+    }
+  }, [authToken]);
   useEffect(() => {
     fetchProjects(0, false);
   }, [fetchProjects]);
-
+  useEffect(() => {
+    fetchRecentProjects();
+  }, [fetchRecentProjects]);
   useEffect(() => {
     fetchFavoriteProjects();
   }, [fetchFavoriteProjects]);
+  const removeProjectEverywhere = (projectId: string) => {
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    setRecentProjects((prev) => prev.filter((p) => p.id !== projectId));
+    setFavoriteProjects((prev) => prev.filter((p) => p.id !== projectId));
+  };
 
+  const updateProjectEverywhere = (
+    projectId: string,
+    updater: (p: Project) => Project,
+  ) => {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === projectId ? updater(p) : p)),
+    );
+    setRecentProjects((prev) =>
+      prev.map((p) => (p.id === projectId ? updater(p) : p)),
+    );
+    setFavoriteProjects((prev) =>
+      prev.map((p) => (p.id === projectId ? updater(p) : p)),
+    );
+  };
+
+  const addToRecent = (project: Project) => {
+    setProjects((prev) => {
+      const filtered = prev.filter((p) => p.id !== project.id);
+      return [project, ...filtered];
+    });
+    setRecentProjects((prev) => {
+      const filtered = prev.filter((p) => p.id !== project.id);
+      return [project, ...filtered].slice(0, 6);
+    });
+  };
   const loadMore = () => {
     if (!loading && hasNext) {
       fetchProjects(currentPage + 1, true);
     }
   };
-
-  const refresh = useCallback(async () => {
-    await Promise.all([fetchProjects(0, false), fetchFavoriteProjects()]);
-  }, [fetchProjects, fetchFavoriteProjects]);
-
-  const refreshFavorites = useCallback(async () => {
-    await fetchFavoriteProjects();
-  }, [fetchFavoriteProjects]);
 
   const toggleFavorite = useCallback(
     async (projectId: string, isFavorited: boolean) => {
@@ -166,13 +215,10 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
           throw new Error("Failed to update favorite");
         }
 
-        setProjects((prev) =>
-          prev.map((project) =>
-            project.id === projectId
-              ? { ...project, isFavorite: nextValue }
-              : project,
-          ),
-        );
+        updateProjectEverywhere(projectId, (p) => ({
+          ...p,
+          isFavorite: nextValue,
+        }));
 
         if (nextValue) {
           if (targetProject) {
@@ -201,11 +247,18 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       fetchFavoriteProjects,
     ],
   );
-
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      fetchProjects(0, false),
+      fetchFavoriteProjects(),
+      fetchRecentProjects(),
+    ]);
+  }, [fetchProjects, fetchFavoriteProjects]);
   return (
     <HomeContext.Provider
       value={{
         projects,
+        recentProjects,
         favoriteProjects,
         loading,
         favoriteLoading,
@@ -218,9 +271,11 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         setSearchTerm,
         setCurrentSort,
         loadMore,
-        refresh,
-        refreshFavorites,
         toggleFavorite,
+        refresh,
+        removeProject: removeProjectEverywhere,
+        updateProject: updateProjectEverywhere,
+        addRecent: addToRecent,
       }}
     >
       {children}
