@@ -5,29 +5,25 @@ import { Input } from "../shadcn/input";
 import { Button } from "../shadcn/button";
 
 type GoalInputProps = {
-  goals: string[]; // Chỉ là mảng string
+  goals: string[];
   setGoals: (goals: string[]) => void;
 };
 
 export function GoalInput({ goals, setGoals }: GoalInputProps) {
-  // Thêm một dòng trống mới
   const addGoalRow = () => {
     setGoals([...goals, ""]);
   };
-
-  // Cập nhật text theo index
   const updateGoal = (index: number, newText: string) => {
     const updatedGoals = [...goals];
     updatedGoals[index] = newText;
     setGoals(updatedGoals);
   };
 
-  // Xóa theo index
   const removeGoal = (index: number) => {
     if (goals.length > 1) {
       setGoals(goals.filter((_, i) => i !== index));
     } else {
-      setGoals([""]); // Luôn giữ ít nhất 1 dòng trống
+      setGoals([""]);
     }
   };
 
@@ -60,7 +56,6 @@ export function GoalInput({ goals, setGoals }: GoalInputProps) {
             }}
             placeholder="Type a goal..."
             className="flex-1 border-none bg-transparent! shadow-none focus-visible:ring-0 h-8 text-sm placeholder:text-muted-foreground/40"
-            // Tự động focus vào dòng mới tạo (ngoại trừ dòng đầu tiên lúc khởi tạo)
             autoFocus={index === goals.length - 1 && index !== 0}
           />
           <Button

@@ -72,7 +72,7 @@ export function ProjectCard({
             {project.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h3 className="truncate text-base font-bold transition-colors group-hover:text-primary sm:text-xl">
+            <h3 className="text-base font-bold transition-colors group-hover:text-primary sm:text-xl line-clamp-1">
               {project.name}
             </h3>
           </div>

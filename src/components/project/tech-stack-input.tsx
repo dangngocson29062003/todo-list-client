@@ -1,5 +1,6 @@
-import { KeyboardEvent, useState, useRef } from "react";
+import { TechStack } from "@/src/types/enum";
 import { X } from "lucide-react";
+import { KeyboardEvent, useRef, useState } from "react";
 import {
   Command,
   CommandGroup,
@@ -7,8 +8,6 @@ import {
   CommandList,
 } from "../shadcn/command";
 import { TechBadge } from "../tech-bage";
-import { TechStack } from "@/src/types/enum";
-import { cn } from "@/src/lib/utils";
 
 export function FancyTechInput({
   selected,

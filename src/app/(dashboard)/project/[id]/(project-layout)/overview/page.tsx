@@ -1,4 +1,8 @@
 "use client";
+import { InlineEditDate } from "@/src/components/inline-edit-date";
+import { KeyObjectivesSection } from "@/src/components/inline-edit-goals";
+import { InlineEditField } from "@/src/components/inline-edit-input";
+import { InlineEditTechStack } from "@/src/components/inline-edit-teckstack";
 import { ProjectProgressArea } from "@/src/components/project/chart/area-chart";
 import { MemberChart } from "@/src/components/project/chart/bar-chart";
 import { TasksChart } from "@/src/components/project/chart/pie-chart";
@@ -15,6 +19,7 @@ import { Progress } from "@/src/components/shadcn/progress";
 import { TechBadge } from "@/src/components/tech-bage";
 import { useProject } from "@/src/context/projectContext";
 import { calculateProgress } from "@/src/helpers/helpter";
+import { updateProject } from "@/src/lib/api-project";
 import { cn } from "@/src/lib/utils";
 import { ProjectMember } from "@/src/types/project-member";
 import { format } from "date-fns";
@@ -33,7 +38,8 @@ import {
   UserPlus2,
 } from "lucide-react";
 export default function ProjectOverview() {
-  const { project, setProject, loading } = useProject();
+  const { project, setProject, loading, refreshProject } = useProject();
+
   const handleAddMember = (newMember: ProjectMember) => {
     setProject((prev) => {
       if (!prev) return prev;
@@ -43,7 +49,6 @@ export default function ProjectOverview() {
       };
     });
   };
-
   const handleRemoveMember = async (memberId: string) => {
     setProject((prev) => {
       if (!prev) return prev;
@@ -57,51 +62,51 @@ export default function ProjectOverview() {
 
   const progressValue = calculateProgress(project.startDate, project.endDate);
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6 p-6">
-      <div className="flex-[2] space-y-6">
-        <section className="space-y-2">
-          <div className="flex gap-2 items-center text-xs font-bold uppercase tracking-wider">
-            <TextAlignStart className="size-4" />
-            Project Description
-          </div>
-          <div className="rounded-md text-sm p-4 bg-muted-foreground/10 shadow  leading-relaxed">
-            {project.description}
-          </div>
-        </section>
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <Target className="size-4" /> <span>Key Objectives</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {project.goals?.map((goal, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3 p-3 rounded-xl shadow bg-muted-foreground/10 text-sm"
-              >
-                <CheckCircle2
-                  size={16}
-                  className="text-emerald-500 mt-0.5 shrink-0"
-                />
-                <span>{goal}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className="space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <Code2 className="size-4" /> <span>Technology Stack</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {project.techStack?.map((tech, index) => (
-              <TechBadge tech={tech} key={index} />
-            ))}
-          </div>
-        </section>
+    <div className="flex flex-col lg:flex-row h-full gap-6">
+      <div className="flex-[2] space-y-4">
+        <InlineEditField
+          value={project.description as string}
+          icon={<TextAlignStart className="size-4" />}
+          label="Description"
+          placeholder="Add a description to help others understand what this is about..."
+          fieldType="textarea"
+          renderDisplay={(value) => (
+            <div className="flex items-center gap-4 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow px-6 py-3">
+              <span className="text-sm">
+                {value || "No description provided for this project."}
+              </span>
+            </div>
+          )}
+          onSave={async (value) => {
+            await updateProject(project.id, {
+              description: value,
+            });
+            await refreshProject();
+          }}
+        />
+        <KeyObjectivesSection
+          goals={project.goals as string[]}
+          onSave={async (value) => {
+            await updateProject(project.id, {
+              goals: value,
+            });
+            await refreshProject();
+          }}
+        />
+        <InlineEditTechStack
+          value={project.techStack}
+          onSave={async (value) => {
+            await updateProject(project.id, {
+              techStack: value,
+            });
+            await refreshProject();
+          }}
+        />
         <section className="space-y-4">
-          <div className="flex gap-2 items-center text-xs font-bold uppercase tracking-wider">
-            <BarChart3 className="size-4" /> Analytics Overview
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <BarChart3 className="size-4" />
+            <span>Analytics Overview</span>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 p-5 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow">
               <div className="mb-4">
@@ -131,12 +136,10 @@ export default function ProjectOverview() {
         </section>
       </div>
       <div className="flex-1 min-w-[320px] space-y-6">
-        <div className="p-6 rounded-2xl bg-muted shadow space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-[10px] font-bold uppercase text-zinc-500">
-              Timeline
-            </h3>
-          </div>
+        <div className="rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow p-6">
+          <h3 className="text-[10px] font-bold uppercase text-zinc-500 mb-4">
+            Timeline
+          </h3>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between text-sm">
@@ -145,22 +148,15 @@ export default function ProjectOverview() {
                   <CalendarIcon className="size-4" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold">
-                    Start Date
-                  </p>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-200">
-                    {format(new Date(project.startDate), "LLLL dd,yyyy")}
-                  </p>
+                  <InlineEditDate
+                    label="Start date"
+                    value={project.startDate}
+                  />
                 </div>
               </div>
               <ArrowRight className="size-4" />
               <div className="text-right">
-                <p className="text-[10px] text-zinc-500 uppercase font-bold">
-                  End Date
-                </p>
-                <p className="font-medium text-zinc-900 dark:text-zinc-200">
-                  {format(project.endDate, "LLLL dd, yyyy")}
-                </p>
+                <InlineEditDate label="End date" value={project.endDate} />
               </div>
             </div>
 
@@ -176,9 +172,9 @@ export default function ProjectOverview() {
             </div>
           </div>
         </div>
-        <div className="p-5 rounded-2xl bg-muted shadow space-y-4">
+        <div className="rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow p-6">
           <div className="space-y-1">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center justify-between gap-2">
                 <h4 className="text-[10px] font-bold uppercase text-muted-foreground">
                   Members
@@ -257,8 +253,6 @@ export default function ProjectOverview() {
                         </span>
                       </div>
                     </div>
-
-                    {/* Hiển thị Badge hoặc Action tùy ý */}
                     <div className="flex items-center gap-2">
                       <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                         <button className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground transition-colors">
@@ -272,7 +266,7 @@ export default function ProjectOverview() {
             </div>
           </div>
         </div>
-        <div className="p-5 rounded-2xl bg-muted shadow space-y-4">
+        <div className="rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow p-6">
           <div className="flex justify-between items-center text-sm">
             <h4 className="text-[10px] font-bold uppercase text-zinc-500">
               Resources

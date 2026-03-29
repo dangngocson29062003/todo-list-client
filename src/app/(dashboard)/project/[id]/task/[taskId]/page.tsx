@@ -49,9 +49,9 @@ import {
 import { Textarea } from "@/src/components/shadcn/textarea";
 import { InlineEditAssignees } from "@/src/components/task/inline-edit-assignees";
 import { InlineEditDate } from "@/src/components/task/inline-edit-date";
-import { InlineEditDescription } from "@/src/components/task/inline-edit-description";
+import { InlineEditDescription } from "@/src/components/inline-edit-textarea";
 import { InlineEditFiles } from "@/src/components/task/inline-edit-files";
-import { InlineEditTitle } from "@/src/components/task/inline-edit-title";
+import { InlineEditTitle } from "@/src/components/inline-edit-input";
 import TaskTablePage from "@/src/components/task/table/task-table-page";
 import {
   Timeline,

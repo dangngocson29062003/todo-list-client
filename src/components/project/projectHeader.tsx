@@ -1,14 +1,19 @@
 "use client";
+import { useProject } from "@/src/context/projectContext";
+import { Leaf, MoreHorizontal, Star } from "lucide-react";
+import { InlineEditField } from "../inline-edit-input";
+import { PriorityBadge } from "../priority-badge";
 import { Badge } from "../shadcn/badge";
 import { Button } from "../shadcn/button";
-import { Star, MoreHorizontal, Leaf } from "lucide-react";
-import ProjectTabs from "./projectTab";
-import { useProject } from "@/src/context/projectContext";
-import { PriorityBadge } from "../priority-badge";
 import { StageBadge } from "../stage-bade";
+import ProjectTabs from "./projectTab";
+import { useProjects } from "@/src/context/homeContext";
+import { updateProject } from "@/src/lib/api-project";
 
 export default function ProjectHeader() {
-  const { project, loading } = useProject();
+  const { project, loading, refreshProject } = useProject();
+  const { refresh } = useProjects();
+
   if (loading) return <div>Loading project details...</div>;
   return (
     <div className="px-4 md:px-6 pt-4">
@@ -18,10 +23,20 @@ export default function ProjectHeader() {
             <Leaf size={20} className="text-green-400" />
           </div>
           <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl md:text-2xl font-semibold leading-tight">
-                {project.name}
-              </h2>
+            <div className="flex items-center gap-2">
+              <InlineEditField
+                value={project.name}
+                renderDisplay={(value) => (
+                  <h2 className="font-bold text-xl">{value}</h2>
+                )}
+                onSave={async (value) => {
+                  await updateProject(project.id, {
+                    name: value,
+                  });
+                  await refreshProject();
+                  await refresh();
+                }}
+              />
               {project.tags?.split(",").map((tag) => (
                 <Badge key={tag}>{tag.trim()}</Badge>
               ))}
