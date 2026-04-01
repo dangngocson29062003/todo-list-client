@@ -18,7 +18,7 @@ import {
   subMonths,
 } from "date-fns";
 import { useRef, useState } from "react";
-import { priorityColorMap } from "../../common/priority-badge";
+
 import GanttTaskList from "./ganttTasklist";
 import GanttToolbar from "./ganttToolbar";
 import GanttTimeline from "./timeline/ganttTimeline";
@@ -33,7 +33,7 @@ const MAX_DATE_WIDTH = 160;
 type DragType = "move" | "resize-left" | "resize-right";
 
 type DragInfo = {
-  id: number;
+  id: string;
   type: DragType;
   startX: number;
 } | null;
@@ -107,11 +107,11 @@ export default function Gantt({ tasks }: Props) {
   );
   const dragInfo = useRef<DragInfo>(null);
 
-  function updateTask(id: number, updater: (t: Task) => Task) {
+  function updateTask(id: string, updater: (t: Task) => Task) {
     setData((prev) => prev.map((t) => (t.id === id ? updater(t) : t)));
   }
 
-  function startDrag(e: React.MouseEvent, id: number, type: DragType) {
+  function startDrag(e: React.MouseEvent, id: string, type: DragType) {
     dragInfo.current = {
       id,
       type,
@@ -161,7 +161,7 @@ export default function Gantt({ tasks }: Props) {
 
   const flatTasks = flatten(tree);
 
-  function toggleExpand(id: number) {
+  function toggleExpand(id: string) {
     setData((prev) =>
       prev.map((t) => (t.id === id ? { ...t, expanded: !t.expanded } : t)),
     );

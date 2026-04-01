@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080";
 export async function GET(
@@ -7,13 +7,12 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await context.params;
     const authHeader = request.headers.get("authorization");
-
+    const { id } = await context.params;
     if (!authHeader) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const response = await fetch(`${API_BASE_URL}/projects/${id}/members`, {
+    const response = await fetch(`${API_BASE_URL}/projects/${id}/tasks`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -24,18 +23,18 @@ export async function GET(
     if (!response.ok) {
       const errorData = await response
         .json()
-        .catch(() => ({ message: "Get members failed" }));
+        .catch(() => ({ message: "Get tasks failed" }));
 
       return NextResponse.json(
-        { error: errorData.message || "Failed to get members" },
+        { error: errorData.message || "Failed to get tasks" },
         { status: response.status },
       );
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error("Get members error:", error);
+    console.error("Get tasks error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -47,14 +46,14 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id } = await context.params;
     const authHeader = request.headers.get("authorization");
-
+    const { id } = await context.params;
     if (!authHeader) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json();
-    const response = await fetch(`${API_BASE_URL}/projects/${id}/members`, {
+    console.log(body);
+    const response = await fetch(`${API_BASE_URL}/projects/${id}/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -66,10 +65,10 @@ export async function POST(
     if (!response.ok) {
       const errorData = await response
         .json()
-        .catch(() => ({ message: "Add member failed" }));
+        .catch(() => ({ message: "Create task failed" }));
 
       return NextResponse.json(
-        { error: errorData.message || "Failed to add member" },
+        { error: errorData.message || "Failed to create task" },
         { status: response.status },
       );
     }
@@ -77,7 +76,7 @@ export async function POST(
     const data = await response.json();
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Add member error:", error);
+    console.error("Create task error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

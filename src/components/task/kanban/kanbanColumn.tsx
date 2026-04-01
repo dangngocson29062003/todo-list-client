@@ -7,18 +7,20 @@ import { KanbanItem } from "./kanbanItem";
 type KanbanColumnProps = {
   status: TaskStatus;
   tasks: Task[];
-  moveTask: (taskId: number, toStatus: TaskStatus) => void;
+  moveTask: (taskId: string, toStatus: TaskStatus) => Promise<void> | void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
+  setStatus: (status: TaskStatus) => void;
 };
 export function KanbanColumn({
   status,
   tasks,
   moveTask,
   setIsModalNewTaskOpen,
+  setStatus,
 }: KanbanColumnProps) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
-    drop: (item: { id: number }) => moveTask(item.id, status),
+    drop: (item: { id: string }) => moveTask(item.id, status),
     collect: (monitor: any) => ({
       isOver: !!monitor.isOver(),
     }),
@@ -55,7 +57,10 @@ export function KanbanColumn({
             <Button
               variant="outline"
               size="icon-xs"
-              onClick={() => console.log("open modal")}
+              onClick={() => {
+                setStatus(status);
+                setIsModalNewTaskOpen(true);
+              }}
             >
               <Plus size={16} />
             </Button>

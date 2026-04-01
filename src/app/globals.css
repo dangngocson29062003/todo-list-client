@@ -179,7 +179,6 @@
   }
 }
 
-
 /* Sidebar scroller for projects and tasks*/
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
@@ -197,5 +196,45 @@
   scrollbar-color: transparent transparent;
 }
 .custom-scrollbar:hover {
-  scrollbar-color: rgba(120,120,120,0.4) transparent;
+  scrollbar-color: rgba(120, 120, 120, 0.4) transparent;
+}
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid rgba(100, 116, 139, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resizer::after {
+  content: "";
+  height: 10px;
+  width: 2px;
+  background-color: #64748b;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+.resizer:hover,
+.resizer.isResizing {
+  width: 10px;
+  border-right: 2px solid #3b82f6;
+  background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.1));
+}
+
+.resizer:hover::after,
+.resizer.isResizing::after {
+  opacity: 1;
+  height: 15px;
+  background-color: #3b82f6;
 }

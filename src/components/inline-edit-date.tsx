@@ -109,7 +109,7 @@ export const InlineEditDate = ({
     <div className={cn("group", className)}>
       <div className="">
         {label && (
-          <div className=" flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
             {icon}
             <span>{label}</span>
             {isEditing ? actionButtons : editButton}

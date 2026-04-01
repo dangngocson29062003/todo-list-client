@@ -1,144 +1,155 @@
+"use client";
+
+import { useProject } from "@/src/context/projectContext";
 import { Task } from "@/src/types/task";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { TaskStatus } from "@/src/types/enum";
+import {
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../shadcn/table";
+import { getColumns } from "./columns";
 
 export default function TaskTablePage() {
-  const initialTasks: Task[] = [
-    {
-      id: 1,
-      title: "Design login page",
-      description: "Create UI for login and register pages",
-      tags: "frontend,ui",
-      priority: "HIGH",
-      status: TaskStatus.TODO,
-      type: "task",
-      progress: 45,
-      parentId: null,
-      startDate: new Date(2026, 2, 10),
-      endDate: new Date(2026, 2, 14),
+  const { project } = useProject();
+
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const columns = useMemo(
+    () => getColumns(project?.members || []),
+    [project?.members],
+  );
+  const table = useReactTable({
+    data: tasks,
+    columns,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      sorting,
+      columnFilters,
     },
-    {
-      id: 2,
-      title: "Setup Spring Boot API",
-      description: "Initialize project structure and authentication APIs",
-      tags: "backend,api",
-      priority: "HIGH",
-      status: TaskStatus.IN_PROGRESS,
-      type: "task",
-      progress: 45,
-      parentId: 1,
-      startDate: new Date(2026, 2, 9),
-      endDate: new Date(2026, 2, 15),
-    },
-    {
-      id: 3,
-      title: "Implement task service",
-      description: "Create CRUD endpoints for tasks",
-      tags: "backend",
-      priority: "MEDIUM",
-      status: TaskStatus.REVIEW,
-      type: "task",
-      progress: 45,
-      parentId: 1,
-      startDate: new Date(2026, 2, 11),
-      endDate: new Date(2026, 2, 16),
-    },
-    {
-      id: 4,
-      title: "Connect frontend with API",
-      description: "Integrate task APIs with Next.js frontend",
-      tags: "frontend,api",
-      priority: "MEDIUM",
-      status: TaskStatus.TODO,
-      type: "task",
-      progress: 45,
-      parentId: null,
-      startDate: new Date(2026, 2, 12),
-      endDate: new Date(2026, 2, 18),
-    },
-    {
-      id: 5,
-      title: "Add drag and drop",
-      description: "Implement kanban drag and drop using dnd-kit",
-      tags: "frontend,kanban",
-      priority: "LOW",
-      status: TaskStatus.DONE,
-      type: "task",
-      progress: 45,
-      parentId: 2,
-      startDate: new Date(2026, 2, 5),
-      endDate: new Date(2026, 2, 10),
-    },
-    {
-      id: 1,
-      title: "Design login page",
-      description: "Create UI for login and register pages",
-      tags: "frontend,ui",
-      priority: "HIGH",
-      status: TaskStatus.TODO,
-      type: "task",
-      progress: 45,
-      parentId: null,
-      startDate: new Date(2026, 2, 10),
-      endDate: new Date(2026, 2, 14),
-    },
-    {
-      id: 2,
-      title: "Setup Spring Boot API",
-      description: "Initialize project structure and authentication APIs",
-      tags: "backend,api",
-      priority: "HIGH",
-      status: TaskStatus.IN_PROGRESS,
-      type: "task",
-      progress: 45,
-      parentId: 1,
-      startDate: new Date(2026, 2, 9),
-      endDate: new Date(2026, 2, 15),
-    },
-    {
-      id: 3,
-      title: "Implement task service",
-      description: "Create CRUD endpoints for tasks",
-      tags: "backend",
-      priority: "MEDIUM",
-      status: TaskStatus.REVIEW,
-      type: "task",
-      progress: 45,
-      parentId: 1,
-      startDate: new Date(2026, 2, 11),
-      endDate: new Date(2026, 2, 16),
-    },
-    {
-      id: 4,
-      title: "Connect frontend with API",
-      description: "Integrate task APIs with Next.js frontend",
-      tags: "frontend,api",
-      priority: "MEDIUM",
-      status: TaskStatus.TODO,
-      type: "task",
-      progress: 45,
-      parentId: null,
-      startDate: new Date(2026, 2, 12),
-      endDate: new Date(2026, 2, 18),
-    },
-    {
-      id: 5,
-      title: "Add drag and drop",
-      description: "Implement kanban drag and drop using dnd-kit",
-      tags: "frontend,kanban",
-      priority: "LOW",
-      status: TaskStatus.DONE,
-      type: "task",
-      progress: 45,
-      parentId: 2,
-      startDate: new Date(2026, 2, 5),
-      endDate: new Date(2026, 2, 10),
-    },
-  ];
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    debugTable: true,
+    debugHeaders: true,
+    debugColumns: true,
+  });
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!project?.id) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/api/projects/${project.id}/tasks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await res.json();
+        const data = result?.data ?? result ?? [];
+        setTasks(Array.isArray(data) ? data : []);
+      } catch {
+        setError("Failed to get tasks");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [project?.id]);
   return (
-    <div className="container w-full">
-      <DataTable columns={columns} data={initialTasks} />
+    <div className="p-2 block max-w-full bg-muted rounded-md">
+      <Table
+        style={{
+          width: table.getTotalSize(),
+          minWidth: "100%",
+          tableLayout: "auto",
+        }}
+      >
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    style={{
+                      position: "relative",
+                      width: header.getSize(),
+                      overflow: "visible",
+                    }}
+                    className="px-4 py-2"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                    {header.column.getCanResize() && (
+                      <div
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className={`resizer ${
+                          header.column.getIsResizing() ? "isResizing" : ""
+                        }`}
+                      ></div>
+                    )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => {
+            return (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      style={{ width: cell.column.getSize() }}
+                      className="px-4 py-4"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }

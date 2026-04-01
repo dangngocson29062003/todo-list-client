@@ -1,6 +1,6 @@
 "use client";
 import { useProject } from "@/src/context/projectContext";
-import { Leaf, MoreHorizontal, Star } from "lucide-react";
+import { Leaf, Loader2, MoreHorizontal, Star } from "lucide-react";
 import { InlineEditField } from "../inline-edit-input";
 import { PriorityBadge } from "../priority-badge";
 import { Badge } from "../shadcn/badge";
@@ -9,11 +9,27 @@ import { StageBadge } from "../stage-bade";
 import ProjectTabs from "./projectTab";
 import { useProjects } from "@/src/context/homeContext";
 import { updateProject } from "@/src/lib/api-project";
+import { useEffect, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../shadcn/tooltip";
 
 export default function ProjectHeader() {
   const { project, loading, refreshProject } = useProject();
-  const { refresh } = useProjects();
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const { refresh, toggleFavorite } = useProjects();
+  const handleToggle = async () => {
+    if (isUpdating) return;
 
+    setIsUpdating(true);
+
+    try {
+      await toggleFavorite(project.id, project.isFavorite);
+      await refreshProject();
+    } catch (error) {
+      console.error("Fail to update favorite:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
   if (loading) return <div>Loading project details...</div>;
   return (
     <div className="px-4 md:px-6 pt-4">
@@ -59,9 +75,32 @@ export default function ProjectHeader() {
           </div>
         </div>
         <div className="flex gap-2 self-start md:self-auto">
-          <Button variant="ghost" size="icon">
-            <Star size={18} />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={
+                  project.isFavorite
+                    ? "text-yellow-500"
+                    : "text-muted-foreground"
+                }
+                onClick={handleToggle}
+              >
+                {isUpdating ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Star
+                    size={18}
+                    fill={project.isFavorite ? "currentColor" : "none"}
+                  />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{project.isFavorite ? "Unfavorite" : "Favorite"}</p>
+            </TooltipContent>
+          </Tooltip>
 
           <Button variant="ghost" size="icon">
             <MoreHorizontal size={18} />

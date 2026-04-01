@@ -1,5 +1,4 @@
-import KanbanBoard from "@/src/components/task/kanban/kanbanBoard";
-import ProjectLayout from "../layout";
+"use client";
 import ListView from "@/src/components/task/list/listView";
 
 export default function TaskList() {

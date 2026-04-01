@@ -1,5 +1,7 @@
 "use client";
-import { priorityColorMap } from "@/src/components/common/priority-badge";
+import { InlineEditDate } from "@/src/components/inline-edit-date";
+import { InlineEditField } from "@/src/components/inline-edit-input";
+import { PriorityBadge } from "@/src/components/priority-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,10 +50,9 @@ import {
 } from "@/src/components/shadcn/sidebar";
 import { Textarea } from "@/src/components/shadcn/textarea";
 import { InlineEditAssignees } from "@/src/components/task/inline-edit-assignees";
-import { InlineEditDate } from "@/src/components/task/inline-edit-date";
-import { InlineEditDescription } from "@/src/components/inline-edit-textarea";
+
 import { InlineEditFiles } from "@/src/components/task/inline-edit-files";
-import { InlineEditTitle } from "@/src/components/inline-edit-input";
+
 import TaskTablePage from "@/src/components/task/table/task-table-page";
 import {
   Timeline,
@@ -62,6 +63,7 @@ import {
   TimelineTitle,
 } from "@/src/components/task/timeline";
 import { Activity } from "@/src/types/activity";
+import { Priority } from "@/src/types/enum";
 import { Task } from "@/src/types/task";
 import { format } from "date-fns";
 import {
@@ -71,6 +73,7 @@ import {
   RotateCw,
   Send,
   Settings2,
+  TextAlignStart,
   Trash,
   TriangleAlert,
   UsersRound,
@@ -123,7 +126,7 @@ export default function TaskPage({ task }: { task: Task }) {
     setActiveModal(type);
   };
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4 h-full p-2 sm:p-4 w-full overflow-x-hidden">
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 p-4 max-w-[1600px] mx-auto h-full">
       <Dialog
         open={activeModal === "edit"}
         onOpenChange={() => setActiveModal(null)}
@@ -188,8 +191,6 @@ export default function TaskPage({ task }: { task: Task }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* AlertDialog Delete */}
       <AlertDialog
         open={activeModal === "delete"}
         onOpenChange={() => setActiveModal(null)}
@@ -212,11 +213,11 @@ export default function TaskPage({ task }: { task: Task }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <div>
-        <div className="flex flex-col bg-muted rounded-md shadow p-4">
-          <div className="flex flex-col gap-1 border-b w-full pb-4">
+      <div className="xl:col-span-8 2xl:col-span-9 space-y-6">
+        <div className="bg-card border rounded-xl shadow-sm p-6 space-y-6">
+          <div className="flex flex-col gap-4 border-b pb-6">
             <div className="flex justify-between items-center">
-              <InlineEditTitle currentTitle="Implement Login Feature" />
+              <InlineEditField value={"Implement login feature"} />
               <div className="flex items-center gap-5">
                 <p className="font-semibold text-xs text-muted-foreground">
                   Created 9 days ago
@@ -266,40 +267,56 @@ export default function TaskPage({ task }: { task: Task }) {
                 </Popover>
               </div>
             </div>
-            <div className="flex mt-2 gap-2 items-center">
-              <div className="flex gap-2 items-center">
-                <div className="flex gap-2 text-xs">Priority: </div>
-                <Badge className={`${priorityColorMap["LOW"]} items-center`}>
-                  <TriangleAlert />
-                  LOW
-                </Badge>
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full border">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                  Priority
+                </span>
+                <PriorityBadge priority={Priority.LOW} />
               </div>
-              <div className="flex gap-2 items-center">
-                <p className="text-xs">Status: </p>
-                <Badge className={`${priorityColorMap["LOW"]} items-center`}>
-                  <ChartNoAxesColumnIncreasing />
-                  TODO
+              <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full border">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                  Status
+                </span>
+                <Badge variant="secondary" className="gap-1">
+                  <ChartNoAxesColumnIncreasing className="size-3" /> TODO
                 </Badge>
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-2 mt-2">
-            <InlineEditDescription currentDescription="Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil molestias officiis quibusdam enim minima cumque a illo aspernatur perferendis deleniti. Distinctio fugiat, labore aut perferendis ab amet repellendus eius praesentium!" />
-            <div className="flex items-center gap-10">
-              <InlineEditDate currentDate={new Date()} title="Start Date" />
-              <InlineEditDate currentDate={new Date()} title="End Date" />
+          <div className="space-y-4">
+            <InlineEditField
+              value={
+                "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt, ab! Dolore unde sequi consequatur ipsam reprehenderit hic doloremque, qui nam veniam, autem vel provident labore dicta molestiae commodi ipsa natus!"
+              }
+              icon={<TextAlignStart className="size-4" />}
+              label="Description"
+              placeholder="Add a description to help others understand what this is about..."
+              fieldType="textarea"
+              renderDisplay={(value) => (
+                <span className="text-sm italic text-muted-foreground">
+                  {value || "No description provided for this project."}
+                </span>
+              )}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4 border-y border-dashed">
+              <InlineEditDate value={new Date()} label="Start Date" />
+              <InlineEditDate value={new Date()} label="End Date" />
             </div>
             <InlineEditAssignees />
-            <div>
-              <InlineEditFiles />
-            </div>
+            <InlineEditFiles />
           </div>
         </div>
-        <div className="mt-4 bg-muted rounded-md shadow p-4">
-          <h2 className="mb-2">Subtasks</h2>
+        <div className="bg-card border rounded-xl shadow-sm p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Subtasks</h2>
+            <Button size="sm" variant="ghost">
+              Add Subtask
+            </Button>
+          </div>
           <TaskTablePage />
         </div>
-        <div className="p-4 flex flex-col bg-muted mt-4 rounded-md">
+        <div className="bg-card border rounded-xl shadow-sm p-6">
           <h2 className="font-bold">Comment</h2>
           <div className="flex-1 overflow-y-auto space-y-4">
             <div className="bg-muted-foreground/20  p-4 mt-2 rounded-md">
@@ -345,33 +362,49 @@ export default function TaskPage({ task }: { task: Task }) {
           </div>
         </div>
       </div>
-      <div className="bg-muted rounded-md shadow p-4">
-        <h3>Activities</h3>
-        <Timeline className="mt-8">
-          {timelineData.map((item) => (
-            <TimelineItem key={item.id}>
-              <TimelineHeader>
-                <TimelineTime>
-                  {format(item.time, "LLL dd,yyyy HH:mm")}
-                </TimelineTime>
-                <TimelineTitle>{item.email}</TimelineTitle>
-              </TimelineHeader>
-              {item.description && (
-                <TimelineDescription>
-                  <h2 className="font-bold text-black dark:text-white">
-                    Created a comment
-                  </h2>
-                  <p>
-                    Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                    Amet ducimus quod asperiores. Et accusantium architecto est
-                    odio quidem dolore nam fuga ipsum, earum at omnis tempora
-                    error odit officia eum?
-                  </p>
-                </TimelineDescription>
-              )}
-            </TimelineItem>
-          ))}
-        </Timeline>
+      <div className="xl:col-span-4 2xl:col-span-3">
+        <div className="sticky top-4 space-y-4">
+          <div className="bg-card border rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-lg">Activity Stream</h3>
+              <Badge variant="outline">{timelineData.length}</Badge>
+            </div>
+
+            <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+              <Timeline className="mt-8">
+                {timelineData.map((item) => (
+                  <TimelineItem key={item.id}>
+                    <TimelineHeader>
+                      <TimelineTime>
+                        {format(item.time, "LLL dd,yyyy HH:mm")}
+                      </TimelineTime>
+                      <TimelineTitle>{item.email}</TimelineTitle>
+                    </TimelineHeader>
+                    {item.description && (
+                      <TimelineDescription>
+                        <h2 className="font-bold text-black dark:text-white">
+                          Created a comment
+                        </h2>
+                        <p>
+                          Lorem ipsum dolor sit, amet consectetur adipisicing
+                          elit. Amet ducimus quod asperiores. Et accusantium
+                          architecto est odio quidem dolore nam fuga ipsum,
+                          earum at omnis tempora error odit officia eum?
+                        </p>
+                      </TimelineDescription>
+                    )}
+                  </TimelineItem>
+                ))}
+              </Timeline>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30 rounded-xl p-4">
+            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+              Pro Tip: Use 'Space' to quick-preview subtasks.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -38,10 +38,11 @@ import {
   TextAlignStart,
   UserPlus2,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 export default function ProjectOverview() {
   const { project, setProject, loading, refreshProject } = useProject();
-  const { addRecent } = useProjects();
+
+  const { addRecent, toggleFavorite } = useProjects();
   useEffect(() => {
     if (!project) return;
 
@@ -81,8 +82,8 @@ export default function ProjectOverview() {
           placeholder="Add a description to help others understand what this is about..."
           fieldType="textarea"
           renderDisplay={(value) => (
-            <div className="flex items-center gap-4 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow px-6 py-3">
-              <span className="text-sm">
+            <div className="flex items-center gap-4 rounded-xl bg-muted px-4 py-3 shadow-sm hover:shadow-md transition-shadow px-6 py-3">
+              <span className="text-sm italic text-muted-foreground">
                 {value || "No description provided for this project."}
               </span>
             </div>

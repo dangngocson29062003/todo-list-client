@@ -66,7 +66,7 @@ export function KeyObjectivesSection({
 
   return (
     <section className={cn("group", className)}>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
         <Target className="size-4" />
         <span>Key Objectives</span>
         {isEditing ? (
@@ -105,7 +105,7 @@ export function KeyObjectivesSection({
               size="sm"
               variant="ghost"
               onClick={handleEdit}
-              className="h-8 w-8 p-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100"
+              className="h-4 w-4 p-0 text-gray-400 lg:opacity-0 transition-opacity lg:group-hover:opacity-100"
             >
               <Edit2 className="size-4" />
             </Button>
@@ -120,17 +120,17 @@ export function KeyObjectivesSection({
           {goals.filter(Boolean).map((goal, index) => (
             <div
               key={`${goal}-${index}`}
-              className="flex items-center gap-3 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow px-6 py-3"
+              className="flex items-center gap-3 rounded-xl bg-muted px-4 py-3 shadow-sm hover:shadow-md transition-shadow px-6 py-3"
             >
-              <div className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+              <div className="flex size-6 items-center justify-center rounded-full bg-muted text-sm italic font-semibold text-muted-foreground">
                 {index + 1}
               </div>
-              <p className="text-sm">{goal}</p>
+              <p className="text-xs italic text-muted-foreground ">{goal}</p>
             </div>
           ))}
 
           {!goals.filter(Boolean).length && (
-            <div className="rounded-xl bg-muted/40 px-4 py-3 text-sm italic text-muted-foreground">
+            <div className="rounded-xl bg-muted px-4 py-3 text-sm italic text-muted-foreground">
               No objectives yet.
             </div>
           )}

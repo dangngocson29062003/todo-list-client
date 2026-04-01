@@ -62,7 +62,7 @@ export function InlineEditTechStack({
   return (
     <section className={cn("group", className)}>
       {/* Header */}
-      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
         <Code2 className="size-4" />
         <span>Technology Stack</span>
         {isEditing ? (
@@ -101,7 +101,7 @@ export function InlineEditTechStack({
               size="sm"
               variant="ghost"
               onClick={handleEdit}
-              className="h-8 w-8 p-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100"
+              className="h-4 w-4 p-0 text-gray-400 lg:opacity-0 transition-opacity lg:group-hover:opacity-100"
             >
               <Edit2 className="size-4" />
             </Button>

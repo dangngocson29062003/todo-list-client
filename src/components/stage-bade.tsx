@@ -60,8 +60,6 @@ export function StageBadge({ stage }: { stage: Stage }) {
       label: "Cancelled",
     },
   };
-
-  // Fallback về PLANNING nếu status không tồn tại
   const { color, icon, label } = config[stage] || config.PLANNING;
 
   return (

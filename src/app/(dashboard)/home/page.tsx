@@ -46,7 +46,7 @@ export default function HomePage() {
     }
   }, []);
   return (
-    <div className="max-w-6xl w-full h-full flex flex-col flex-1 m-auto p-4">
+    <div className="max-w-7xl w-full flex flex-col flex-1 m-auto p-4">
       <div className=" w-full mb-12 text-center">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           {heroMessage.title}

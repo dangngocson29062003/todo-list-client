@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/src/components/shadcn/dropdown-menu";
+import {
   ArrowUpRight,
   LinkIcon,
   MoreHorizontal,
@@ -9,16 +16,8 @@ import {
   StarOff,
   Trash2,
 } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/src/components/shadcn/dropdown-menu";
-import { SidebarMenuAction, useSidebar } from "../shadcn/sidebar";
 import { Button } from "../shadcn/button";
+import { SidebarMenuAction, useSidebar } from "../shadcn/sidebar";
 
 interface ProjectActionsDropdownProps {
   projectId: string;

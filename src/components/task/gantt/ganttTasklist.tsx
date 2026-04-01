@@ -10,7 +10,7 @@ type Props = {
   endWidth: number;
 
   startResize: (e: React.MouseEvent, column: "task" | "start") => void;
-  toggleExpand: (id: number) => void;
+  toggleExpand: (id: string) => void;
 };
 
 export default function GanttTaskList({
@@ -85,7 +85,7 @@ export default function GanttTaskList({
               )}
 
               <div className="flex flex-col leading-tight min-w-0">
-                <span className="font-medium truncate">{task.title}</span>
+                <span className="font-medium truncate">{task.name}</span>
 
                 {task.description && (
                   <span className="text-[11px] text-gray-400 truncate">

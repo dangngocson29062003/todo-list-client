@@ -121,10 +121,9 @@ export const InlineEditField = ({
     canEdit && !disabled ? (
       <Button
         type="button"
-        size="icon-sm"
         variant="ghost"
         onClick={handleEdit}
-        className="shrink-0 p-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100"
+        className="shrink-0 w-4 h-4 p-0 text-gray-400 lg:opacity-0 transition-opacity lg:group-hover:opacity-100"
       >
         <Edit2 className="size-4" />
       </Button>
@@ -133,7 +132,7 @@ export const InlineEditField = ({
   return (
     <div className={cn("group", isEditing ? "w-full" : "", className)}>
       {label && (
-        <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
           {icon}
           <span>{label}</span>
           {isEditing ? actionButtons : editButton}

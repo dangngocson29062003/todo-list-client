@@ -2,6 +2,7 @@
 
 import {
   Check,
+  CheckCircle,
   ChevronRight,
   ExternalLink,
   Hash,
@@ -36,8 +37,8 @@ import { CreateProjectModal } from "../project/create-project-modal";
 import { ProjectActionsDropdown } from "../project/project-actions-dropdown";
 import { Button } from "../shadcn/button";
 import { Dialog, DialogTrigger } from "../shadcn/dialog";
-import { moveToBin } from "@/src/lib/api-project";
-
+import { moveToBin, restore } from "@/src/lib/api-project";
+import { toast } from "sonner";
 export function NavProjects() {
   const { isMobile } = useSidebar();
   const [open, setOpen] = useState(false);
@@ -49,6 +50,7 @@ export function NavProjects() {
     setCurrentSort,
     toggleFavorite,
     removeProject,
+    refresh,
   } = useProjects();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -61,12 +63,55 @@ export function NavProjects() {
   const handleSuccess = () => {
     setOpen(false);
   };
-  const handleDelete = async (projectId: string) => {
-    const success = await moveToBin(projectId);
+  const handleRestore = async (projectId: string) => {
+    const success = await restore(projectId);
 
     if (success) {
-      removeProject(projectId);
+      toast.dismiss();
+      await refresh();
+    } else {
+      toast.error("Failed to restore project");
     }
+  };
+  const handleDelete = async (projectId: string) => {
+    const promise = moveToBin(projectId).then((success) => {
+      if (!success) throw new Error("Failed");
+      removeProject(projectId);
+      return success;
+    });
+
+    toast.promise(promise, {
+      loading: "Moving to bin...",
+      success: (data) => (
+        <div className="flex items-center gap-2">
+          <svg
+            className="w-5 h-5 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+
+          <span>Project moved to bin</span>
+
+          <button
+            onClick={async () => await handleRestore(projectId)}
+            className="ml-auto font-bold text-blue-500 hover:underline"
+          >
+            Undo
+          </button>
+        </div>
+      ),
+      error: "Could not delete project",
+      icon: null,
+    });
   };
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">

@@ -2,10 +2,28 @@
 import { Task } from "@/src/types/task";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Calendar, MoreHorizontalIcon } from "lucide-react";
-import PriorityBadge from "../../common/priority-badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../../shadcn/avatar";
-import { Badge } from "../../shadcn/badge";
+import {
+  ArrowDownAZ,
+  ArrowUpZA,
+  Calendar,
+  ChartBarBig,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Eye,
+  Link2,
+  MoreHorizontalIcon,
+  Pencil,
+  Settings2,
+  TextAlignStart,
+  Trash2,
+  TypeOutline,
+  UserPlus,
+  UsersRound,
+} from "lucide-react";
+
+import { PriorityBadge } from "../../priority-badge";
 import { Button } from "../../shadcn/button";
 import {
   DropdownMenu,
@@ -14,143 +32,128 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../shadcn/dropdown-menu";
+import { StatusIndicator } from "../../status-badge";
+import { AssigneeFilter } from "./assignee-filter";
+import { AssigneeStack } from "./assignee-stack";
+import { PriorityFilter } from "./priority-filter";
+import { ProjectMember } from "@/src/types/project-member";
+import { Assignee } from "@/src/types/assignee";
 
-const statusConfig = {
-  TODO: {
-    label: "Todo",
-    color: "#2563EB",
-  },
-  IN_PROGRESS: {
-    label: "In Progress",
-    color: "#d5d906",
-  },
-  REVIEW: {
-    label: "Review",
-    color: "#D97706",
-  },
-  DONE: {
-    label: "Done",
-    color: "#059669",
-  },
-};
-
-export const columns: ColumnDef<Task>[] = [
+export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
   {
-    accessorKey: "id",
-    header: () => {
+    accessorKey: "name",
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+
       return (
-        <div className="flex items-center justify-center">
-          <span>ID</span>
+        <div
+          onClick={() => {
+            const isSorted = column.getIsSorted();
+            if (isSorted === "desc") {
+              column.clearSorting();
+            } else {
+              column.toggleSorting(isSorted === "asc");
+            }
+          }}
+          className="flex items-center justify-between text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <TypeOutline
+                className={`size-4 transition-opacity ${isSorted ? "opacity-0" : "opacity-100"}`}
+              />
+              {isSorted === "asc" && (
+                <ArrowDownAZ className="size-4 absolute inset-0 text-blue-500" />
+              )}
+              {isSorted === "desc" && (
+                <ArrowUpZA className="size-4 absolute inset-0 text-blue-500" />
+              )}
+            </div>
+
+            <p className="text-xs font-medium">Name</p>
+          </div>
+
+          <div className="flex flex-col">
+            <ChevronUp
+              className={`size-3.5 -mb-1 ${isSorted === "asc" ? "text-blue-500" : "opacity-30"}`}
+            />
+            <ChevronDown
+              className={`size-3.5 ${isSorted === "desc" ? "text-blue-500" : "opacity-30"}`}
+            />
+          </div>
         </div>
       );
     },
     cell: ({ row }) => {
+      const name = row.original.name;
       const id = row.original.id;
       return (
-        <div className="flex justify-center">
-          <span className="text-sm text-muted-foreground">{id}</span>
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold">{name}</span>
+          <span className="text-xs text-muted-foreground">{id}</span>
         </div>
       );
     },
   },
   {
     accessorKey: "priority",
-    header: () => {
-      return <div className="text-center">Priority</div>;
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+    header: ({ column }) => {
+      return <PriorityFilter column={column} />;
     },
     cell: ({ row }) => {
-      const title = row.original.title;
-      return (
-        <div className="flex justify-center">
-          <PriorityBadge priority={row.original.priority} />
-        </div>
-      );
+      return <PriorityBadge priority={row.original.priority} />;
     },
   },
-  {
-    accessorKey: "title",
-    header: "Title",
-    cell: ({ row }) => {
-      const title = row.original.title;
-      return (
-        <div className="flex flex-col gap-1">
-          <span className="">{title}</span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.original.status;
-      const config = statusConfig[status];
 
-      return (
-        <Badge
-          variant="outline"
-          className="flex text-md items-center gap-2 px-2 py-1 rounded-md border-l-4"
-          style={{
-            borderLeftColor: config.color,
-          }}
-        >
-          <span
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: config.color }}
-          />
-          {config.label}
-        </Badge>
-      );
-    },
-  },
   {
     accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "assignees",
     header: () => {
       return (
-        <div className="flex items-center justify-center">
-          <span>Assignees</span>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <TextAlignStart className="size-4" />
+          <p className="text-xs font-medium">Description</p>
         </div>
       );
     },
-    cell: ({ row }) => {
-      const assignees = row.original.assignees || [];
+    size: 300,
+    minSize: 300,
+    cell: ({ row }) => (
+      <p
+        className="line-clamp-3 whitespace-normal break-words leading-relaxed overflow-hidden text-sm text-muted-foreground text-xs"
+        title={row.original.description}
+      >
+        {row.original.description || "-"}
+      </p>
+    ),
+  },
 
-      if (assignees.length === 0) return;
-
-      return (
-        <div className="flex items-center justify-center">
-          {assignees.slice(0, 2).map((user, index) => (
-            <Avatar
-              key={index}
-              className="h-8 w-8 border-2 border-white -ml-3 first:ml-0"
-              title={user.name}
-            >
-              <AvatarImage src={user.avatar} />
-              <AvatarFallback>
-                {user.name.slice(0, 1).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-
-          {assignees.length > 2 && (
-            <span className="-ml-2 z-10 border-2 border-white text-xs text-gray-400 bg-gray-100 px-2 py-1.5 rounded-full">
-              +{assignees.length - 2}
-            </span>
-          )}
-        </div>
+  {
+    accessorKey: "assignees",
+    header: ({ column }) => {
+      return <AssigneeFilter column={column} members={members || []} />;
+    },
+    filterFn: (row, userId, filterValue: string[]) => {
+      if (!filterValue?.length) return true;
+      const taskAssignees = row.getValue(userId) as Assignee[];
+      console.log(filterValue);
+      return taskAssignees.some((assignee) =>
+        filterValue.includes(assignee.id),
       );
+    },
+    cell: ({ row }) => {
+      return <AssigneeStack assignees={row.original.assignees} />;
     },
   },
   {
     accessorKey: "startDate",
     header: () => {
       return (
-        <div className="flex items-center justify-center">
-          <span>Timeline</span>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Calendar className="size-4" />
+          <p className="text-xs font-medium">Timeline</p>
         </div>
       );
     },
@@ -161,28 +164,47 @@ export const columns: ColumnDef<Task>[] = [
       if (!start && !end) return "-";
 
       return (
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Calendar size={14} />
-          <span className="font-medium text-foreground">
-            {start ? format(new Date(start), "dd MMM") : "-"}
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+          <span className="">
+            {start ? format(new Date(start), "MMM dd") : "-"}
           </span>
-          <span>→</span>
-          <span className="font-medium text-foreground">
-            {end ? format(new Date(end), "dd MMM") : "-"}
+          -
+          <span className="">
+            {end ? format(new Date(end), "MMM dd, yyyy") : "-"}
           </span>
         </div>
       );
     },
   },
+
   {
-    accessorKey: "actions",
+    accessorKey: "status",
     header: () => {
       return (
-        <div className="flex items-center justify-center">
-          <span>Actions</span>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <ChartBarBig className="size-4" />
+          <p className="text-xs font-medium">Status</p>
         </div>
       );
     },
+    cell: ({ row }) => {
+      const status = row.original.status;
+      return <StatusIndicator status={status} />;
+    },
+  },
+  {
+    accessorKey: "actions",
+    enableResizing: false,
+    header: () => {
+      return (
+        <div className="flex justify-center items-center gap-2 text-muted-foreground">
+          <Settings2 className="size-4" />
+          <p className="text-xs font-medium">Actions</p>
+        </div>
+      );
+    },
+    size: 80,
+    minSize: 80,
     cell: () => {
       return (
         <div className="flex justify-center">
@@ -193,11 +215,46 @@ export const columns: ColumnDef<Task>[] = [
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Duplicate</DropdownMenuItem>
+
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem>
+                <Eye className="size-4 mr-2" />
+                View details
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <Pencil className="size-4 mr-2" />
+                Edit task
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <Copy className="size-4 mr-2" />
+                Duplicate task
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <Link2 className="size-4 mr-2" />
+                Copy link
+              </DropdownMenuItem>
+
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <CheckCircle2 className="size-4 mr-2" />
+                Mark as done
+              </DropdownMenuItem>
+
+              <DropdownMenuItem>
+                <UserPlus className="size-4 mr-2" />
+                Assign user
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem variant="destructive">
+                <Trash2 className="size-4 mr-2" />
+                Delete task
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

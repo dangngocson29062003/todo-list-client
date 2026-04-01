@@ -46,7 +46,7 @@ type Props = {
   startMonth: Date;
   firstWeekStart: Date;
 
-  startDrag: (e: React.MouseEvent, id: number, type: DragType) => void;
+  startDrag: (e: React.MouseEvent, id: string, type: DragType) => void;
 
   priorityColorMap: Record<string, string>;
 };

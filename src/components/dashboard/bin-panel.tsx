@@ -3,7 +3,7 @@ import { useAuthContext } from "@/src/context/authContext";
 import { Project } from "@/src/types/project";
 import { useCallback, useEffect, useState } from "react";
 import { Input } from "../shadcn/input";
-import { ArrowRight, Clock3, Trash, Undo2 } from "lucide-react";
+import { ArrowRight, Clock3, Loader2, Trash, Undo2 } from "lucide-react";
 import { Button } from "../shadcn/button";
 import { format, formatDistanceToNow } from "date-fns";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../shadcn/tooltip";
@@ -20,7 +20,7 @@ export function BinPanel() {
   const { authToken } = useAuthContext();
   const { refresh } = useProjects();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [open, setOpen] = useState<boolean>(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const fetchProjects = useCallback(async () => {
@@ -60,6 +60,13 @@ export function BinPanel() {
       await refresh();
     }
   };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="size-4 animate-spin" />
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-black/5">

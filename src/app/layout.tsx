@@ -1,8 +1,8 @@
+import { Lexend } from "next/font/google";
 import { NotificationProvider } from "../components/notification/notificationProvider";
 import { ThemeProvider } from "../components/theme-provider";
 import { AuthProvider } from "../context/authContext";
 import "./globals.css";
-import { Lexend } from "next/font/google";
 const lexend = Lexend({
   subsets: ["latin"],
   display: "swap",
@@ -28,9 +28,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <AuthProvider>
-              <NotificationProvider>
-                {children}
-              </NotificationProvider>
+              <NotificationProvider>{children}</NotificationProvider>
             </AuthProvider>
           </ThemeProvider>
         </body>

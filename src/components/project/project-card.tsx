@@ -46,7 +46,7 @@ export function ProjectCard({
           <div className="flex min-w-0 shrink items-center gap-1 text-[10px] text-muted-foreground sm:text-[10px]">
             <Clock9 size={12} />
             <span className="truncate">
-              Created{" "}
+              Created
               {formatDistanceToNow(new Date(project.createdAt), {
                 addSuffix: true,
               })}
