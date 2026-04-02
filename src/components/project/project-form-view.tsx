@@ -56,7 +56,7 @@ export function ProjectFormView({
     name: "",
     startDate: new Date(),
     endDate: new Date(),
-    priority: Priority.NORMAL,
+    priority: Priority.MEDIUM,
     stage: Stage.PLANNING,
     goals: [""] as string[],
     techStack: [] as string[],
@@ -72,7 +72,7 @@ export function ProjectFormView({
   const router = useRouter();
   const projectPriorityLabels: Record<Priority, string> = {
     [Priority.LOW]: "Low",
-    [Priority.NORMAL]: "Normal",
+    [Priority.MEDIUM]: "Medium",
     [Priority.HIGH]: "High",
     [Priority.URGENT]: "Urgent",
   };

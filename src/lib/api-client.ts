@@ -1,7 +1,11 @@
 const API_URL = "http://localhost:8080";
 let refreshPromise: Promise<void> | null = null;
 
-export async function api(url: string, options: RequestInit & { params?: Record<string, any> }, retry = true) {
+export async function api(
+  url: string,
+  options: RequestInit & { params?: Record<string, any> },
+  retry = true,
+) {
   const token = localStorage.getItem("token");
 
   let finalUrl = `${API_URL}${url}`;
@@ -9,8 +13,8 @@ export async function api(url: string, options: RequestInit & { params?: Record<
   if (options.params) {
     const filteredParams = Object.fromEntries(
       Object.entries(options.params).filter(
-        ([_, value]) => value !== undefined && value !== null
-      )
+        ([_, value]) => value !== undefined && value !== null,
+      ),
     );
 
     if (Object.keys(filteredParams).length > 0) {
@@ -60,7 +64,6 @@ async function refreshLock(): Promise<void> {
 
         const data = await res.json();
         const newToken = data.data;
-        console.log(newToken);
 
         localStorage.setItem("token", newToken);
       })
@@ -70,4 +73,3 @@ async function refreshLock(): Promise<void> {
   }
   return refreshPromise;
 }
-

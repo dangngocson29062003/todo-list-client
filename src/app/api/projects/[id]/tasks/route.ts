@@ -52,7 +52,6 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await request.json();
-    console.log(body);
     const response = await fetch(`${API_BASE_URL}/projects/${id}/tasks`, {
       method: "POST",
       headers: {

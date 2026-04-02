@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "../../shadcn/table";
 import { getColumns } from "./columns";
+import { Loader2 } from "lucide-react";
 
 export default function TaskTablePage() {
   const { project } = useProject();
@@ -28,9 +29,6 @@ export default function TaskTablePage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const columns = useMemo(
@@ -82,6 +80,13 @@ export default function TaskTablePage() {
 
     fetchTasks();
   }, [project?.id]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+        <Loader2 className="size-8 animate-spin" />
+      </div>
+    );
+  }
   return (
     <div className="p-2 block max-w-full bg-muted rounded-md">
       <Table

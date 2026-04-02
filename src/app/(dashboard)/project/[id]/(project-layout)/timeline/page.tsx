@@ -1,83 +1,109 @@
 "use client";
 import Gantt from "@/src/components/task/gantt/gantt";
-import { TaskStatus } from "@/src/types/enum";
+import { useProject } from "@/src/context/projectContext";
+import { Priority, TaskStatus } from "@/src/types/enum";
 import { Task } from "@/src/types/task";
-const initialTasks: Task[] = [
-  {
-    id: 1,
-    title: "Design login page",
-    description: "Create UI for login and register pages",
-    tags: "frontend,ui",
-    priority: "HIGH",
-    status: TaskStatus.TODO,
-    type: "task",
-    progress: 45,
-    parentId: null,
-    expanded: true,
-    startDate: new Date(2026, 2, 10),
-    endDate: new Date(2026, 2, 14),
-  },
-  {
-    id: 2,
-    title: "Setup Spring Boot API",
-    description: "Initialize project structure and authentication APIs",
-    tags: "backend,api",
-    priority: "HIGH",
-    status: TaskStatus.IN_PROGRESS,
-    type: "task",
-    progress: 45,
-    parentId: 1,
-    expanded: true,
-    startDate: new Date(2026, 2, 9),
-    endDate: new Date(2026, 2, 15),
-  },
-  {
-    id: 3,
-    title: "Implement task service",
-    description: "Create CRUD endpoints for tasks",
-    tags: "backend",
-    priority: "MEDIUM",
-    status: TaskStatus.REVIEW,
-    type: "task",
-    progress: 45,
-    parentId: 1,
-    expanded: true,
-    startDate: new Date(2026, 2, 11),
-    endDate: new Date(2026, 2, 16),
-  },
-  {
-    id: 4,
-    title: "Connect frontend with API",
-    description: "Integrate task APIs with Next.js frontend",
-    tags: "frontend,api",
-    priority: "MEDIUM",
-    status: TaskStatus.TODO,
-    type: "task",
-    progress: 45,
-    parentId: null,
-    expanded: true,
-    startDate: new Date(2026, 2, 12),
-    endDate: new Date(2026, 2, 18),
-  },
-  {
-    id: 5,
-    title: "Add drag and drop",
-    description: "Implement kanban drag and drop using dnd-kit",
-    tags: "frontend,kanban",
-    priority: "LOW",
-    status: TaskStatus.DONE,
-    type: "task",
-    progress: 45,
-    parentId: 2,
-    expanded: true,
-    startDate: new Date(2026, 2, 5),
-    endDate: new Date(2026, 2, 10),
-  },
-];
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 export default function TimeLine() {
-  return (
-    <div className="w-full">
-      <Gantt tasks={initialTasks} />
-    </div>
-  );
+  const { project } = useProject();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [priority, setPriority] = useState<Priority>(Priority.LOW);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!project?.id) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Unauthorized");
+
+        const res = await fetch(`/api/projects/${project.id}/tasks`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+
+        const result = await res.json().catch(() => null);
+
+        if (!res.ok) {
+          throw new Error(result?.error || "Failed to get tasks");
+        }
+
+        const data = result?.data ?? result ?? [];
+        setTasks(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to get tasks");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [project?.id]);
+
+  // const handleMoveTask = async (taskId: string, toPriority: Priority) => {
+  //   if (!project?.id) return;
+
+  //   const previousTasks = tasks;
+
+  //   setTasks((prev) =>
+  //     prev.map((task) =>
+  //       task.id === taskId ? { ...task, priority: toPriority } : task,
+  //     ),
+  //   );
+
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) throw new Error("Unauthorized");
+
+  //     const res = await fetch(`/api/projects/${project.id}/tasks/${taskId}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify({
+  //         priority: toPriority,
+  //       }),
+  //     });
+
+  //     const data = await res.json().catch(() => null);
+
+  //     if (!res.ok) {
+  //       throw new Error(data?.error || "Failed to update task");
+  //     }
+
+  //     const updatedTask = data?.data ?? data;
+  //     if (updatedTask) {
+  //       setTasks((prev) =>
+  //         prev.map((task) => (task.id === taskId ? updatedTask : task)),
+  //       );
+  //     }
+  //   } catch (error) {
+  //     setTasks(previousTasks);
+  //     console.error(error);
+  //   }
+  // };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+        <Loader2 className="size-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-4 text-sm text-red-500">{error}</div>;
+  }
+  return <Gantt tasks={tasks} />;
 }

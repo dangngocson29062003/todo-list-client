@@ -85,7 +85,6 @@ export default function KanbanBoard() {
       if (!res.ok) {
         throw new Error(data?.error || "Failed to update task");
       }
-      console.log(data.data);
       setTasks((prev) =>
         prev.map((task) => (task.id === taskId ? data.data : task)),
       );
@@ -124,7 +123,7 @@ export default function KanbanBoard() {
               status={status}
               tasks={tasks || []}
               moveTask={handleMoveTask}
-              setIsModalNewTaskOpen={() => console.log("open modal")}
+              setIsModalNewTaskOpen={setIsModalOpen}
               setStatus={setStatus}
             />
           ))}

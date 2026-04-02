@@ -1,45 +1,54 @@
 import {
-  differenceInDays,
   addDays,
+  addMonths,
+  differenceInDays,
+  differenceInMonths,
+  differenceInWeeks,
   format,
   startOfMonth,
-  differenceInMonths,
-  addMonths,
-  startOfWeek,
-  differenceInWeeks,
 } from "date-fns";
 import { Task } from "../types/task";
 
 export const DAY_WIDTH = 50;
 export const WEEK_WIDTH = 140;
 export const MONTH_WIDTH = 260;
-
-export function buildTree(tasks: Task[]) {
-  const map = new Map<number, any>();
+export interface GanttTask extends Task {
+  children: GanttTask[];
+  depth: number;
+}
+export function buildTree(tasks: Task[]): GanttTask[] {
+  const map = new Map<string, any>();
 
   tasks.forEach((t) => {
     map.set(t.id, { ...t, children: [] });
   });
 
-  const roots: any[] = [];
+  const roots: GanttTask[] = [];
 
   tasks.forEach((t) => {
+    const item = map.get(t.id);
     if (t.parentId !== null) {
-      map.get(t.parentId)?.children.push(map.get(t.id));
+      const parent = map.get(t.parentId);
+      if (parent) {
+        parent.children.push(item);
+      }
     } else {
-      roots.push(map.get(t.id));
+      roots.push(item);
     }
   });
-
   return roots;
 }
-export function flatten(tasks: any[], depth = 0): (Task & { depth: number })[] {
-  const result: (Task & { depth: number })[] = [];
+
+export function flatten(
+  tasks: GanttTask[],
+  depth = 0,
+): (GanttTask & { hasChildren: boolean })[] {
+  const result: any[] = [];
 
   for (const task of tasks) {
-    result.push({ ...task, depth });
-
-    if (task.expanded && task.children?.length) {
+    const hasChildren = task.children && task.children.length > 0;
+    result.push({ ...task, depth, hasChildren });
+    if (task.expanded && hasChildren) {
       result.push(...flatten(task.children, depth + 1));
     }
   }
@@ -47,7 +56,7 @@ export function flatten(tasks: any[], depth = 0): (Task & { depth: number })[] {
   return result;
 }
 
-export function getDepth(taskId: number, tasks: Task[]): number {
+export function getDepth(taskId: string, tasks: Task[]): number {
   let depth = 0;
   let current = tasks.find((t) => t.id === taskId);
 
@@ -58,7 +67,20 @@ export function getDepth(taskId: number, tasks: Task[]): number {
 
   return depth;
 }
+export const getAllDescendantIds = (
+  tasks: Task[],
+  parentId: string,
+): string[] => {
+  let ids: string[] = [];
+  const children = tasks.filter((t) => t.parentId === parentId);
 
+  children.forEach((child) => {
+    ids.push(child.id);
+    ids = [...ids, ...getAllDescendantIds(tasks, child.id)];
+  });
+
+  return ids;
+};
 export function getMonthGroups(dates: Date[]) {
   const groups: { month: string; start: number; end: number }[] = [];
 
@@ -134,39 +156,39 @@ export const calculateTaskLayout = (
 ) => {
   let startOffset = 0;
   let duration = 0;
-
+  const sDate = new Date(task.startDate);
+  const eDate = new Date(task.endDate);
   if (viewMode === "day") {
-    startOffset = differenceInDays(task.startDate, startDate) * DAY_WIDTH;
+    startOffset = differenceInDays(sDate, startDate) * DAY_WIDTH;
 
-    duration = (differenceInDays(task.endDate, task.startDate) + 1) * DAY_WIDTH;
+    duration = (differenceInDays(eDate, sDate) + 1) * DAY_WIDTH;
   }
 
   if (viewMode === "week") {
-    const weekIndex = differenceInWeeks(task.startDate, firstWeekStart);
+    const weekIndex = differenceInWeeks(sDate, firstWeekStart);
 
     const startOfCurrentWeek = addDays(firstWeekStart, weekIndex * 7);
 
-    const offsetDays = differenceInDays(task.startDate, startOfCurrentWeek);
+    const offsetDays = differenceInDays(sDate, startOfCurrentWeek);
 
     startOffset =
       weekIndex * WEEK_WIDTH + offsetDays * (WEEK_WIDTH / 7) - WEEK_WIDTH / 7;
 
-    duration =
-      (differenceInDays(task.endDate, task.startDate) + 1) * (WEEK_WIDTH / 7);
+    duration = (differenceInDays(eDate, sDate) + 1) * (WEEK_WIDTH / 7);
   }
 
   if (viewMode === "month") {
     const daysInStartMonth = differenceInDays(
-      addMonths(startOfMonth(task.startDate), 1),
-      startOfMonth(task.startDate),
+      addMonths(startOfMonth(sDate), 1),
+      startOfMonth(sDate),
     );
 
-    const monthDiff = differenceInMonths(task.startDate, startMonth);
-    const dayOffsetInMonth = (task.startDate.getDate() - 1) / daysInStartMonth;
+    const monthDiff = differenceInMonths(sDate, startMonth);
+    const dayOffsetInMonth = (sDate.getDate() - 1) / daysInStartMonth;
 
     startOffset = (monthDiff + dayOffsetInMonth) * MONTH_WIDTH;
 
-    const taskDays = differenceInDays(task.endDate, task.startDate) + 1;
+    const taskDays = differenceInDays(eDate, sDate) + 1;
     duration = (taskDays / 30) * MONTH_WIDTH;
   }
 

@@ -1,12 +1,16 @@
 "use client";
 import { Assignee } from "@/src/types/assignee";
-import { Avatar, AvatarFallback, AvatarImage } from "../../shadcn/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/components/shadcn/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../../shadcn/tooltip";
+} from "@/src/components/shadcn/tooltip";
 
 interface AssigneeStackProps {
   assignees?: Assignee[];
@@ -31,7 +35,7 @@ export const AssigneeStack = ({ assignees }: AssigneeStackProps) => {
         {mainAssignees.map((user, index) => (
           <Tooltip key={index} delayDuration={0}>
             <TooltipTrigger asChild>
-              <Avatar className="z-20 -ml-2 h-8 w-8 border-2 border-background transition-all duration-300 group-hover:-ml-1 hover:z-50 hover:scale-110">
+              <Avatar className="z-20 -ml-2 first:ml-0 h-8 w-8 border-2 border-background transition-all duration-300 group-hover:-ml-1 hover:z-50 hover:scale-110">
                 <AvatarImage src={user?.avatarUrl} />
                 <AvatarFallback className="bg-primary text-[10px] font-bold text-primary-foreground uppercase">
                   {user?.email?.charAt(0) || "?"}

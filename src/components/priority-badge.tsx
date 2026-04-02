@@ -8,9 +8,9 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
       color: "bg-slate-500/10 text-slate-500",
       label: "Low",
     },
-    NORMAL: {
+    MEDIUM: {
       color: "bg-blue-500/10 text-blue-500",
-      label: "Normal",
+      label: "Medium",
     },
     HIGH: {
       color: "bg-orange-500/10 text-orange-500",
@@ -22,7 +22,7 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
     },
   };
 
-  const { color, label } = config[priority] || config.NORMAL;
+  const { color, label } = config[priority] || config.MEDIUM;
 
   return (
     <Badge

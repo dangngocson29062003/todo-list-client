@@ -20,7 +20,7 @@ function ProjectContent({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <ProjectHeader />
-      <main className="p-6">{children}</main>
+      <main className="py-6">{children}</main>
     </div>
   );
 }

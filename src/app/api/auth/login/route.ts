@@ -45,7 +45,6 @@ async function refreshLock(): Promise<void> {
 
         const data = await res.json();
         const newToken = data.data;
-        console.log(newToken);
 
         localStorage.setItem("token", newToken);
       })

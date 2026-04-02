@@ -26,7 +26,6 @@ export default function LoginPage() {
     try {
       setLoading(true);
       const data = await login(email, password, rememberMe);
-      console.log("Login successful:", data);
       notify("success", "Login successful");
       authLogin(data.accessToken, data.user);
       router.push("/home");

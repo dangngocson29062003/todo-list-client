@@ -42,7 +42,7 @@ import { useProject } from "@/src/context/projectContext";
 
 const taskPriorityLabels: Record<Priority, string> = {
   [Priority.LOW]: "Low",
-  [Priority.NORMAL]: "Normal",
+  [Priority.MEDIUM]: "Medium",
   [Priority.HIGH]: "High",
   [Priority.URGENT]: "Urgent",
 };
@@ -57,14 +57,18 @@ const taskStatusLabels: Record<TaskStatus, string> = {
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
+  parentId?: string;
   defaultPriority?: Priority;
   defaultStatus?: TaskStatus;
+  defaultStartDate?: Date;
+  defaultEndDate?: Date;
   onCreated?: (task: Task) => void;
 }
 
 type TaskFormState = {
   name: string;
   description: string;
+  parentId: string | null;
   priority: Priority;
   status: TaskStatus;
   startDate: Date;
@@ -75,8 +79,11 @@ type TaskFormState = {
 export default function CreateTaskModal({
   isOpen,
   onClose,
+  parentId,
   defaultPriority,
   defaultStatus,
+  defaultStartDate,
+  defaultEndDate,
   onCreated,
 }: CreateTaskModalProps) {
   const { project } = useProject();
@@ -84,9 +91,10 @@ export default function CreateTaskModal({
     name: "",
     description: "",
     priority: defaultPriority || Priority.LOW,
+    parentId: parentId || null,
     status: TaskStatus.TODO,
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: defaultStartDate || new Date(),
+    endDate: defaultEndDate || new Date(),
     tags: [],
   });
 
@@ -106,15 +114,15 @@ export default function CreateTaskModal({
       [key]: value,
     }));
   };
-
   const resetForm = () => {
     setForm({
       name: "",
       description: "",
+      parentId: parentId || null,
       priority: defaultPriority || Priority.LOW,
       status: defaultStatus || TaskStatus.TODO,
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: defaultStartDate || new Date(),
+      endDate: defaultEndDate || new Date(),
       tags: [],
     });
     setInputValue("");
@@ -135,12 +143,22 @@ export default function CreateTaskModal({
     if (isOpen) {
       setForm((prev) => ({
         ...prev,
+        parentId: parentId || null,
         priority: defaultPriority || Priority.LOW,
         status: defaultStatus || TaskStatus.TODO,
+        startDate: defaultStartDate || new Date(),
+        endDate: defaultEndDate || new Date(),
       }));
       setError(null);
     }
-  }, [defaultPriority, isOpen]);
+  }, [
+    parentId,
+    defaultPriority,
+    defaultStatus,
+    defaultStartDate,
+    defaultEndDate,
+    isOpen,
+  ]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -200,7 +218,20 @@ export default function CreateTaskModal({
       setError("End date must be after start date");
       return;
     }
-
+    if (form.parentId) {
+      if (defaultStartDate && form.startDate < defaultStartDate) {
+        setError(
+          `Start date cannot be earlier than parent's start date (${format(defaultStartDate, "dd/MM/yyyy")})`,
+        );
+        return;
+      }
+      if (defaultEndDate && form.endDate > defaultEndDate) {
+        setError(
+          `End date cannot be later than parent's end date (${format(defaultEndDate, "dd/MM/yyyy")})`,
+        );
+        return;
+      }
+    }
     try {
       setSubmitting(true);
       setError(null);
@@ -221,6 +252,7 @@ export default function CreateTaskModal({
         },
         body: JSON.stringify({
           name: form.name.trim(),
+          parentId: form.parentId || null,
           description: form.description.trim() || null,
           status: form.status,
           priority: form.priority,

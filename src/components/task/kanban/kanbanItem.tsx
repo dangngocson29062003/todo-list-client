@@ -30,6 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../shadcn/tooltip";
+import { AssigneeStack } from "../assignee-stack";
 
 interface KanbanItem {
   task: Task;
@@ -144,12 +145,10 @@ export function KanbanItem({ task }: KanbanItem) {
       </div>
       <div className="mt-auto pt-3 flex items-center justify-between border-t border-dashed border-border">
         <div className="flex shrink-none items-center gap-3">
-          {task.commentCount && (
-            <div className="flex items-center gap-2 text-muted-foreground/70">
-              <MessageSquareMore className="size-3.5" />
-              <span className="text-xs font-medium">{task.commentCount}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-muted-foreground/70">
+            <MessageSquareMore className="size-3.5" />
+            <span className="text-xs font-medium">{task.commentCount}</span>
+          </div>
           <div className="flex items-center gap-2 text-muted-foreground/70">
             <ListChecks className="size-3.5" />
             <span className="text-xs font-medium">{task.commentCount}</span>
@@ -157,23 +156,7 @@ export function KanbanItem({ task }: KanbanItem) {
         </div>
 
         <div className="flex flex-1 justify-end -space-x-2">
-          <TooltipProvider>
-            {task.assignees?.map((assignee, i) => (
-              <Tooltip key={i}>
-                <TooltipTrigger asChild>
-                  <Avatar className="z-30 cursor-pointer transition-transform hover:scale-110">
-                    <AvatarImage src={assignee.avatarUrl} />
-                    <AvatarFallback className="text-xs bg-muted-foreground/20">
-                      {assignee.email[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p className="text-xs font-medium">{assignee.email}</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
-          </TooltipProvider>
+          <AssigneeStack assignees={task.assignees} />
         </div>
       </div>
     </div>

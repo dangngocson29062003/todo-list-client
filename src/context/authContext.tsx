@@ -15,7 +15,7 @@ interface User {
 
 interface AuthContextType {
   authUser: User | null;
-  authToken:string | null; 
+  authToken: string | null;
   authSetToken: (newToken: string) => void;
   authLogin: (newToken: string, user: User) => void;
   authLogout: () => void;
@@ -41,7 +41,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function fetchUserData() {
     try {
       const user = await getMe();
-      // console.log(user)
       setAuthUser(user);
     } catch {
       setAuthUser(null);
@@ -63,9 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("token");
   }
 
-  function authSetToken(newToken:string){
+  function authSetToken(newToken: string) {
     setAuthToken(newToken);
-    localStorage.setItem("token",newToken);
+    localStorage.setItem("token", newToken);
   }
 
   if (loading) return null;

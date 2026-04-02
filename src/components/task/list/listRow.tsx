@@ -54,7 +54,7 @@ export function ListRow({
 
   const priorityColor: Record<Priority, string> = {
     LOW: "bg-slate-500",
-    NORMAL: "bg-blue-500",
+    MEDIUM: "bg-blue-500",
     HIGH: "bg-orange-500",
     URGENT: "bg-red-500",
   };

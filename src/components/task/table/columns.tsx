@@ -1,7 +1,7 @@
 "use client";
 import { Task } from "@/src/types/task";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import {
   ArrowDownAZ,
   ArrowUpZA,
@@ -34,10 +34,13 @@ import {
 } from "../../shadcn/dropdown-menu";
 import { StatusIndicator } from "../../status-badge";
 import { AssigneeFilter } from "./assignee-filter";
-import { AssigneeStack } from "./assignee-stack";
 import { PriorityFilter } from "./priority-filter";
 import { ProjectMember } from "@/src/types/project-member";
 import { Assignee } from "@/src/types/assignee";
+import { AssigneeStack } from "../assignee-stack";
+import { TimelineFilter } from "./timeline-filter";
+import { DateRange } from "react-day-picker";
+import { StatusFilter } from "./status-filter";
 
 export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
   {
@@ -138,9 +141,8 @@ export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
     filterFn: (row, userId, filterValue: string[]) => {
       if (!filterValue?.length) return true;
       const taskAssignees = row.getValue(userId) as Assignee[];
-      console.log(filterValue);
       return taskAssignees.some((assignee) =>
-        filterValue.includes(assignee.id),
+        filterValue.includes(assignee.userId),
       );
     },
     cell: ({ row }) => {
@@ -149,13 +151,8 @@ export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
   },
   {
     accessorKey: "startDate",
-    header: () => {
-      return (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Calendar className="size-4" />
-          <p className="text-xs font-medium">Timeline</p>
-        </div>
-      );
+    header: ({ column }) => {
+      return <TimelineFilter column={column} />;
     },
     cell: ({ row }) => {
       const start = row.original.startDate;
@@ -175,17 +172,32 @@ export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
         </div>
       );
     },
+    filterFn: (row, id, filterValue: DateRange | undefined) => {
+      if (!filterValue?.from) return true;
+
+      const rowStartDate = startOfDay(new Date(row.original.endDate));
+      const rowEndDate = startOfDay(new Date(row.original.endDate));
+      const { from, to } = filterValue;
+      if (from && !to) {
+        return rowStartDate >= from;
+      }
+
+      if (from && to) {
+        return (
+          (rowStartDate >= from && rowStartDate <= to) ||
+          (rowEndDate >= from && rowEndDate <= to) ||
+          (rowStartDate <= from && rowEndDate >= to)
+        );
+      }
+
+      return true;
+    },
   },
 
   {
     accessorKey: "status",
-    header: () => {
-      return (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <ChartBarBig className="size-4" />
-          <p className="text-xs font-medium">Status</p>
-        </div>
-      );
+    header: ({ column }) => {
+      return <StatusFilter column={column} />;
     },
     cell: ({ row }) => {
       const status = row.original.status;

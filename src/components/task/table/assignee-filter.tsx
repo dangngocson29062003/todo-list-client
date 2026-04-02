@@ -66,7 +66,7 @@ export function AssigneeFilter({
                       </div>
                       <Avatar className="h-6 w-6">
                         <AvatarImage src={member.avatarUrl} />
-                        <AvatarFallback>
+                        <AvatarFallback className="bg-primary text-[10px] font-bold text-primary-foreground uppercase">
                           {member.email[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>

@@ -17,13 +17,11 @@ export default function SignupPage() {
   const [rePassword, setRePassword] = useState("");
 
   async function handleRegister() {
-    if (loading || !validate())
-      return;
+    if (loading || !validate()) return;
     try {
       setLoading(true);
       const data = await register(email, password);
-      console.log("Registration successful:", data);
-      notify("info", data)
+      notify("info", data);
       router.push("/login");
     } catch (err) {
       notify("error", "Registration failed", getErrorMessage(err));
@@ -33,7 +31,11 @@ export default function SignupPage() {
   }
   function validate() {
     if (!email || !password) {
-      notify("error", "Registration failed", "Email and password cannot be empty");
+      notify(
+        "error",
+        "Registration failed",
+        "Email and password cannot be empty",
+      );
       return false;
     }
     if (password !== rePassword) {
@@ -41,23 +43,32 @@ export default function SignupPage() {
       return false;
     }
     if (password.length < 6) {
-      notify("error", "Registration failed", "Password must be at least 6 characters");
+      notify(
+        "error",
+        "Registration failed",
+        "Password must be at least 6 characters",
+      );
       return false;
     }
     return true;
   }
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center 
-    bg-gray-100 dark:bg-zinc-900 transition-colors">
-      <div className="flex flex-col gap-4 relative w-100 mx-auto 
+    <div
+      className="min-h-screen flex items-center justify-center 
+    bg-gray-100 dark:bg-zinc-900 transition-colors"
+    >
+      <div
+        className="flex flex-col gap-4 relative w-100 mx-auto 
       border border-gray-200 dark:border-zinc-700
       bg-white dark:bg-zinc-800
-       shadow-2xl py-8 px-10 rounded-xl">
+       shadow-2xl py-8 px-10 rounded-xl"
+      >
         <div className="absolute top-3 left-3">
-          <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-gray-800 dark:hover:text-white"
-            onClick={() => router.push("/landing")} />
+          <ArrowLeft
+            className="w-5 h-5 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-gray-800 dark:hover:text-white"
+            onClick={() => router.push("/landing")}
+          />
         </div>
         <div>
           <h2 className="text-lg font-semibold text-center">
@@ -69,7 +80,6 @@ export default function SignupPage() {
         </div>
 
         <div className="flex flex-col gap-3 pt-2">
-
           {/* Email input */}
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -119,7 +129,6 @@ export default function SignupPage() {
               onChange={(e) => setRePassword(e.target.value)}
             />
           </div>
-
         </div>
 
         <div className="pt-2">
@@ -129,7 +138,8 @@ export default function SignupPage() {
             dark:bg-white dark:text-black dark:hover:bg-gray-200
             text-white
             rounded-lg font-semibold
-            transition-all duration-200 hover:shadow-md cursor-pointer">
+            transition-all duration-200 hover:shadow-md cursor-pointer"
+          >
             Signup
           </button>
         </div>
@@ -149,8 +159,12 @@ export default function SignupPage() {
         </div>
         <div className="flex justify-center">
           <button
-            onClick={() => window.location.href = "http://localhost:8080/oauth2/authorization/google"}
-            className="flex items-center justify-center w-full h-9 text-sm text-gray-600 dark:text-gray-200 gap-2 bg-gray-100 dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 shadow shadow-gray-300 dark:shadow-none rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 transition-all duration-200 cursor-pointer">
+            onClick={() =>
+              (window.location.href =
+                "http://localhost:8080/oauth2/authorization/google")
+            }
+            className="flex items-center justify-center w-full h-9 text-sm text-gray-600 dark:text-gray-200 gap-2 bg-gray-100 dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 shadow shadow-gray-300 dark:shadow-none rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 transition-all duration-200 cursor-pointer"
+          >
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png"
               alt="Google"
@@ -159,9 +173,7 @@ export default function SignupPage() {
             Google
           </button>
         </div>
-
       </div>
     </div>
   );
-
 }
