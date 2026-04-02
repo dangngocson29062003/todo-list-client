@@ -2,8 +2,11 @@
 
 import {
   buildTree,
+  DAY_WIDTH,
   flatten,
   getAllDescendantIds,
+  MONTH_WIDTH,
+  WEEK_WIDTH,
 } from "@/src/helpers/ganttHelper";
 import { Task } from "@/src/types/task";
 import { addMonths, subMonths } from "date-fns";
@@ -20,6 +23,7 @@ import { toast } from "sonner";
 import { Button } from "../../shadcn/button";
 import { Check, Loader2, Save } from "lucide-react";
 import { useProject } from "@/src/context/projectContext";
+
 const priorityConfig: Record<string, { color: string; label: string }> = {
   LOW: {
     color: "bg-slate-500/10 text-slate-500 border-slate-500/20",
@@ -38,10 +42,11 @@ const priorityConfig: Record<string, { color: string; label: string }> = {
     label: "Urgent",
   },
 };
-const DAY_WIDTH = 50;
+
 type Props = {
   tasks: Task[];
 };
+
 export default function Gantt({ tasks }: Props) {
   const { project } = useProject();
   const [currentOriginTasks, setCurrentOriginTasks] = useState(tasks);
@@ -54,17 +59,41 @@ export default function Gantt({ tasks }: Props) {
     start: subMonths(new Date(), 2),
     end: addMonths(new Date(), 2),
   });
+
   const { taskWidth, startWidth, startResize } = useGanttResize();
   const timeContext = useGanttTime(range, viewMode);
-  const { startDrag } = useGanttDrag(data, setData, DAY_WIDTH);
+
+  // --- LOGIC KÉO THẢ TẠO TASK ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTaskDates, setNewTaskDates] = useState<{
+    start?: Date;
+    end?: Date;
+  }>({});
+
+  const { startDrag, ghostTask } = useGanttDrag(
+    data,
+    setData,
+    DAY_WIDTH,
+    WEEK_WIDTH,
+    MONTH_WIDTH,
+    viewMode,
+    timeContext.startDate,
+    (start, end) => {
+      setNewTaskDates({ start, end });
+      setParentTaskId(null);
+      setParentDates({});
+      setIsModalOpen(true);
+    },
+  );
+
   const flatTasks = useMemo(() => flatten(buildTree(data)), [data]);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentTaskId, setParentTaskId] = useState<string | null>(null);
   const [parentDates, setParentDates] = useState<{ start?: Date; end?: Date }>(
     {},
   );
 
+  // ... (Giữ nguyên logic changedTaskIds, handleReset, handleOpenCreateModal, toggleExpand, handleSave)
   const changedTaskIds = useMemo(() => {
     return data
       .filter((current) => {
@@ -79,6 +108,7 @@ export default function Gantt({ tasks }: Props) {
       })
       .map((t) => t.id);
   }, [data, currentOriginTasks]);
+
   const handleReset = (taskId: string) => {
     setData((prevData) => {
       const allDescendantIds = getAllDescendantIds(prevData, taskId);
@@ -86,19 +116,16 @@ export default function Gantt({ tasks }: Props) {
       return prevData.map((currentTask) => {
         if (idsToReset.includes(currentTask.id)) {
           const original = tasks.find((t) => t.id === currentTask.id);
-          if (original) {
-            return {
-              ...original,
-              expanded: currentTask.expanded,
-            };
-          }
+          if (original) return { ...original, expanded: currentTask.expanded };
         }
         return currentTask;
       });
     });
   };
+
   const handleOpenCreateModal = (parentId: string | null = null) => {
     setParentTaskId(parentId);
+    setNewTaskDates({}); // Reset ngày kéo thả nếu mở thủ công
     if (parentId) {
       const parentTask = data.find((t) => t.id === parentId);
       if (parentTask) {
@@ -112,11 +139,13 @@ export default function Gantt({ tasks }: Props) {
     }
     setIsModalOpen(true);
   };
+
   const toggleExpand = useCallback((id: string) => {
     setData((prev) =>
       prev.map((t) => (t.id === id ? { ...t, expanded: !t.expanded } : t)),
     );
   }, []);
+
   const handleSave = async (taskId: string) => {
     const descendantIds = getAllDescendantIds(data, taskId);
     const allIdsToSave = [taskId, ...descendantIds];
@@ -167,29 +196,29 @@ export default function Gantt({ tasks }: Props) {
     toast.promise(savePromise(), {
       loading: (
         <div className="flex items-center gap-2">
-          <Loader2 className="size-4 text-muted-foreground animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
           <p>Saving...</p>
         </div>
       ),
-      success: (data) => (
+      success: (
         <div className="flex items-center gap-2">
           <Check className="size-4 text-green-400" />
           <p>Saved</p>
         </div>
       ),
-      error: (err) =>
-        err.message || "Failed to save changes. Please try again.",
-      icon: null,
+      error: (err) => err.message || "Failed to save changes.",
     });
   };
+
   return (
     <div className="flex flex-col justify-center border rounded-xl overflow-hidden bg-muted dark:bg-muted/50 shadow-sm">
       <CreateTaskModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         parentId={parentTaskId as string}
-        defaultStartDate={parentDates.start}
-        defaultEndDate={parentDates.end}
+        // Ưu tiên ngày kéo thả (newTaskDates), nếu không có thì dùng parentDates
+        defaultStartDate={newTaskDates.start || parentDates.start}
+        defaultEndDate={newTaskDates.end || parentDates.end}
         onCreated={(newTask) => {
           setData((prev) => [newTask, ...prev]);
           if (parentTaskId) {
@@ -201,6 +230,7 @@ export default function Gantt({ tasks }: Props) {
           }
         }}
       />
+
       <GanttToolbar
         title="Project Management"
         viewMode={viewMode}
@@ -222,7 +252,7 @@ export default function Gantt({ tasks }: Props) {
         />
         <div
           ref={timelineContainerRef}
-          className="flex-1 overflow-x-auto relative bg-background/50"
+          className="flex-1 overflow-x-auto relative bg-background/50 gantt-container"
         >
           <GanttTimeline
             {...timeContext}
@@ -231,6 +261,7 @@ export default function Gantt({ tasks }: Props) {
             range={range}
             flatTasks={flatTasks}
             startDrag={startDrag}
+            ghostTask={ghostTask}
             priorityColorMap={priorityConfig}
             changedTaskIds={changedTaskIds}
             onReset={handleReset}

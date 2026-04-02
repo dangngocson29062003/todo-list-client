@@ -38,6 +38,7 @@ type Props = {
   changedTaskIds: string[];
   onReset: (id: string) => void;
   onSave: (id: string) => void;
+  ghostTask: { start: Date; end: Date } | null;
 };
 const GanttTimeline = React.memo(function GanttTimeline({
   timelineRef,
@@ -58,6 +59,7 @@ const GanttTimeline = React.memo(function GanttTimeline({
   changedTaskIds,
   onReset,
   onSave,
+  ghostTask,
 }: Props) {
   const { todayOffset } = calculateTodayMarker(
     viewMode,
@@ -122,6 +124,7 @@ const GanttTimeline = React.memo(function GanttTimeline({
           changedTaskIds={changedTaskIds}
           onReset={onReset}
           onSave={onSave}
+          ghostTask={ghostTask}
         />
         <GanttConnectors
           flatTasks={flatTasks}

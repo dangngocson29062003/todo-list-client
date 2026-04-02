@@ -127,6 +127,23 @@ const GanttTaskList = React.memo(function GanttTaskList({
             </div>
           );
         })}
+        <div
+          className="group h-12 grid items-center border-b bg-background/50 hover:bg-accent/30 transition-colors cursor-crosshair"
+          style={{
+            gridTemplateColumns: `${taskWidth}px ${startWidth}px ${endWidth}px`,
+          }}
+        >
+          <div className="flex items-center gap-3 h-full px-4 text-muted-foreground">
+            <div className="flex items-center justify-center w-5 h-5 rounded-md border border-dashed border-muted-foreground/50">
+              <Plus className="size-3" />
+            </div>
+            <span className="text-[11px] font-medium uppercase tracking-tight opacity-70 group-hover:opacity-100 transition-opacity">
+              Drag on right to create
+            </span>
+          </div>
+          <div className="border-l border-transparent h-full" />
+          <div className="border-l border-transparent h-full" />
+        </div>
       </div>
     </div>
   );
