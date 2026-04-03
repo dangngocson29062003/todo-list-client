@@ -2,15 +2,13 @@
 
 import {
   buildTree,
-  DAY_WIDTH,
   flatten,
   getAllDescendantIds,
-  MONTH_WIDTH,
-  WEEK_WIDTH,
+  // Bỏ import các hằng số tĩnh vì giờ ta dùng State
 } from "@/src/helpers/ganttHelper";
 import { Task } from "@/src/types/task";
 import { addMonths, subMonths } from "date-fns";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useGanttDrag } from "@/src/hooks/useGanttDrag";
 import { useGanttResize } from "@/src/hooks/useGanttResize";
@@ -20,8 +18,7 @@ import GanttTaskList from "./gantt-task-list";
 import GanttToolbar from "./gantt-toolbar";
 import GanttTimeline from "./timeline/gantt-timeline";
 import { toast } from "sonner";
-import { Button } from "../../shadcn/button";
-import { Check, Loader2, Save } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useProject } from "@/src/context/projectContext";
 
 const priorityConfig: Record<string, { color: string; label: string }> = {
@@ -43,39 +40,39 @@ const priorityConfig: Record<string, { color: string; label: string }> = {
   },
 };
 
-type Props = {
-  tasks: Task[];
-};
+type Props = { tasks: Task[] };
 
 export default function Gantt({ tasks }: Props) {
   const { project } = useProject();
   const [currentOriginTasks, setCurrentOriginTasks] = useState(tasks);
-
   const [data, setData] = useState<Task[]>(() =>
     currentOriginTasks.map((task) => ({ ...task, expanded: true })),
   );
+
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
   const [range, setRange] = useState({
     start: subMonths(new Date(), 2),
     end: addMonths(new Date(), 2),
   });
 
+  // --- 1. QUẢN LÝ ZOOM BẰNG STATE WIDTH ---
+  const [dayWidth, setDayWidth] = useState(50);
+  const [weekWidth, setWeekWidth] = useState(140);
+  const [monthWidth, setMonthWidth] = useState(450);
+
   const { taskWidth, startWidth, startResize } = useGanttResize();
   const timeContext = useGanttTime(range, viewMode);
-
-  // --- LOGIC KÉO THẢ TẠO TASK ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskDates, setNewTaskDates] = useState<{
     start?: Date;
     end?: Date;
   }>({});
-
   const { startDrag, ghostTask } = useGanttDrag(
     data,
     setData,
-    DAY_WIDTH,
-    WEEK_WIDTH,
-    MONTH_WIDTH,
+    dayWidth,
+    weekWidth,
+    monthWidth,
     viewMode,
     timeContext.startDate,
     (start, end) => {
@@ -92,8 +89,163 @@ export default function Gantt({ tasks }: Props) {
   const [parentDates, setParentDates] = useState<{ start?: Date; end?: Date }>(
     {},
   );
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const step = 10;
+        if (e.deltaY < 0) {
+          // Zoom In
+          if (viewMode === "day")
+            setDayWidth((prev) => Math.min(prev + step, 150));
+          if (viewMode === "week")
+            setWeekWidth((prev) => Math.min(prev + step * 2, 400));
+          if (viewMode === "month")
+            setMonthWidth((prev) => Math.min(prev + step * 5, 1200));
+        } else {
+          // Zoom Out
+          if (viewMode === "day")
+            setDayWidth((prev) => Math.max(prev - step, 30));
+          if (viewMode === "week")
+            setWeekWidth((prev) => Math.max(prev - step * 2, 80));
+          if (viewMode === "month")
+            setMonthWidth((prev) => Math.max(prev - step * 5, 200));
+        }
+      }
+    };
 
-  // ... (Giữ nguyên logic changedTaskIds, handleReset, handleOpenCreateModal, toggleExpand, handleSave)
+    const container = timelineContainerRef.current;
+    if (container) {
+      container.addEventListener("wheel", handleWheel, { passive: false });
+    }
+    return () => container?.removeEventListener("wheel", handleWheel);
+  }, [viewMode]);
+
+  const handleReset = (taskId: string) => {
+    setData((prevData) => {
+      const allDescendantIds = getAllDescendantIds(prevData, taskId);
+
+      const idsToReset = [taskId, ...allDescendantIds];
+
+      return prevData.map((currentTask) => {
+        if (idsToReset.includes(currentTask.id)) {
+          const original = tasks.find((t) => t.id === currentTask.id);
+
+          if (original) return { ...original, expanded: currentTask.expanded };
+        }
+
+        return currentTask;
+      });
+    });
+  };
+
+  const handleOpenCreateModal = (parentId: string | null = null) => {
+    setParentTaskId(parentId);
+
+    setNewTaskDates({});
+
+    if (parentId) {
+      const parentTask = data.find((t) => t.id === parentId);
+
+      if (parentTask) {
+        setParentDates({
+          start: new Date(parentTask.startDate),
+
+          end: new Date(parentTask.endDate),
+        });
+      }
+    } else {
+      setParentDates({});
+    }
+
+    setIsModalOpen(true);
+  };
+  const handleSave = async (taskId: string) => {
+    const descendantIds = getAllDescendantIds(data, taskId);
+
+    const allIdsToSave = [taskId, ...descendantIds];
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Authentication required. Please log in.");
+
+      return;
+    }
+
+    const tasksToUpdate = data.filter(
+      (t) => allIdsToSave.includes(t.id) && changedTaskIds.includes(t.id),
+    );
+
+    if (tasksToUpdate.length === 0) return;
+
+    const savePromise = async () => {
+      await Promise.all(
+        tasksToUpdate.map((task) =>
+          fetch(`/api/projects/${project.id}/tasks/${task.id}`, {
+            method: "PUT",
+
+            headers: {
+              "Content-Type": "application/json",
+
+              Authorization: `Bearer ${token}`,
+            },
+
+            body: JSON.stringify({
+              startDate: task.startDate,
+
+              endDate: task.endDate,
+            }),
+          }).then((res) => {
+            if (!res.ok) throw new Error("Failed to update some tasks");
+
+            return res.json();
+          }),
+        ),
+      );
+
+      setCurrentOriginTasks((prev) =>
+        prev.map((origin) => {
+          const updated = tasksToUpdate.find((u) => u.id === origin.id);
+
+          return updated
+            ? {
+                ...origin,
+
+                startDate: updated.startDate,
+
+                endDate: updated.endDate,
+              }
+            : origin;
+        }),
+      );
+    };
+
+    toast.promise(savePromise(), {
+      loading: (
+        <div className="flex items-center gap-2">
+          <Loader2 className="size-4 animate-spin" />
+
+          <p>Saving...</p>
+        </div>
+      ),
+
+      success: (
+        <div className="flex items-center gap-2">
+          <Check className="size-4 text-green-400" />
+
+          <p>Saved</p>
+        </div>
+      ),
+
+      error: (err) => err.message || "Failed to save changes.",
+    });
+  };
+  const toggleExpand = useCallback((id: string) => {
+    setData((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, expanded: !t.expanded } : t)),
+    );
+  }, []);
   const changedTaskIds = useMemo(() => {
     return data
       .filter((current) => {
@@ -109,125 +261,16 @@ export default function Gantt({ tasks }: Props) {
       .map((t) => t.id);
   }, [data, currentOriginTasks]);
 
-  const handleReset = (taskId: string) => {
-    setData((prevData) => {
-      const allDescendantIds = getAllDescendantIds(prevData, taskId);
-      const idsToReset = [taskId, ...allDescendantIds];
-      return prevData.map((currentTask) => {
-        if (idsToReset.includes(currentTask.id)) {
-          const original = tasks.find((t) => t.id === currentTask.id);
-          if (original) return { ...original, expanded: currentTask.expanded };
-        }
-        return currentTask;
-      });
-    });
-  };
-
-  const handleOpenCreateModal = (parentId: string | null = null) => {
-    setParentTaskId(parentId);
-    setNewTaskDates({}); // Reset ngày kéo thả nếu mở thủ công
-    if (parentId) {
-      const parentTask = data.find((t) => t.id === parentId);
-      if (parentTask) {
-        setParentDates({
-          start: new Date(parentTask.startDate),
-          end: new Date(parentTask.endDate),
-        });
-      }
-    } else {
-      setParentDates({});
-    }
-    setIsModalOpen(true);
-  };
-
-  const toggleExpand = useCallback((id: string) => {
-    setData((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, expanded: !t.expanded } : t)),
-    );
-  }, []);
-
-  const handleSave = async (taskId: string) => {
-    const descendantIds = getAllDescendantIds(data, taskId);
-    const allIdsToSave = [taskId, ...descendantIds];
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      toast.error("Authentication required. Please log in.");
-      return;
-    }
-
-    const tasksToUpdate = data.filter(
-      (t) => allIdsToSave.includes(t.id) && changedTaskIds.includes(t.id),
-    );
-
-    if (tasksToUpdate.length === 0) return;
-    const savePromise = async () => {
-      await Promise.all(
-        tasksToUpdate.map((task) =>
-          fetch(`/api/projects/${project.id}/tasks/${task.id}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              startDate: task.startDate,
-              endDate: task.endDate,
-            }),
-          }).then((res) => {
-            if (!res.ok) throw new Error("Failed to update some tasks");
-            return res.json();
-          }),
-        ),
-      );
-      setCurrentOriginTasks((prev) =>
-        prev.map((origin) => {
-          const updated = tasksToUpdate.find((u) => u.id === origin.id);
-          return updated
-            ? {
-                ...origin,
-                startDate: updated.startDate,
-                endDate: updated.endDate,
-              }
-            : origin;
-        }),
-      );
-    };
-    toast.promise(savePromise(), {
-      loading: (
-        <div className="flex items-center gap-2">
-          <Loader2 className="size-4 animate-spin" />
-          <p>Saving...</p>
-        </div>
-      ),
-      success: (
-        <div className="flex items-center gap-2">
-          <Check className="size-4 text-green-400" />
-          <p>Saved</p>
-        </div>
-      ),
-      error: (err) => err.message || "Failed to save changes.",
-    });
-  };
-
   return (
     <div className="flex flex-col justify-center border rounded-xl overflow-hidden bg-muted dark:bg-muted/50 shadow-sm">
       <CreateTaskModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         parentId={parentTaskId as string}
-        // Ưu tiên ngày kéo thả (newTaskDates), nếu không có thì dùng parentDates
         defaultStartDate={newTaskDates.start || parentDates.start}
         defaultEndDate={newTaskDates.end || parentDates.end}
         onCreated={(newTask) => {
           setData((prev) => [newTask, ...prev]);
-          if (parentTaskId) {
-            setData((prev) =>
-              prev.map((t) =>
-                t.id === parentTaskId ? { ...t, expanded: true } : t,
-              ),
-            );
-          }
         }}
       />
 
@@ -238,6 +281,28 @@ export default function Gantt({ tasks }: Props) {
         range={range}
         setRange={setRange}
       />
+      <div className="px-4 py-2 bg-background border-b flex items-center gap-2">
+        <span className="text-xs font-medium">Zoom Level:</span>
+        <input
+          type="range"
+          min={viewMode === "day" ? 30 : viewMode === "week" ? 80 : 200}
+          max={viewMode === "day" ? 150 : viewMode === "week" ? 400 : 1200}
+          value={
+            viewMode === "day"
+              ? dayWidth
+              : viewMode === "week"
+                ? weekWidth
+                : monthWidth
+          }
+          onChange={(e) => {
+            const val = parseInt(e.target.value);
+            if (viewMode === "day") setDayWidth(val);
+            if (viewMode === "week") setWeekWidth(val);
+            if (viewMode === "month") setMonthWidth(val);
+          }}
+          className="w-32 h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
+        />
+      </div>
 
       <div className="flex flex-col md:flex-row ">
         <GanttTaskList
@@ -249,6 +314,7 @@ export default function Gantt({ tasks }: Props) {
           startResize={startResize}
           toggleExpand={toggleExpand}
           onAddTask={(id) => handleOpenCreateModal(id)}
+          ghostTask={ghostTask}
         />
         <div
           ref={timelineContainerRef}
@@ -256,6 +322,9 @@ export default function Gantt({ tasks }: Props) {
         >
           <GanttTimeline
             {...timeContext}
+            dayWidth={dayWidth}
+            weekWidth={weekWidth}
+            monthWidth={monthWidth}
             timelineRef={timelineContainerRef}
             viewMode={viewMode}
             range={range}

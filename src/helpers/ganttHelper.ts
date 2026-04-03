@@ -148,20 +148,27 @@ export function getWeekMonthGroups(weeks: Date[]) {
 }
 
 export const calculateTaskLayout = (
-  task: Task,
+  task: any,
   viewMode: string,
   startDate: Date,
   firstWeekStart: Date,
   startMonth: Date,
+  dayWidth: number,
+  weekWidth: number,
+  monthWidth: number,
 ) => {
   let startOffset = 0;
-  let duration = 0;
-  const sDate = new Date(task.startDate);
-  const eDate = new Date(task.endDate);
-  if (viewMode === "day") {
-    startOffset = differenceInDays(sDate, startDate) * DAY_WIDTH;
 
-    duration = (differenceInDays(eDate, sDate) + 1) * DAY_WIDTH;
+  let duration = 0;
+
+  const sDate = new Date(task.startDate);
+
+  const eDate = new Date(task.endDate);
+
+  if (viewMode === "day") {
+    startOffset = differenceInDays(sDate, startDate) * dayWidth;
+
+    duration = (differenceInDays(eDate, sDate) + 1) * dayWidth;
   }
 
   if (viewMode === "week") {
@@ -172,24 +179,27 @@ export const calculateTaskLayout = (
     const offsetDays = differenceInDays(sDate, startOfCurrentWeek);
 
     startOffset =
-      weekIndex * WEEK_WIDTH + offsetDays * (WEEK_WIDTH / 7) - WEEK_WIDTH / 7;
+      weekIndex * weekWidth + offsetDays * (weekWidth / 7) - weekWidth / 7;
 
-    duration = (differenceInDays(eDate, sDate) + 1) * (WEEK_WIDTH / 7);
+    duration = (differenceInDays(eDate, sDate) + 1) * (weekWidth / 7);
   }
 
   if (viewMode === "month") {
     const daysInStartMonth = differenceInDays(
       addMonths(startOfMonth(sDate), 1),
+
       startOfMonth(sDate),
     );
 
     const monthDiff = differenceInMonths(sDate, startMonth);
+
     const dayOffsetInMonth = (sDate.getDate() - 1) / daysInStartMonth;
 
-    startOffset = (monthDiff + dayOffsetInMonth) * MONTH_WIDTH;
+    startOffset = (monthDiff + dayOffsetInMonth) * monthWidth;
 
     const taskDays = differenceInDays(eDate, sDate) + 1;
-    duration = (taskDays / 30) * MONTH_WIDTH;
+
+    duration = (taskDays / 30) * monthWidth;
   }
 
   return { startOffset, duration };
@@ -199,27 +209,36 @@ export const calculateTodayMarker = (
   startDate: Date,
   firstWeekStart: Date,
   startMonth: Date,
+  dayWidth: number,
+  weekWidth: number,
+  monthWidth: number,
 ) => {
   let todayOffset = 0;
 
   if (viewMode === "day") {
-    todayOffset = differenceInDays(new Date(), startDate) * DAY_WIDTH + 25;
+    todayOffset =
+      differenceInDays(new Date(), startDate) * dayWidth + dayWidth / 2;
   }
 
   if (viewMode === "week") {
     const daysFromWeekStart = differenceInDays(new Date(), firstWeekStart);
-    todayOffset = daysFromWeekStart * (WEEK_WIDTH / 7);
+
+    todayOffset = daysFromWeekStart * (weekWidth / 7);
   }
 
   if (viewMode === "month") {
     const monthDiff = differenceInMonths(new Date(), startMonth);
+
     const daysInTodayMonth = differenceInDays(
       addMonths(startOfMonth(new Date()), 1),
+
       startOfMonth(new Date()),
     );
+
     const dayRatio = (new Date().getDate() - 1) / daysInTodayMonth;
 
-    todayOffset = (monthDiff + dayRatio) * MONTH_WIDTH + 10;
+    todayOffset = (monthDiff + dayRatio) * monthWidth + 10;
   }
+
   return { todayOffset };
 };

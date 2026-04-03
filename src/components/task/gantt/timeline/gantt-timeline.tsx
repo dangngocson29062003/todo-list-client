@@ -6,15 +6,10 @@ import GanttHeader from "./gantt-header";
 import GanttSubHeader from "./gantt-sub-header";
 import GanttTodayMarker from "./gantt-today-marker";
 import GanttTaskRows from "./gantt-task-row";
-import {
-  calculateTodayMarker,
-  DAY_WIDTH,
-  MONTH_WIDTH,
-  WEEK_WIDTH,
-} from "@/src/helpers/ganttHelper";
+import { calculateTodayMarker } from "@/src/helpers/ganttHelper";
 import GanttConnectors from "./gantt-connectors";
 
-type DragType = "move" | "resize-left" | "resize-right";
+type DragType = "move" | "resize-left" | "resize-right" | "create";
 
 type MonthGroup = { start: number; end: number };
 type WeekMonthGroup = { start: number; end: number; label: string };
@@ -22,6 +17,11 @@ type WeekMonthGroup = { start: number; end: number; label: string };
 type Props = {
   timelineRef: React.RefObject<HTMLDivElement | null>;
   viewMode: "day" | "week" | "month";
+  // --- NHẬN WIDTH ĐỘNG TỪ PARENT ---
+  dayWidth: number;
+  weekWidth: number;
+  monthWidth: number;
+
   totalDays: number;
   weeks: Date[];
   months: Date[];
@@ -40,9 +40,13 @@ type Props = {
   onSave: (id: string) => void;
   ghostTask: { start: Date; end: Date } | null;
 };
+
 const GanttTimeline = React.memo(function GanttTimeline({
   timelineRef,
   viewMode,
+  dayWidth,
+  weekWidth,
+  monthWidth,
   totalDays,
   weeks,
   months,
@@ -66,13 +70,16 @@ const GanttTimeline = React.memo(function GanttTimeline({
     startDate,
     firstWeekStart,
     startMonth,
+    dayWidth,
+    weekWidth,
+    monthWidth,
   );
   const width =
     viewMode === "day"
-      ? totalDays * DAY_WIDTH
+      ? totalDays * dayWidth
       : viewMode === "week"
-        ? weeks.length * WEEK_WIDTH
-        : months.length * MONTH_WIDTH;
+        ? weeks.length * weekWidth
+        : months.length * monthWidth;
   useEffect(() => {
     if (!timelineRef || !timelineRef.current) return;
 
@@ -81,7 +88,7 @@ const GanttTimeline = React.memo(function GanttTimeline({
       const centerOffset =
         todayOffset -
         container.clientWidth / 2 +
-        (viewMode === "day" ? DAY_WIDTH : MONTH_WIDTH) / 2;
+        (viewMode === "day" ? dayWidth : monthWidth) / 2;
 
       container.scrollTo({
         left: Math.max(centerOffset, 0),
@@ -90,12 +97,15 @@ const GanttTimeline = React.memo(function GanttTimeline({
     }, 100);
 
     return () => clearTimeout(timeout);
-  }, [viewMode, range, timelineRef, todayOffset]);
+  }, [viewMode, range, timelineRef, todayOffset, dayWidth, monthWidth]);
 
   return (
     <div className="relative" style={{ width }}>
       <GanttHeader
         viewMode={viewMode}
+        dayWidth={dayWidth}
+        weekWidth={weekWidth}
+        monthWidth={monthWidth}
         totalDays={totalDays}
         weeks={weeks}
         monthGroups={monthGroups}
@@ -105,6 +115,9 @@ const GanttTimeline = React.memo(function GanttTimeline({
 
       <GanttSubHeader
         viewMode={viewMode}
+        dayWidth={dayWidth}
+        weekWidth={weekWidth}
+        monthWidth={monthWidth}
         dates={dates}
         weeks={weeks}
         months={months}
@@ -112,10 +125,14 @@ const GanttTimeline = React.memo(function GanttTimeline({
       />
 
       <GanttTodayMarker todayOffset={todayOffset} />
+
       <div className="relative">
         <GanttTaskRows
           flatTasks={flatTasks}
           viewMode={viewMode}
+          dayWidth={dayWidth}
+          weekWidth={weekWidth}
+          monthWidth={monthWidth}
           startDate={startDate}
           startMonth={startMonth}
           firstWeekStart={firstWeekStart}
@@ -126,9 +143,13 @@ const GanttTimeline = React.memo(function GanttTimeline({
           onSave={onSave}
           ghostTask={ghostTask}
         />
+
         <GanttConnectors
           flatTasks={flatTasks}
           viewMode={viewMode}
+          dayWidth={dayWidth}
+          weekWidth={weekWidth}
+          monthWidth={monthWidth}
           startDate={startDate}
           firstWeekStart={firstWeekStart}
           startMonth={startMonth}

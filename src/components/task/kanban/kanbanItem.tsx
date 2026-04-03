@@ -121,9 +121,15 @@ export function KanbanItem({ task }: KanbanItem) {
         <h4 className="text-sm font-bold text-foreground mb-1 line-clamp-1 italic tracking-tight">
           {task.name}
         </h4>
-        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-          {task.description || "No description provided."}
-        </p>
+        {task.description ? (
+          <p className="text-sm text-gray-600 dark:text-neutral-500">
+            {task.description}
+          </p>
+        ) : (
+          <span className="flex items-center text-muted-foreground/40 italic text-xs">
+            No description provided for this task.
+          </span>
+        )}
       </div>
       <div className="flex items-center justify-between gap-2 mb-4 py-2 px-2.5 rounded-lg bg-muted-foreground/10 dark:bg-muted">
         <div className="flex flex-col">

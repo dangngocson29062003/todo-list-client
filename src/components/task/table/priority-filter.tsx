@@ -24,8 +24,8 @@ export function PriorityFilter({ column }: { column: any }) {
       <PopoverTrigger asChild>
         <div className="flex items-center justify-between text-muted-foreground hover:text-foreground transition-colors group">
           <div className="flex items-center gap-2">
-            <Calendar className="size-4" />
-            <p className="text-xs font-medium">Timeline</p>
+            <CircleAlert className="size-4" />
+            <p className="text-xs font-medium">Priority</p>
           </div>
           {selectedValues.size > 0 ? (
             <Funnel className="size-4 fill-blue-500 text-blue-500" />

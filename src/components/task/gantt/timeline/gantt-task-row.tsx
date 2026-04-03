@@ -1,3 +1,5 @@
+"use client";
+
 import { Task } from "@/src/types/task";
 import { GanttTaskRowItem } from "./gantt-row-item";
 import {
@@ -6,22 +8,20 @@ import {
   differenceInDays,
   differenceInMonths,
   differenceInWeeks,
-  format,
   startOfMonth,
 } from "date-fns";
-import {
-  calculateTaskLayout,
-  DAY_WIDTH,
-  MONTH_WIDTH,
-  WEEK_WIDTH,
-} from "@/src/helpers/ganttHelper";
 import { useMemo } from "react";
 
-type DragType = "move" | "resize-left" | "resize-right";
+type DragType = "move" | "resize-left" | "resize-right" | "create";
 
 type Props = {
   flatTasks: Task[];
   viewMode: "day" | "week" | "month";
+  // Nhận width động từ cha
+  dayWidth: number;
+  weekWidth: number;
+  monthWidth: number;
+
   changedTaskIds: string[];
   startDate: Date;
   startMonth: Date;
@@ -38,6 +38,9 @@ type Props = {
 export default function GanttTaskRows({
   flatTasks,
   viewMode,
+  dayWidth,
+  weekWidth,
+  monthWidth,
   startDate,
   startMonth,
   firstWeekStart,
@@ -54,13 +57,17 @@ export default function GanttTaskRows({
   const ghostLayout = useMemo(() => {
     if (!ghostTask || !ghostTask.start || !ghostTask.end) return null;
     let startOffset = 0;
-    let duration = 0;
-    const sDate = new Date(ghostTask.start);
-    const eDate = new Date(ghostTask.end);
-    if (viewMode === "day") {
-      startOffset = differenceInDays(sDate, startDate) * DAY_WIDTH;
 
-      duration = (differenceInDays(eDate, sDate) + 1) * DAY_WIDTH;
+    let duration = 0;
+
+    const sDate = new Date(ghostTask.start);
+
+    const eDate = new Date(ghostTask.end);
+
+    if (viewMode === "day") {
+      startOffset = differenceInDays(sDate, startDate) * dayWidth;
+
+      duration = (differenceInDays(eDate, sDate) + 1) * dayWidth;
     }
 
     if (viewMode === "week") {
@@ -71,28 +78,32 @@ export default function GanttTaskRows({
       const offsetDays = differenceInDays(sDate, startOfCurrentWeek);
 
       startOffset =
-        weekIndex * WEEK_WIDTH + offsetDays * (WEEK_WIDTH / 7) - WEEK_WIDTH / 7;
+        weekIndex * weekWidth + offsetDays * (weekWidth / 7) - weekWidth / 7;
 
-      duration = (differenceInDays(eDate, sDate) + 1) * (WEEK_WIDTH / 7);
+      duration = (differenceInDays(eDate, sDate) + 1) * (weekWidth / 7);
     }
 
     if (viewMode === "month") {
       const daysInStartMonth = differenceInDays(
         addMonths(startOfMonth(sDate), 1),
+
         startOfMonth(sDate),
       );
 
       const monthDiff = differenceInMonths(sDate, startMonth);
+
       const dayOffsetInMonth = (sDate.getDate() - 1) / daysInStartMonth;
 
-      startOffset = (monthDiff + dayOffsetInMonth) * MONTH_WIDTH;
+      startOffset = (monthDiff + dayOffsetInMonth) * monthWidth;
 
       const taskDays = differenceInDays(eDate, sDate) + 1;
-      duration = (taskDays / 30) * MONTH_WIDTH;
+
+      duration = (taskDays / 30) * monthWidth;
     }
 
     return { startOffset, duration };
-  }, [ghostTask, viewMode, startDate]);
+  }, [ghostTask, viewMode, startDate, dayWidth, weekWidth, monthWidth]);
+
   return (
     <>
       {flatTasks.map((task) => {
@@ -106,6 +117,9 @@ export default function GanttTaskRows({
             key={task.id}
             task={task}
             viewMode={viewMode}
+            dayWidth={dayWidth}
+            weekWidth={weekWidth}
+            monthWidth={monthWidth}
             startDate={startDate}
             startMonth={startMonth}
             firstWeekStart={firstWeekStart}
@@ -127,15 +141,14 @@ export default function GanttTaskRows({
             + Drag on timeline to create task
           </span>
         </div>
-
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover/create:opacity-100 pointer-events-none" />
       </div>
-      {ghostTask && (
+      {ghostTask && ghostLayout && (
         <div
-          className="absolute h-9 border-2 border-dashed border-blue-400 rounded-md z-50 pointer-events-none flex items-center px-2 shadow-sm"
+          className="absolute h-9 border-2 border-dashed border-blue-400 rounded-md z-50 pointer-events-none flex items-center px-2 shadow-sm bg-blue-400/10"
           style={{
-            left: ghostLayout?.startOffset,
-            width: ghostLayout?.duration,
+            left: `${ghostLayout.startOffset}px`,
+            width: `${ghostLayout.duration}px`,
             bottom: 6,
           }}
         >

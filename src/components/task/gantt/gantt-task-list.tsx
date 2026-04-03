@@ -10,7 +10,6 @@ interface GanttTask extends Task {
   depth: number;
   expanded?: boolean;
 }
-
 type Props = {
   flatTasks: GanttTask[];
   allTasks: Task[];
@@ -20,6 +19,7 @@ type Props = {
   startResize: (e: React.MouseEvent, column: "task" | "start") => void;
   toggleExpand: (id: string) => void;
   onAddTask: (parentId: string) => void;
+  ghostTask: { start: Date; end: Date } | null;
 };
 
 const GanttTaskList = React.memo(function GanttTaskList({
@@ -31,6 +31,7 @@ const GanttTaskList = React.memo(function GanttTaskList({
   startResize,
   toggleExpand,
   onAddTask,
+  ghostTask,
 }: Props) {
   return (
     <div className="border-r bg-muted/30 dark:bg-muted/10 shrink-0">
@@ -141,8 +142,13 @@ const GanttTaskList = React.memo(function GanttTaskList({
               Drag on right to create
             </span>
           </div>
-          <div className="border-l border-transparent h-full" />
-          <div className="border-l border-transparent h-full" />
+
+          <div className="relative text-center text-xs text-muted-foreground h-full flex items-center justify-center">
+            {ghostTask && format(new Date(ghostTask?.start), "dd/MM")}
+          </div>
+          <div className="relative text-center text-xs text-muted-foreground h-full flex items-center justify-center">
+            {ghostTask && format(new Date(ghostTask?.end), "dd/MM")}
+          </div>
         </div>
       </div>
     </div>

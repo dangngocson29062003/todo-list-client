@@ -1,6 +1,14 @@
 // src/hooks/useGanttDrag.ts
 import { useRef, useCallback, useState } from "react";
-import { addDays, isBefore, isAfter, differenceInDays } from "date-fns";
+import {
+  addDays,
+  isBefore,
+  isAfter,
+  differenceInDays,
+  startOfMonth,
+  addMonths,
+  startOfWeek,
+} from "date-fns";
 import { Task } from "@/src/types/task";
 
 type DragType = "move" | "resize-left" | "resize-right" | "create";
@@ -32,12 +40,36 @@ export function useGanttDrag(
   );
   const getDateFromX = useCallback(
     (x: number) => {
-      let unitWidth = dayWidth;
-      if (viewMode === "week") unitWidth = weekWidth / 7;
-      if (viewMode === "month") unitWidth = monthWidth / 30.42; // Tỉ lệ trung bình chuẩn
+      if (viewMode === "day") {
+        const deltaDays = x / dayWidth;
+        return addDays(new Date(chartStartDate), deltaDays);
+      }
 
-      const deltaDays = Math.floor(x / unitWidth);
-      return addDays(new Date(chartStartDate), deltaDays);
+      if (viewMode === "week") {
+        const firstWeekStart = startOfWeek(chartStartDate);
+        const unitWidth = weekWidth / 7;
+        const totalDaysFromFirstWeek = (x + unitWidth) / unitWidth;
+
+        return addDays(new Date(firstWeekStart), totalDaysFromFirstWeek);
+      }
+
+      if (viewMode === "month") {
+        const monthIndex = Math.floor(x / monthWidth);
+        const targetMonthStart = addMonths(
+          startOfMonth(chartStartDate),
+          monthIndex,
+        );
+        const remainingX = x % monthWidth;
+        const daysInThisMonth = differenceInDays(
+          addMonths(targetMonthStart, 1),
+          targetMonthStart,
+        );
+        const extraDays = (remainingX / monthWidth) * daysInThisMonth;
+
+        return addDays(targetMonthStart, extraDays);
+      }
+
+      return new Date(chartStartDate);
     },
     [viewMode, dayWidth, weekWidth, monthWidth, chartStartDate],
   );
@@ -159,20 +191,19 @@ export function useGanttDrag(
 
       const initialX = getX(e.clientX);
       const initialMouseDate = getDateFromX(initialX);
-
-      // --- LOGIC CHO CREATE ---
       if (type === "create") {
         const onDragCreate = (moveEvent: MouseEvent) => {
           const currentX = getX(moveEvent.clientX);
           const currentMouseDate = getDateFromX(currentX);
-
+          let start = isBefore(initialMouseDate, currentMouseDate)
+            ? initialMouseDate
+            : currentMouseDate;
+          let end = isBefore(initialMouseDate, currentMouseDate)
+            ? currentMouseDate
+            : initialMouseDate;
           setGhostTask({
-            start: isBefore(initialMouseDate, currentMouseDate)
-              ? initialMouseDate
-              : currentMouseDate,
-            end: isBefore(initialMouseDate, currentMouseDate)
-              ? currentMouseDate
-              : initialMouseDate,
+            start: new Date(start.setHours(0, 0, 0, 0)),
+            end: new Date(end.setHours(0, 0, 0, 0)),
           });
         };
 
@@ -191,8 +222,6 @@ export function useGanttDrag(
         window.addEventListener("mouseup", stopDragCreate);
         return;
       }
-
-      // --- LOGIC CHO MOVE / RESIZE ---
       const task = data.find((t) => t.id === id);
       if (!task) return;
 
@@ -214,9 +243,9 @@ export function useGanttDrag(
 
         const currentX = getX(moveEvent.clientX);
         const currentMouseDate = getDateFromX(currentX);
-        const deltaDays = differenceInDays(
-          currentMouseDate,
-          info.initialMouseDate,
+        const deltaDays = Math.round(
+          (currentMouseDate.getTime() - info.initialMouseDate.getTime()) /
+            (24 * 3600 * 1000),
         );
 
         if (deltaDays !== lastDeltaDays.current) {

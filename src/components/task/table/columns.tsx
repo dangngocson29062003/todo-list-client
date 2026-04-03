@@ -128,7 +128,11 @@ export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
         className="line-clamp-3 whitespace-normal break-words leading-relaxed overflow-hidden text-sm text-muted-foreground text-xs"
         title={row.original.description}
       >
-        {row.original.description || "-"}
+        {row.original.description ?? (
+          <span className="flex items-center text-muted-foreground/40 italic text-xs">
+            No description provided for this task.
+          </span>
+        )}
       </p>
     ),
   },

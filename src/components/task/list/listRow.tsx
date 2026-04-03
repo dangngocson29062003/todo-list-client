@@ -13,16 +13,28 @@ import {
   UsersRound,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useDrop } from "react-dnd";
+import { useDrag, useDrop } from "react-dnd";
 import { Button } from "../../shadcn/button";
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "../../shadcn/table";
 import { ListItem } from "./listItem";
+import {
+  ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import { getColumns } from "../table/columns";
+import { useProject } from "@/src/context/projectContext";
 
 type KanbanColumnProps = {
   priority: Priority;
@@ -39,6 +51,9 @@ export function ListRow({
   setIsModalNewTaskOpen,
   setPriority,
 }: KanbanColumnProps) {
+  const { project } = useProject();
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
     drop: (item: { id: string }) => moveTask(item.id, priority),
@@ -58,7 +73,28 @@ export function ListRow({
     HIGH: "bg-orange-500",
     URGENT: "bg-red-500",
   };
-
+  const columns = useMemo(
+    () => getColumns(project?.members || []),
+    [project?.members],
+  );
+  const table = useReactTable({
+    data: filteredTasks,
+    columns,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    getCoreRowModel: getCoreRowModel(),
+    state: {
+      sorting,
+      columnFilters,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    debugTable: true,
+    debugHeaders: true,
+    debugColumns: true,
+  });
   return (
     <div
       ref={(instance) => {
@@ -107,63 +143,54 @@ export function ListRow({
 
       {open && (
         <div className="p-2">
-          <Table className="table-fixed w-full">
-            {filteredTasks.length > 0 && (
-              <>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[15%] ">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <TypeOutline className="size-4" />
-                        Name
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[10%]">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <TriangleAlert className="size-4" />
-                        Status
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[10%]">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <TriangleAlert className="size-4" />
-                        Priority
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[40%]">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <TextAlignStart className="size-4" />
-                        Description
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[10%]">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <UsersRound className="size-4" />
-                        Assignees
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[15%]">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="size-4" />
-                        Due Date
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[10%] align-end">
-                      <div className="flex items-center justify-end gap-2 text-muted-foreground">
-                        <Settings className="size-4" />
-                        Actions
-                      </div>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {filteredTasks.map((task) => (
-                    <ListItem key={task.id} task={task} />
-                  ))}
-                </TableBody>
-              </>
-            )}
+          <Table
+            style={{
+              width: table.getTotalSize(),
+              minWidth: "100%",
+              tableLayout: "auto",
+            }}
+          >
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{
+                          position: "relative",
+                          width: header.getSize(),
+                          overflow: "visible",
+                        }}
+                        className="px-4 py-2"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                        {header.column.getCanResize() && (
+                          <div
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            className={`resizer ${
+                              header.column.getIsResizing() ? "isResizing" : ""
+                            }`}
+                          ></div>
+                        )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <ListItem key={row.id} row={row} />
+              ))}
+            </TableBody>
           </Table>
 
           {filteredTasks.length === 0 && (

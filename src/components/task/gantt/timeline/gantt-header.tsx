@@ -1,8 +1,14 @@
-import { DAY_WIDTH, WEEK_WIDTH } from "@/src/helpers/ganttHelper";
+"use client";
+
 import { addDays, format } from "date-fns";
 
 type Props = {
   viewMode: "day" | "week" | "month";
+  // Nhận width động từ cha
+  dayWidth: number;
+  weekWidth: number;
+  monthWidth: number;
+
   totalDays: number;
   weeks: Date[];
   monthGroups: { start: number; end: number }[];
@@ -12,6 +18,9 @@ type Props = {
 
 export default function GanttHeader({
   viewMode,
+  dayWidth,
+  weekWidth,
+  monthWidth,
   totalDays,
   weeks,
   monthGroups,
@@ -26,13 +35,12 @@ export default function GanttHeader({
           style={{
             gridTemplateColumns:
               viewMode === "day"
-                ? `repeat(${totalDays}, ${DAY_WIDTH}px)`
+                ? `repeat(${totalDays}, ${dayWidth}px)`
                 : viewMode === "week"
-                  ? `repeat(${weeks.length}, ${WEEK_WIDTH}px)`
-                  : ``,
+                  ? `repeat(${weeks.length}, ${weekWidth}px)`
+                  : `repeat(${weeks.length}, ${monthWidth}px)`,
           }}
         >
-          {/* DAY MODE */}
           {viewMode === "day" &&
             monthGroups.map((m, i) => (
               <div
@@ -45,8 +53,6 @@ export default function GanttHeader({
                 {format(addDays(startDate, m.start), "MMM yyyy")}
               </div>
             ))}
-
-          {/* WEEK MODE */}
           {viewMode === "week" &&
             weekMonthGroups.map((group, i) => (
               <div

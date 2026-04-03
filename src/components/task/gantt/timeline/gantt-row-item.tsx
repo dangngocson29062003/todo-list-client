@@ -1,5 +1,6 @@
-import { format } from "date-fns";
+"use client";
 
+import { format } from "date-fns";
 import { PriorityBadge } from "@/src/components/priority-badge";
 import { Button } from "@/src/components/shadcn/button";
 import {
@@ -14,10 +15,14 @@ import React from "react";
 import { AssigneeStack } from "../../assignee-stack";
 
 type DragType = "move" | "resize-left" | "resize-right";
+
 export const GanttTaskRowItem = React.memo(
   ({
     task,
     viewMode,
+    dayWidth,
+    weekWidth,
+    monthWidth,
     startDate,
     firstWeekStart,
     startMonth,
@@ -30,6 +35,9 @@ export const GanttTaskRowItem = React.memo(
   }: {
     task: Task;
     viewMode: "day" | "week" | "month";
+    dayWidth: number;
+    weekWidth: number;
+    monthWidth: number;
     startDate: Date;
     startMonth: Date;
     firstWeekStart: Date;
@@ -46,6 +54,9 @@ export const GanttTaskRowItem = React.memo(
       startDate,
       firstWeekStart,
       startMonth,
+      dayWidth,
+      weekWidth,
+      monthWidth,
     );
 
     const shouldShowSave = isDirectlyChanged && !hasChangedParent;
@@ -64,7 +75,7 @@ export const GanttTaskRowItem = React.memo(
             <Button
               size="icon-lg"
               variant="outline"
-              className="rounded-full shadow-lg text-blue-700 hover:text-blue-900 transition-transform hover:scale-110"
+              className="rounded-full shadow-lg text-blue-700 hover:text-blue-900 transition-transform hover:scale-110 bg-background"
               onClick={(e) => {
                 e.stopPropagation();
                 onSave(task.id);
@@ -75,7 +86,7 @@ export const GanttTaskRowItem = React.memo(
             <Button
               size="icon-lg"
               variant="outline"
-              className="rounded-full shadow-lg text-orange-600 transition-transform hover:scale-110"
+              className="rounded-full shadow-lg text-orange-600 transition-transform hover:scale-110 bg-background"
               title="Reset changes"
               onClick={(e) => {
                 e.stopPropagation();
@@ -94,10 +105,15 @@ export const GanttTaskRowItem = React.memo(
                 (priorityColorMap[task.priority].color as string) ||
                 "bg-indigo-500 hover:bg-indigo-600"
               }`}
-              style={{ left: startOffset, width: duration, top: 6 }}
+              style={{
+                left: startOffset,
+                width: duration,
+                top: 6,
+                transition: "left 0.1s ease-out, width 0.1s ease-out",
+              }}
               onMouseDown={(e) => startDrag(e, task.id, "move")}
             >
-              {((viewMode === "day" && duration > 120) ||
+              {((viewMode === "day" && duration > 80) ||
                 viewMode === "week" ||
                 viewMode === "month") && (
                 <span className="truncate w-full pr-4 font-medium">
@@ -113,47 +129,38 @@ export const GanttTaskRowItem = React.memo(
                 }`}
               >
                 <Info className="size-4 shrink-0" />
-                {viewMode === "day" &&
-                  (duration > 200 || (duration <= 120 && duration > 40)) && (
-                    <span className="text-[10px]">Details</span>
-                  )}
               </div>
               <div
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   startDrag(e, task.id, "resize-left");
                 }}
-                className="absolute left-0 top-0 w-2 h-full rounded-l-lg bg-muted-foreground/30 hover:bg-muted-foreground/50 cursor-ew-resize"
+                className="absolute left-0 top-0 w-2 h-full rounded-l-lg bg-black/10 hover:bg-black/20 cursor-ew-resize"
               />
               <div
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   startDrag(e, task.id, "resize-right");
                 }}
-                className="absolute right-0 top-0 w-2 h-full rounded-r-lg bg-muted-foreground/30 hover:bg-muted-foreground/50 cursor-ew-resize"
+                className="absolute right-0 top-0 w-2 h-full rounded-r-lg bg-black/10 hover:bg-black/20 cursor-ew-resize"
               />
             </div>
           </PopoverTrigger>
+
           <PopoverContent
             side="left"
-            className="flex shadow flex-col gap-2 p-2 w-full"
+            className="flex shadow flex-col gap-2 p-2 w-64"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
               <h2 className="font-bold truncate">{task.name}</h2>
-
               <PriorityBadge priority={task.priority} />
             </div>
-
-            <div className="flex gap-2">
-              <Calendar className="size-4" />
-
-              <div className="text-xs font-bold">
-                {format(task.startDate, "MMM dd")} -{" "}
-                {format(task.endDate, "MMM dd, yyyy")}
-              </div>
+            <div className="flex items-center gap-2 text-xs font-bold">
+              <Calendar className="size-4 text-muted-foreground" />
+              {format(new Date(task.startDate), "MMM dd")} -{" "}
+              {format(new Date(task.endDate), "MMM dd, yyyy")}
             </div>
-
-            <div className="flex gap-1">
+            <div className="pt-1">
               <AssigneeStack assignees={task.assignees} />
             </div>
           </PopoverContent>

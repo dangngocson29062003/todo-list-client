@@ -22,6 +22,7 @@ import {
 } from "../../shadcn/table";
 import { getColumns } from "./columns";
 import { Loader2 } from "lucide-react";
+import { useDrag } from "react-dnd";
 
 export default function TaskTablePage() {
   const { project } = useProject();

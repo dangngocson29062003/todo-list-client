@@ -1,8 +1,14 @@
-import { DAY_WIDTH, MONTH_WIDTH, WEEK_WIDTH } from "@/src/helpers/ganttHelper";
+"use client";
+
 import { format, getWeek } from "date-fns";
 
 type Props = {
   viewMode: "day" | "week" | "month";
+  // Nhận width động từ props thay vì import hằng số
+  dayWidth: number;
+  weekWidth: number;
+  monthWidth: number;
+
   dates: Date[];
   weeks: Date[];
   months: Date[];
@@ -11,6 +17,9 @@ type Props = {
 
 export default function GanttSubHeader({
   viewMode,
+  dayWidth,
+  weekWidth,
+  monthWidth,
   dates,
   weeks,
   months,
@@ -23,39 +32,48 @@ export default function GanttSubHeader({
     >
       {viewMode === "day" ? (
         <div
-          className="grid border-b sticky top-0 bg-gray-50 dark:bg-border z-10 h-(--gantt-height) items-center text-sm text-center"
+          className="grid h-(--gantt-height) items-center text-sm text-center"
           style={{
-            gridTemplateColumns: `repeat(${totalDays}, ${DAY_WIDTH}px)`,
+            gridTemplateColumns: `repeat(${totalDays}, ${dayWidth}px)`,
           }}
         >
           {dates.map((date, i) => (
-            <div key={i} className="border-r">
+            <div
+              key={i}
+              className="border-r h-full flex items-center justify-center"
+            >
               {format(date, "d")}
             </div>
           ))}
         </div>
       ) : viewMode === "week" ? (
         <div
-          className="grid"
+          className="grid h-full items-center"
           style={{
-            gridTemplateColumns: `repeat(${weeks.length}, ${WEEK_WIDTH}px)`,
+            gridTemplateColumns: `repeat(${weeks.length}, ${weekWidth}px)`,
           }}
         >
           {weeks.map((week, i) => (
-            <div key={i} className="border-r">
+            <div
+              key={i}
+              className="border-r h-full flex items-center justify-center"
+            >
               W{getWeek(week)}
             </div>
           ))}
         </div>
       ) : (
         <div
-          className="grid items-center border-b sticky top-0 bg-gray-50 dark:bg-border z-10 min-h-[calc(var(--gantt-height)*2)]"
+          className="grid items-center h-full"
           style={{
-            gridTemplateColumns: `repeat(${months.length}, ${MONTH_WIDTH}px)`,
+            gridTemplateColumns: `repeat(${months.length}, ${monthWidth}px)`,
           }}
         >
           {months.map((m, i) => (
-            <div key={i} className="border-r text-center text-sm font-bold">
+            <div
+              key={i}
+              className="border-r text-center text-sm font-bold h-full flex items-center justify-center"
+            >
               {format(m, "MMM yyyy")}
             </div>
           ))}

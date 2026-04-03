@@ -1,9 +1,16 @@
+"use client";
+
 import { Task } from "@/src/types/task";
 import { calculateTaskLayout } from "@/src/helpers/ganttHelper";
 
 type Props = {
   flatTasks: Task[];
   viewMode: "day" | "week" | "month";
+  // --- NHẬN WIDTH ĐỘNG TỪ PARENT ---
+  dayWidth: number;
+  weekWidth: number;
+  monthWidth: number;
+
   startDate: Date;
   firstWeekStart: Date;
   startMonth: Date;
@@ -12,6 +19,9 @@ type Props = {
 export default function GanttConnectors({
   flatTasks,
   viewMode,
+  dayWidth,
+  weekWidth,
+  monthWidth,
   startDate,
   firstWeekStart,
   startMonth,
@@ -53,13 +63,15 @@ export default function GanttConnectors({
 
         const parentTask = flatTasks[parentIndex];
         const isDeepSubtask = !!parentTask.parentId;
-
         const parentLayout = calculateTaskLayout(
           parentTask,
           viewMode,
           startDate,
           firstWeekStart,
           startMonth,
+          dayWidth,
+          weekWidth,
+          monthWidth,
         );
         const childLayout = calculateTaskLayout(
           task,
@@ -67,7 +79,11 @@ export default function GanttConnectors({
           startDate,
           firstWeekStart,
           startMonth,
+          dayWidth,
+          weekWidth,
+          monthWidth,
         );
+
         let x1: number;
         let xOffset: number;
         let x2: number;
@@ -98,7 +114,7 @@ export default function GanttConnectors({
               strokeDasharray={isDeepSubtask ? "4 3" : "none"}
               style={{
                 opacity: isDeepSubtask ? 0.7 : 1,
-                transition: "d 0.3s ease",
+                transition: "d 0.1s ease-out",
               }}
             />
           </g>
