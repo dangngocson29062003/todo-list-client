@@ -1,12 +1,10 @@
 "use client";
 
 import { RecentCarousel } from "@/src/components/home/recent-carousel";
-import RecentlyItem from "@/src/components/home/recentlyItem";
 import { useAuthContext } from "@/src/context/authContext";
 import { useProjects } from "@/src/context/homeContext";
-import { Project } from "@/src/types/project";
 import { Calendars, Clock2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const { authToken, authUser } = useAuthContext();

@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     // Remove console logs in production
     removeConsole: process.env.NODE_ENV === "production",
   },
+  reactStrictMode: false,
   output: "standalone",
   images: {
     unoptimized: true,

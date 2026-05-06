@@ -9,16 +9,20 @@ export async function GET(
   try {
     const authHeader = request.headers.get("authorization");
     const { id } = await context.params;
+    const { searchParams } = new URL(request.url);
     if (!authHeader) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const response = await fetch(`${API_BASE_URL}/projects/${id}/tasks`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: authHeader,
+    const response = await fetch(
+      `${API_BASE_URL}/projects/${id}/tasks?${searchParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authHeader,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response

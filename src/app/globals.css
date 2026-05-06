@@ -178,7 +178,23 @@
     @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
   }
 }
-
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
 /* Sidebar scroller for projects and tasks*/
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

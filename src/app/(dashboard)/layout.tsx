@@ -27,19 +27,28 @@ export default function DashboardLayout({
   children: React.ReactNode;
   title: string;
 }) {
-  const { authUser, authToken } = useAuthContext();
+  const { authToken, authUser, loading } = useAuthContext();
   const router = useRouter();
   useEffect(() => {
-    if (!authUser && !authToken) {
-      router.replace("/landing");
+    if (!loading) {
+      if (!authUser && !authToken) {
+        router.replace("/login");
+      }
     }
-  }, [authUser, authToken, router]);
+  }, [authToken, authUser, loading, router]);
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
       <HomeProvider>
         <AppSidebar />
-        <SidebarInset className="pb-10 relative">
+        <SidebarInset className="relative">
           <header className="flex h-14 shrink-0 items-center gap-2 border-bx">
             <div className="flex flex-1 items-center gap-2 px-3">
               <SidebarTrigger />
@@ -61,7 +70,7 @@ export default function DashboardLayout({
               <NavActions />
             </div>
           </header>
-          <div className="w-full py-4 px-8 mx-auto relative">{children}</div>
+          <div className="w-full p-4 mx-auto relative">{children}</div>
           <Toaster
             position="bottom-center"
             style={{

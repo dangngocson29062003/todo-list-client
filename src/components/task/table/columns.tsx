@@ -5,44 +5,29 @@ import { format, startOfDay } from "date-fns";
 import {
   ArrowDownAZ,
   ArrowUpZA,
-  Calendar,
-  ChartBarBig,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Copy,
-  Eye,
-  Link2,
-  MoreHorizontalIcon,
-  Pencil,
   Settings2,
   TextAlignStart,
-  Trash2,
   TypeOutline,
-  UserPlus,
-  UsersRound,
 } from "lucide-react";
 
+import { Assignee } from "@/src/types/assignee";
+import { ProjectMember } from "@/src/types/project-member";
+import { DateRange } from "react-day-picker";
 import { PriorityBadge } from "../../priority-badge";
-import { Button } from "../../shadcn/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../shadcn/dropdown-menu";
 import { StatusIndicator } from "../../status-badge";
+import { AssigneeStack } from "../assignee-stack";
+import { TaskActions } from "../task-actions";
 import { AssigneeFilter } from "./assignee-filter";
 import { PriorityFilter } from "./priority-filter";
-import { ProjectMember } from "@/src/types/project-member";
-import { Assignee } from "@/src/types/assignee";
-import { AssigneeStack } from "../assignee-stack";
-import { TimelineFilter } from "./timeline-filter";
-import { DateRange } from "react-day-picker";
 import { StatusFilter } from "./status-filter";
+import { TimelineFilter } from "./timeline-filter";
 
-export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
+export const getColumns = (
+  members: ProjectMember[],
+  onDuplicate: (id: string) => void,
+): ColumnDef<Task>[] => [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -221,60 +206,9 @@ export const getColumns = (members: ProjectMember[]): ColumnDef<Task>[] => [
     },
     size: 80,
     minSize: 80,
-    cell: () => {
-      return (
-        <div className="flex justify-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
-                <MoreHorizontalIcon />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem>
-                <Eye className="size-4 mr-2" />
-                View details
-              </DropdownMenuItem>
-
-              <DropdownMenuItem>
-                <Pencil className="size-4 mr-2" />
-                Edit task
-              </DropdownMenuItem>
-
-              <DropdownMenuItem>
-                <Copy className="size-4 mr-2" />
-                Duplicate task
-              </DropdownMenuItem>
-
-              <DropdownMenuItem>
-                <Link2 className="size-4 mr-2" />
-                Copy link
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem>
-                <CheckCircle2 className="size-4 mr-2" />
-                Mark as done
-              </DropdownMenuItem>
-
-              <DropdownMenuItem>
-                <UserPlus className="size-4 mr-2" />
-                Assign user
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem variant="destructive">
-                <Trash2 className="size-4 mr-2" />
-                Delete task
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+    cell: ({ row }) => {
+      const taskId = row.original.id;
+      return <TaskActions taskId={taskId} onDuplicate={onDuplicate} />;
     },
   },
 ];

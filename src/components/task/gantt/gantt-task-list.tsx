@@ -36,7 +36,7 @@ const GanttTaskList = React.memo(function GanttTaskList({
   return (
     <div className="border-r bg-muted/30 dark:bg-muted/10 shrink-0">
       <div
-        className="h-[calc(var(--gantt-height)*2)] grid items-center text-center text-sm font-semibold border-b bg-muted/50"
+        className="h-[calc(var(--gantt-height)*2)] grid items-center text-center text-sm font-semibold border-b bg-white"
         style={{
           gridTemplateColumns: `${taskWidth}px ${startWidth}px ${endWidth}px`,
         }}

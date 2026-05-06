@@ -100,7 +100,7 @@ const GanttTimeline = React.memo(function GanttTimeline({
   }, [viewMode, range, timelineRef, todayOffset, dayWidth, monthWidth]);
 
   return (
-    <div className="relative" style={{ width }}>
+    <div className="relative flex flex-col" style={{ width }}>
       <GanttHeader
         viewMode={viewMode}
         dayWidth={dayWidth}

@@ -20,6 +20,7 @@ import GanttTimeline from "./timeline/gantt-timeline";
 import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
 import { useProject } from "@/src/context/projectContext";
+import { getTasks } from "@/src/lib/api-task";
 
 const priorityConfig: Record<string, { color: string; label: string }> = {
   LOW: {
@@ -40,26 +41,19 @@ const priorityConfig: Record<string, { color: string; label: string }> = {
   },
 };
 
-type Props = { tasks: Task[] };
-
-export default function Gantt({ tasks }: Props) {
+export default function Gantt() {
   const { project } = useProject();
-  const [currentOriginTasks, setCurrentOriginTasks] = useState(tasks);
-  const [data, setData] = useState<Task[]>(() =>
-    currentOriginTasks.map((task) => ({ ...task, expanded: true })),
-  );
-
+  const [currentOriginTasks, setCurrentOriginTasks] = useState<Task[]>([]);
+  const [data, setData] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
   const [range, setRange] = useState({
     start: subMonths(new Date(), 2),
     end: addMonths(new Date(), 2),
   });
-
-  // --- 1. QUẢN LÝ ZOOM BẰNG STATE WIDTH ---
   const [dayWidth, setDayWidth] = useState(50);
   const [weekWidth, setWeekWidth] = useState(140);
   const [monthWidth, setMonthWidth] = useState(450);
-
   const { taskWidth, startWidth, startResize } = useGanttResize();
   const timeContext = useGanttTime(range, viewMode);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,7 +76,30 @@ export default function Gantt({ tasks }: Props) {
       setIsModalOpen(true);
     },
   );
+  useEffect(() => {
+    const loadGanttData = async () => {
+      if (!project?.id) return;
 
+      try {
+        setIsLoading(true);
+        const tasksFromServer = await getTasks(project.id);
+
+        const tasksArray = Array.isArray(tasksFromServer)
+          ? tasksFromServer
+          : [];
+
+        setCurrentOriginTasks(tasksArray);
+        setData(tasksArray.map((task: Task) => ({ ...task, expanded: true })));
+      } catch (error) {
+        console.error("Gantt fetch error:", error);
+        toast.error("Failed to load Gantt data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadGanttData();
+  }, [project?.id]);
   const flatTasks = useMemo(() => flatten(buildTree(data)), [data]);
   const timelineContainerRef = useRef<HTMLDivElement>(null);
   const [parentTaskId, setParentTaskId] = useState<string | null>(null);
@@ -129,7 +146,9 @@ export default function Gantt({ tasks }: Props) {
 
       return prevData.map((currentTask) => {
         if (idsToReset.includes(currentTask.id)) {
-          const original = tasks.find((t) => t.id === currentTask.id);
+          const original = currentOriginTasks.find(
+            (t) => t.id === currentTask.id,
+          );
 
           if (original) return { ...original, expanded: currentTask.expanded };
         }
@@ -138,7 +157,7 @@ export default function Gantt({ tasks }: Props) {
       });
     });
   };
-
+  console.log(1);
   const handleOpenCreateModal = (parentId: string | null = null) => {
     setParentTaskId(parentId);
 
@@ -262,7 +281,7 @@ export default function Gantt({ tasks }: Props) {
   }, [data, currentOriginTasks]);
 
   return (
-    <div className="flex flex-col justify-center border rounded-xl overflow-hidden bg-muted dark:bg-muted/50 shadow-sm">
+    <div className="flex flex-col border rounded-xl overflow-hidden bg-muted dark:bg-muted/50 shadow-sm h-full">
       <CreateTaskModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -303,7 +322,7 @@ export default function Gantt({ tasks }: Props) {
           className="w-32 h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer"
         />
       </div>
-
+      <div></div>
       <div className="flex flex-col md:flex-row ">
         <GanttTaskList
           flatTasks={flatTasks}

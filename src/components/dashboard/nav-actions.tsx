@@ -27,18 +27,21 @@ import {
   SidebarMenuItem,
 } from "@/src/components/shadcn/sidebar";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 
 const data = [
   [
     {
       label: "Setting",
       icon: Settings,
+      href: "/settings",
     },
   ],
   [
     {
       label: "Logout",
       icon: LogOut,
+      href: "/logout",
     },
   ],
 ];
@@ -87,9 +90,11 @@ export function NavActions() {
                     <SidebarMenu>
                       {group.map((item, index) => (
                         <SidebarMenuItem key={index}>
-                          <SidebarMenuButton>
-                            <item.icon /> <span>{item.label}</span>
-                          </SidebarMenuButton>
+                          <Link href={item.href}>
+                            <SidebarMenuButton>
+                              <item.icon /> <span>{item.label}</span>
+                            </SidebarMenuButton>
+                          </Link>
                         </SidebarMenuItem>
                       ))}
                     </SidebarMenu>

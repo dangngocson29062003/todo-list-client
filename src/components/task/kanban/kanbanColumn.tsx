@@ -4,12 +4,21 @@ import { Dot, Plus } from "lucide-react";
 import { useDrop } from "react-dnd";
 import { Button } from "../../shadcn/button";
 import { KanbanItem } from "./kanbanItem";
+
+const statusColor: any = {
+  TODO: "#2563EB",
+  IN_PROGRESS: "#d5d906",
+  REVIEW: "#D97706",
+  DONE: "#059669",
+};
+
 type KanbanColumnProps = {
   status: TaskStatus;
   tasks: Task[];
   moveTask: (taskId: string, toStatus: TaskStatus) => Promise<void> | void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
   setStatus: (status: TaskStatus) => void;
+  onDuplicate: (taskId: string) => void;
 };
 export function KanbanColumn({
   status,
@@ -17,6 +26,7 @@ export function KanbanColumn({
   moveTask,
   setIsModalNewTaskOpen,
   setStatus,
+  onDuplicate,
 }: KanbanColumnProps) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "task",
@@ -25,14 +35,6 @@ export function KanbanColumn({
       isOver: !!monitor.isOver(),
     }),
   }));
-
-  const statusColor: any = {
-    TODO: "#2563EB",
-    IN_PROGRESS: "#d5d906",
-    REVIEW: "#D97706",
-    DONE: "#059669",
-  };
-
   return (
     <div
       ref={(instance) => {
@@ -71,7 +73,7 @@ export function KanbanColumn({
       {tasks
         .filter((task) => task.status === status)
         .map((task) => (
-          <KanbanItem key={task.id} task={task} />
+          <KanbanItem key={task.id} task={task} onDuplicate={onDuplicate} />
         ))}
     </div>
   );

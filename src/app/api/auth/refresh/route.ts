@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL =
@@ -7,30 +8,31 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const body = await request.json();
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get("refresh_token")?.value;
+    const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Cookie: `refresh_token=${refreshToken}`,
       },
-      body: JSON.stringify(body),
+      credentials: "include",
     });
 
     if (!response.ok) {
       const errorData = await response
         .json()
-        .catch(() => ({ message: "Login failed" }));
+        .catch(() => ({ message: "Refresh token failed" }));
 
       return NextResponse.json(
-        { error: errorData.message || "Failed to login" },
+        { error: errorData.message || "Failed to refresh token" },
         { status: response.status },
       );
     }
-
     const data = await response.json();
-    return NextResponse.json(data, { status: data.status });
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Refresh token error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

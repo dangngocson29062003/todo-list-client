@@ -1,92 +1,127 @@
 "use client";
+import { Button } from "@/src/components/shadcn/button";
+import { useAuthContext } from "@/src/context/authContext";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
-import { useEffect } from "react";
-import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
-
-export default function EmailVerifyPage() {
-    const params = useSearchParams();
-    const router = useRouter();
-    const status = params.get("status")?.trim().toUpperCase();
-
-    const config = {
-        SUCCESS: {
-            title: "Email Verified",
-            message: "Your account has been verified successfully.\nYou can now log in.",
-            color: "text-green-600",
-            icon: <CheckCircle2 className="w-16 h-16" />,
-            redirect: true,
-        },
-        EXPIRED: {
-            title: "Verification Expired",
-            message: "Your verification link expired.\nA new confirmation email has been sent.",
-            color: "text-yellow-500",
-            icon: <AlertCircle className="w-16 h-16" />,
-            redirect: false,
-        },
-        USED: {
-            title: "Already Verified",
-            message: "Your account has already been verified.\nPlease log in.",
-            color: "text-blue-600",
-            icon: <Info className="w-16 h-16" />,
-            redirect: true,
-        },
-        NOT_FOUND: {
-            title: "Invalid Link",
-            message: "This verification link is invalid or does not exist.",
-            color: "text-red-600",
-            icon: <AlertTriangle className="w-16 h-16" />,
-            redirect: false,
-        },
-    } as const;
-
-    const data = config[status as keyof typeof config] ?? {
-        title: "Verification Error",
-        message: "Something went wrong.",
-        color: "text-red-600",
-        icon: <AlertTriangle className="w-16 h-16" />,
-        redirect: false,
-    };
-
-    useEffect(() => {
-        if (data.redirect) {
-            const timer = setTimeout(() => {
-                router.push("/login");
-            }, 3000);
-
-            return () => clearTimeout(timer);
+export default function VerifyEmailPage() {
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "error",
+  );
+  const searchParams = useSearchParams();
+  const { authLogin, authToken, authUser } = useAuthContext();
+  const router = useRouter();
+  useEffect(() => {
+    if (authToken && authUser) {
+      router.push("/home");
+      return;
+    }
+    const token = searchParams.get("token");
+    const verifyToken = async () => {
+      if (!token) return setStatus("error");
+      try {
+        const res = await fetch(`/api/auth/verify-email?token=${token}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Failed to verify");
         }
-    }, [data.redirect, router]);
+        const result = await res.json();
+        const data = result.data;
+        setStatus("success");
+        setTimeout(() => {
+          authLogin(data.accessToken);
+        }, 1000);
+      } catch (err) {
+        setStatus((prev) => (prev === "success" ? "success" : "error"));
+      }
+    };
+    verifyToken();
+  }, [authToken, authUser]);
 
-    return (
-        <div className="min-h-screen flex items-center justify-center
-            bg-gradient-to-br from-gray-50 to-gray-100
-            dark:from-zinc-900 dark:to-zinc-950 transition-colors">
-
-            <div className="w-[420px] text-center
-                border border-gray-200 dark:border-zinc-700
-                bg-white dark:bg-zinc-800
-                shadow-2xl py-8 px-8 rounded-2xl">
-
-                <div className={`flex justify-center text-5xl mb-6 ${data.color}`}>
-                    {data.icon}
-                </div>
-
-                <h1 className={`text-xl font-semibold mb-4 ${data.color}`}>
-                    {data.title}
-                </h1>
-
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-8 whitespace-pre-line leading-relaxed">
-                    {data.message}
-                </p>
-
-                {data.redirect && (
-                    <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        Redirecting to login...
-                    </div>
-                )}
-            </div>
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
+      {status === "loading" && (
+        <div className="flex flex-col items-center max-w-sm w-full animate-in fade-in zoom-in duration-500">
+          <div className="relative flex items-center justify-center mb-8">
+            <div className="absolute w-18 h-18 border-4 border-transparent border-t-blue-600 border-r-blue-600 rounded-full animate-spin"></div>
+            <Image
+              src="/images/logo.png"
+              alt="logo"
+              width={32}
+              height={32}
+              className="animate-pulse"
+            />
+          </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              Verifying Identity
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              We're securely authenticating your email...
+            </p>
+          </div>
         </div>
-    );
+      )}
+
+      {status === "success" && (
+        <div className="flex flex-col items-center max-w-sm w-full">
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="absolute w-28 h-28 bg-green-400/50 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute w-24 h-24 border-2 border-green-500/50 rounded-full animate-ping opacity-30"></div>
+            <Image
+              src="/images/logo.png"
+              alt="logo"
+              width={32}
+              height={32}
+              className="animate-pulse"
+            />
+          </div>
+
+          <h2 className="text-2xl font-bold text-green-600">
+            Verified Successfully
+          </h2>
+
+          <p className="text-sm text-gray-500 mt-2">Redirecting to home...</p>
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="flex flex-col items-center max-w-sm w-full animate-in fade-in zoom-in duration-500">
+          <div className="relative flex items-center justify-center mb-8">
+            <div className="absolute w-28 h-28 bg-red-400/50 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute w-24 h-24 border-2 border-red-500/50 rounded-full animate-ping opacity-30"></div>
+            {/* LOGO */}
+            <Image
+              src="/images/logo.png"
+              alt="logo"
+              width={32}
+              height={32}
+              className="animate-pulse"
+            />
+          </div>
+
+          <h2 className="text-2xl font-bold text-red-600">
+            Verification Failed
+          </h2>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center max-w-[260px]">
+            This verification link is invalid or has expired.
+          </p>
+          <div className="flex flex-col gap-3 mt-6 w-full">
+            <Button>
+              <Link href={"/login"}>Back to Login</Link>
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

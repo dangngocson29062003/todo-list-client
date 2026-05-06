@@ -1,13 +1,10 @@
 "use client";
-import { StepCard } from "@/src/components/landing/stepCard";
+import { FeatureItem } from "@/src/components/landing/featureItem";
+import { FeaturePreview } from "@/src/components/landing/featurePreview";
 import Footer from "@/src/components/landing/footer";
 import Header from "@/src/components/landing/header";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/src/components/shadcn/accordion";
+import { StepCard } from "@/src/components/landing/stepCard";
+import { Accordion } from "@/src/components/shadcn/accordion";
 import { Badge } from "@/src/components/shadcn/badge";
 import { Button } from "@/src/components/shadcn/button";
 import { Tabs, TabsContent, TabsList } from "@/src/components/shadcn/tabs";
@@ -16,8 +13,6 @@ import { BadgeCheck, MoveRightIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FeaturePreview } from "@/src/components/landing/featurePreview";
-import { FeatureItem } from "@/src/components/landing/featureItem";
 const features = [
   {
     title: "Create Project",

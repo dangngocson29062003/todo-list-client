@@ -9,6 +9,8 @@ import { TaskStatus } from "@/src/types/enum";
 import { Loader2 } from "lucide-react";
 import { useProject } from "@/src/context/projectContext";
 import CreateTaskModal from "../create-task-modal";
+import { getTasks, handleDuplicateTask } from "@/src/lib/api-task";
+import { toast } from "sonner";
 export default function KanbanBoard() {
   const { project } = useProject();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,28 +26,14 @@ export default function KanbanBoard() {
       try {
         setLoading(true);
         setError(null);
-
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Unauthorized");
-
-        const res = await fetch(`/api/projects/${project.id}/tasks`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          cache: "no-store",
+        const data = await getTasks(project.id, {
+          isParentOnly: true,
         });
 
-        const result = await res.json().catch(() => null);
-
-        if (!res.ok) {
-          throw new Error(result?.error || "Failed to get tasks");
-        }
-
-        const data = result?.data ?? result ?? [];
         setTasks(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to get tasks");
+      } catch (err: any) {
+        setError(err.message);
+        toast.error(err.message);
       } finally {
         setLoading(false);
       }
@@ -53,7 +41,16 @@ export default function KanbanBoard() {
 
     fetchTasks();
   }, [project?.id]);
-
+  const onDuplicate = async (taskId: string) => {
+    if (!project?.id) return;
+    try {
+      const newTask = await handleDuplicateTask(taskId, project.id);
+      setTasks((prev) => [newTask, ...prev]);
+      toast.success("Duplicated");
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
   const handleMoveTask = async (taskId: string, toStatus: TaskStatus) => {
     if (!project?.id) return;
 
@@ -125,6 +122,7 @@ export default function KanbanBoard() {
               moveTask={handleMoveTask}
               setIsModalNewTaskOpen={setIsModalOpen}
               setStatus={setStatus}
+              onDuplicate={onDuplicate}
             />
           ))}
         </div>

@@ -1,12 +1,6 @@
 "use client";
-import { PriorityBadge } from "@/src/components/priority-badge";
 import { CreateProjectModal } from "@/src/components/project/create-project-modal";
 import { ProjectCard } from "@/src/components/project/project-card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/src/components/shadcn/avatar";
 import { Button } from "@/src/components/shadcn/button";
 import { Dialog, DialogTrigger } from "@/src/components/shadcn/dialog";
 import {
@@ -14,7 +8,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/src/components/shadcn/input-group";
-import { Progress } from "@/src/components/shadcn/progress";
 import { useSidebar } from "@/src/components/shadcn/sidebar";
 import {
   Tooltip,
@@ -22,25 +15,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/src/components/shadcn/tooltip";
-import { StageBadge } from "@/src/components/stage-bade";
-import { TechBadge } from "@/src/components/tech-bage";
 import { useProjects } from "@/src/context/homeContext";
 
-import { Project } from "@/src/types/project";
-import { format, formatDistanceToNow } from "date-fns";
 import {
   ArrowDownAZ,
-  Calendar,
   Check,
   ChevronDown,
   Clock9,
   ClockPlus,
   Loader2,
-  MoreVertical,
   Plus,
   SearchIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export default function ProjectList() {

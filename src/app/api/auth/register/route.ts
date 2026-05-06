@@ -8,7 +8,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -19,18 +19,17 @@ export async function POST(
     if (!response.ok) {
       const errorData = await response
         .json()
-        .catch(() => ({ message: "Login failed" }));
+        .catch(() => ({ message: "Register failed" }));
 
       return NextResponse.json(
-        { error: errorData.message || "Failed to login" },
+        { error: errorData.message || "Failed to register" },
         { status: response.status },
       );
     }
-
     const data = await response.json();
-    return NextResponse.json(data, { status: data.status });
+    return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Register error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -31,11 +31,13 @@ import {
   TooltipTrigger,
 } from "../../shadcn/tooltip";
 import { AssigneeStack } from "../assignee-stack";
+import { TaskActions } from "../task-actions";
 
 interface KanbanItem {
   task: Task;
+  onDuplicate: (taskId: string) => void;
 }
-export function KanbanItem({ task }: KanbanItem) {
+export function KanbanItem({ task, onDuplicate }: KanbanItem) {
   const duration =
     differenceInDays(new Date(task.endDate), new Date(task.startDate)) + 1;
 
@@ -77,44 +79,7 @@ export function KanbanItem({ task }: KanbanItem) {
               })}
             </span>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild={true}>
-              <div
-                role="button"
-                className="flex items-center justify-center rounded-md size-7 transition-colors hover:bg-secondary focus-visible:outline-none cursor-pointer"
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontalIcon className="size-4 text-muted-foreground" />
-                <span className="sr-only">Open menu</span>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem>
-                <Eye className="size-4 mr-2" /> View details
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Pencil className="size-4 mr-2" /> Edit task
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Copy className="size-4 mr-2" /> Duplicate task
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link2 className="size-4 mr-2" /> Copy link
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <CheckCircle2 className="size-4 mr-2" /> Mark as done
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <UserPlus className="size-4 mr-2" /> Assign user
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
-                <Trash2 className="size-4 mr-2" /> Delete task
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <TaskActions taskId={task.id} onDuplicate={onDuplicate} />
         </div>
       </div>
       <div className="mb-3">

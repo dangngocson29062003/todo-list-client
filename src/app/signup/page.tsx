@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowLeft, Lock, LockIcon, LockKeyhole, Mail } from "lucide-react";
-import { register } from "@/src/service/auth-service";
-import { useRouter } from "next/navigation";
 import { useNotifyContext } from "@/src/components/notification/notificationProvider";
+import { Input } from "@/src/components/shadcn/input";
 import { getErrorMessage } from "@/src/utils/helpers";
+import { Lock, LockKeyhole, Mail } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -20,9 +21,24 @@ export default function SignupPage() {
     if (loading || !validate()) return;
     try {
       setLoading(true);
-      const data = await register(email, password);
-      notify("info", data);
-      router.push("/login");
+      const payload = {
+        email,
+        password,
+      };
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to register");
+      }
+      const result = await res.json();
+      notify("success", "Registration successful. Please verify your email.");
+      router.push("/email/notice");
     } catch (err) {
       notify("error", "Registration failed", getErrorMessage(err));
     } finally {
@@ -54,125 +70,87 @@ export default function SignupPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center 
-    bg-gray-100 dark:bg-zinc-900 transition-colors"
-    >
-      <div
-        className="flex flex-col gap-4 relative w-100 mx-auto 
-      border border-gray-200 dark:border-zinc-700
-      bg-white dark:bg-zinc-800
-       shadow-2xl py-8 px-10 rounded-xl"
-      >
-        <div className="absolute top-3 left-3">
-          <ArrowLeft
-            className="w-5 h-5 text-gray-600 dark:text-gray-300 cursor-pointer hover:text-gray-800 dark:hover:text-white"
-            onClick={() => router.push("/landing")}
-          />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 px-4">
+      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-xl p-8 space-y-6 relative">
+        <div className="text-center space-y-2">
+          <div className="flex justify-center">
+            <Image
+              src="/images/logo.png"
+              alt="logo"
+              width={32}
+              height={32}
+              className="animate-pulse"
+            />
+          </div>
+
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Create your account
           </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
-            Sign up to start managing your projects
+          <p className="text-sm text-gray-500">
+            Start managing your projects today
           </p>
         </div>
-
-        <div className="flex flex-col gap-3 pt-2">
-          {/* Email input */}
+        <div className="space-y-4">
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
-
-            <input
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
               placeholder="Email"
-              className="w-full h-11 border border-gray-300 dark:border-zinc-600
-              bg-white dark:bg-zinc-900
-              text-gray-900 dark:text-gray-100
-              rounded-lg pl-10 pr-2 text-sm
-              focus:outline-none focus:ring-1 focus:ring-gray-700 dark:focus:ring-gray-400"
+              className="pl-10 h-11 rounded-lg border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-
-          {/* Password input */}
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
-
-            <input
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
               type="password"
               placeholder="Password"
-              className="w-full h-11 border border-gray-300 dark:border-zinc-600
-              bg-white dark:bg-zinc-900
-              text-gray-900 dark:text-gray-100
-              rounded-lg pl-10 pr-2 text-sm
-              focus:outline-none focus:ring-1 focus:ring-gray-700 dark:focus:ring-gray-400"
+              className="pl-10 h-11 rounded-lg border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
-          {/* Confirm Password input */}
           <div className="relative">
-            <LockKeyhole className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
-
-            <input
+            <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
               type="password"
               placeholder="Confirm Password"
-              className="w-full h-11 border border-gray-300 dark:border-zinc-600
-              bg-white dark:bg-zinc-900
-              text-gray-900 dark:text-gray-100
-              rounded-lg pl-10 pr-2 text-sm
-              focus:outline-none focus:ring-1 focus:ring-gray-700 dark:focus:ring-gray-400"
+              className="pl-10 h-11 rounded-lg border-gray-300 dark:border-zinc-700 focus:ring-2 focus:ring-black dark:focus:ring-white"
               value={rePassword}
               onChange={(e) => setRePassword(e.target.value)}
             />
           </div>
         </div>
-
-        <div className="pt-2">
-          <button
-            onClick={handleRegister}
-            className="w-full py-2 bg-zinc-800 hover:bg-zinc-900
-            dark:bg-white dark:text-black dark:hover:bg-gray-200
-            text-white
-            rounded-lg font-semibold
-            transition-all duration-200 hover:shadow-md cursor-pointer"
-          >
-            Signup
-          </button>
+        <button
+          onClick={handleRegister}
+          className="w-full h-11 rounded-lg bg-black text-white hover:bg-gray-800 transition"
+        >
+          Sign up
+        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-700"></div>
+          <span className="text-xs text-gray-400">OR</span>
+          <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-700"></div>
         </div>
-
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+        <button
+          onClick={() =>
+            (window.location.href =
+              "http://localhost:8080/oauth2/authorization/google")
+          }
+          className="flex items-center justify-center gap-2 w-full h-11 rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 transition"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png"
+            className="w-4 h-4"
+          />
+          <span className="text-sm">Continue with Google</span>
+        </button>
+        <p className="text-sm text-center text-gray-500">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <a href="/login" className="text-black dark:text-white font-medium">
             Sign in
           </a>
         </p>
-
-        <div>
-          <hr className="border-gray-300 dark:border-zinc-700" />
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-            Or connect with
-          </p>
-        </div>
-        <div className="flex justify-center">
-          <button
-            onClick={() =>
-              (window.location.href =
-                "http://localhost:8080/oauth2/authorization/google")
-            }
-            className="flex items-center justify-center w-full h-9 text-sm text-gray-600 dark:text-gray-200 gap-2 bg-gray-100 dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 shadow shadow-gray-300 dark:shadow-none rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 transition-all duration-200 cursor-pointer"
-          >
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png"
-              alt="Google"
-              className="w-4 h-4"
-            />
-            Google
-          </button>
-        </div>
       </div>
     </div>
   );

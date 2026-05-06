@@ -1,15 +1,18 @@
 "use client";
 
+import { useProject } from "@/src/context/projectContext";
+import { getTasks, handleDuplicateTask } from "@/src/lib/api-task";
+
 import { Priority } from "@/src/types/enum";
 import { Task } from "@/src/types/task";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { toast } from "sonner";
 import CreateTaskModal from "../create-task-modal";
-import { ListRow } from "./listRow";
-import { useProject } from "@/src/context/projectContext";
-import { Loader2 } from "lucide-react";
 import { TaskEmptyState } from "../task-empty-state";
+import { ListRow } from "./listRow";
 
 export default function ListView() {
   const { project } = useProject();
@@ -26,28 +29,14 @@ export default function ListView() {
       try {
         setLoading(true);
         setError(null);
-
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Unauthorized");
-
-        const res = await fetch(`/api/projects/${project.id}/tasks`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          cache: "no-store",
+        const data = await getTasks(project.id, {
+          isParentOnly: true,
         });
 
-        const result = await res.json().catch(() => null);
-
-        if (!res.ok) {
-          throw new Error(result?.error || "Failed to get tasks");
-        }
-
-        const data = result?.data ?? result ?? [];
         setTasks(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to get tasks");
+      } catch (err: any) {
+        setError(err.message);
+        toast.error(err.message);
       } finally {
         setLoading(false);
       }
@@ -99,7 +88,16 @@ export default function ListView() {
       console.error(error);
     }
   };
-
+  const onDuplicate = async (taskId: string) => {
+    if (!project?.id) return;
+    try {
+      const newTask = await handleDuplicateTask(taskId, project.id);
+      setTasks((prev) => [newTask, ...prev]);
+      toast.success("Duplicated");
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6 text-sm text-muted-foreground">
@@ -140,6 +138,7 @@ export default function ListView() {
               moveTask={handleMoveTask}
               setIsModalNewTaskOpen={setIsModalOpen}
               setPriority={setPriority}
+              onDuplicate={onDuplicate}
             />
           ))}
         </DndProvider>

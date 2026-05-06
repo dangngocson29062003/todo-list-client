@@ -1,24 +1,14 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getMe } from "../service/auth-service";
-
-interface User {
-  id: string;
-  email: string;
-  fullName: string;
-  nickname: string;
-  phone: string;
-  address: string;
-  avatarUrl: string;
-  exp: number;
-}
-
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation";
 interface AuthContextType {
   authUser: User | null;
   authToken: string | null;
   authSetToken: (newToken: string) => void;
-  authLogin: (newToken: string, user: User) => void;
+  authLogin: (newToken: string) => void;
   authLogout: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -27,39 +17,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter();
+  const loadUser = async (token: string) => {
+    try {
+      const res = await fetch(`/api/user/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch recent projects");
+      const result = await res.json();
+      console.log(result.data);
+      setAuthUser(result.data);
+    } catch (err) {
+      console.error("Fetch user failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setAuthToken(storedToken);
-      fetchUserData();
+      loadUser(storedToken);
     } else {
       setLoading(false);
     }
   }, []);
 
-  async function fetchUserData() {
+  const authLogin = async (newToken: string) => {
+    setLoading(true);
+
+    const payload: any = jwtDecode(newToken);
+    console.log(payload);
+    if (!payload.verified) {
+      localStorage.setItem("token", newToken);
+      setAuthToken(newToken);
+      setLoading(false);
+      router.replace("/email/notice");
+      return;
+    }
+
+    localStorage.setItem("token", newToken);
+    setAuthToken(newToken);
+    await loadUser(newToken);
+    setLoading(false);
+  };
+
+  async function authLogout() {
     try {
-      const user = await getMe();
-      setAuthUser(user);
-    } catch {
-      setAuthUser(null);
+      setLoading(true);
+      await fetch(`/api/user/me`);
       setAuthToken(null);
+      setAuthUser(null);
+      localStorage.removeItem("token");
+    } catch (err) {
+      console.error("Logout failed:", err);
     } finally {
       setLoading(false);
     }
-  }
-
-  function authLogin(newToken: string, user: User) {
-    setAuthToken(newToken);
-    setAuthUser(user);
-    localStorage.setItem("token", newToken);
-  }
-
-  function authLogout() {
-    setAuthToken(null);
-    setAuthUser(null);
-    localStorage.removeItem("token");
   }
 
   function authSetToken(newToken: string) {
@@ -71,7 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ authUser, authToken, authSetToken, authLogin, authLogout }}
+      value={{
+        authUser,
+        authToken,
+        authSetToken,
+        authLogin,
+        authLogout,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -42,14 +42,21 @@ type KanbanColumnProps = {
   moveTask: (taskId: string, toPriority: Priority) => Promise<void> | void;
   setIsModalNewTaskOpen: (isOpen: boolean) => void;
   setPriority: (priority: Priority) => void;
+  onDuplicate: (taskId: string) => void;
 };
-
+const priorityColor: Record<Priority, string> = {
+  LOW: "bg-slate-500",
+  MEDIUM: "bg-blue-500",
+  HIGH: "bg-orange-500",
+  URGENT: "bg-red-500",
+};
 export function ListRow({
   priority,
   tasks,
   moveTask,
   setIsModalNewTaskOpen,
   setPriority,
+  onDuplicate,
 }: KanbanColumnProps) {
   const { project } = useProject();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -67,14 +74,8 @@ export function ListRow({
   );
   const [open, setOpen] = useState(filteredTasks.length > 0);
 
-  const priorityColor: Record<Priority, string> = {
-    LOW: "bg-slate-500",
-    MEDIUM: "bg-blue-500",
-    HIGH: "bg-orange-500",
-    URGENT: "bg-red-500",
-  };
   const columns = useMemo(
-    () => getColumns(project?.members || []),
+    () => getColumns(project?.members || [], onDuplicate),
     [project?.members],
   );
   const table = useReactTable({

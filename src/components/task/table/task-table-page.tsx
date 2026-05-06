@@ -11,6 +11,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Table,
@@ -21,20 +22,29 @@ import {
   TableRow,
 } from "../../shadcn/table";
 import { getColumns } from "./columns";
-import { Loader2 } from "lucide-react";
-import { useDrag } from "react-dnd";
+import { toast } from "sonner";
+import { getTasks, handleDuplicateTask } from "@/src/lib/api-task";
 
 export default function TaskTablePage() {
   const { project } = useProject();
-
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const onDuplicate = async (taskId: string) => {
+    if (!project?.id) return;
+    try {
+      const newTask = await handleDuplicateTask(taskId, project.id);
+      setTasks((prev) => [newTask, ...prev]);
+      toast.success("Duplicated");
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
   const columns = useMemo(
-    () => getColumns(project?.members || []),
-    [project?.members],
+    () => getColumns(project?.members || [], onDuplicate),
+    [project?.members, onDuplicate],
   );
   const table = useReactTable({
     data: tasks,
@@ -61,19 +71,14 @@ export default function TaskTablePage() {
       try {
         setLoading(true);
         setError(null);
-
-        const token = localStorage.getItem("token");
-        const res = await fetch(`/api/projects/${project.id}/tasks`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const data = await getTasks(project.id, {
+          isParentOnly: true,
         });
 
-        const result = await res.json();
-        const data = result?.data ?? result ?? [];
         setTasks(Array.isArray(data) ? data : []);
-      } catch {
-        setError("Failed to get tasks");
+      } catch (err: any) {
+        setError(err.message);
+        toast.error(err.message);
       } finally {
         setLoading(false);
       }
@@ -81,6 +86,7 @@ export default function TaskTablePage() {
 
     fetchTasks();
   }, [project?.id]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-6 text-sm text-muted-foreground">

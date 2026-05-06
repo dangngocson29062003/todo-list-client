@@ -31,7 +31,7 @@ export default function GanttHeader({
     <>
       {viewMode !== "month" && (
         <div
-          className="grid border-b bg-gray-50 dark:bg-muted h-(--gantt-height) items-center font-bold"
+          className="grid border-b bg-gray-50 dark:bg-muted h-[var(--gantt-height)] items-center font-bold"
           style={{
             gridTemplateColumns:
               viewMode === "day"
