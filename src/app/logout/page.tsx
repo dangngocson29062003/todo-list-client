@@ -6,23 +6,16 @@ import { useEffect, useRef } from "react";
 export default function LogoutPage() {
   const router = useRouter();
   const { authLogout } = useAuthContext();
-
-  const calledRef = useRef(false);
-
   useEffect(() => {
-    if (calledRef.current) return;
-    calledRef.current = true;
-
     const handleLogout = async () => {
       try {
-        await authLogout(); // nếu async
+        await authLogout();
       } catch (e) {
         console.error("Logout failed", e);
       } finally {
-        router.replace("/"); // 🔥 luôn redirect ở đây
+        router.push("/");
       }
     };
-
     handleLogout();
   }, []);
 

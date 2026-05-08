@@ -102,18 +102,11 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const [openBinModal, setOpenBinModal] = React.useState(false);
-
   const navMainItemsActive = data.navMain.map((item) => ({
     ...item,
     isActive: pathname === item.url,
   }));
 
-  const navSecondaryItems = data.navSecondary.map((item) => ({
-    ...item,
-    onClick:
-      item.action === "open-bin" ? () => setOpenBinModal(true) : undefined,
-  }));
   return (
     <>
       <Sidebar className="border-r-0" {...props}>
@@ -126,23 +119,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <NavProjects />
           <NavTasks tasks={data.tasks} />
           <NavFavorites />
-          <NavSecondary items={navSecondaryItems} className="mt-auto" />
+          <NavSecondary items={data.navSecondary} className="mt-auto" />
         </SidebarContent>
 
         <SidebarRail />
       </Sidebar>
-
-      <Dialog open={openBinModal} onOpenChange={setOpenBinModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Bin</DialogTitle>
-          </DialogHeader>
-
-          <div className="text-sm text-muted-foreground">
-            Nội dung modal của Bin đặt ở đây.
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

@@ -141,7 +141,7 @@ export const InlineEditField = ({
 
       <div className="flex flex-col gap-2">
         {isEditing ? (
-          <div className="flex space-y-2 w-full">
+          <div className="flex items-center w-full">
             {fieldType === "input" ? (
               <Input
                 value={draftValue}
@@ -178,7 +178,7 @@ export const InlineEditField = ({
                   className={`${
                     fieldType === "textarea"
                       ? "text-sm whitespace-pre-wrap break-words"
-                      : "text-sm truncate"
+                      : "text-sm"
                   }
                     ${!value && "italic text-muted-foreground"}`}
                 >

@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { type LucideIcon } from "lucide-react";
 
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/src/components/shadcn/popover";
 
 import { BinPanel } from "./bin-panel";
+import SettingModal from "./settings/settings-modal";
 
 export function NavSecondary({
   items,
@@ -28,49 +30,69 @@ export function NavSecondary({
     url?: string;
     icon: LucideIcon;
     badge?: React.ReactNode;
-    onClick?: () => void;
   }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const { isMobile } = useSidebar();
 
-  return (
-    <SidebarGroup {...props}>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              {item.title === "Bin" ? (
-                <Popover modal>
-                  <PopoverTrigger asChild>
-                    <SidebarMenuButton>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </PopoverTrigger>
+  const [openSettings, setOpenSettings] = useState(false);
 
-                  <PopoverContent
-                    side={isMobile ? "top" : "right"}
-                    align="start"
-                    sideOffset={-8}
-                    className="h-[460px] lg:w-[400px] mb-2 p-0 shadow-lg border border-border rounded-xl"
-                  >
-                    <BinPanel />
-                  </PopoverContent>
-                </Popover>
-              ) : (
-                <SidebarMenuButton asChild>
-                  <a href={item.url}>
+  return (
+    <>
+      <SidebarGroup {...props}>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {items.map((item: any) => (
+              <SidebarMenuItem key={item.title}>
+                {/* BIN */}
+                {item.title === "Bin" ? (
+                  <Popover modal>
+                    <PopoverTrigger asChild>
+                      <SidebarMenuButton>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </PopoverTrigger>
+
+                    <PopoverContent
+                      side={isMobile ? "top" : "right"}
+                      align="start"
+                      sideOffset={-8}
+                      className="
+                        h-[460px]
+                        lg:w-[400px]
+                        mb-2 p-0
+                        shadow-lg border
+                        rounded-xl
+                      "
+                    >
+                      <BinPanel />
+                    </PopoverContent>
+                  </Popover>
+                ) : item.title === "Settings" ? (
+                  <SidebarMenuButton onClick={() => setOpenSettings(true)}>
                     <item.icon />
                     <span>{item.title}</span>
-                  </a>
-                </SidebarMenuButton>
-              )}
+                  </SidebarMenuButton>
+                ) : (
+                  /* NORMAL ITEM */
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                )}
 
-              {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+                {item.badge && (
+                  <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                )}
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SettingModal open={openSettings} onOpenChange={setOpenSettings} />
+    </>
   );
 }

@@ -1,33 +1,25 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080/api/v1";
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const { searchParams } = new URL(request.url);
+    const otp = searchParams.get("otp");
+    if (!otp) {
+      return NextResponse.json({ error: "OTP is required" }, { status: 400 });
+    }
+    const cookieStore = await cookies();
+    const mfaToken = cookieStore.get("mfa_token")?.value;
+    const response = await fetch(`${API_BASE_URL}/auth/2fa?otp=${otp}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Cookie: `mfa_token=${mfaToken}`,
       },
       credentials: "include",
-      body: JSON.stringify(body),
     });
-
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: "Login failed" }));
-
-      return NextResponse.json(
-        { error: errorData.message || "Failed to login" },
-        { status: response.status },
-      );
-    }
-
     const data = await response.json();
     const nextResponse = NextResponse.json(data, {
       status: response.status,
@@ -38,9 +30,12 @@ export async function POST(
     }
     return nextResponse;
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("2FA verify error:", error);
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+      },
       { status: 500 },
     );
   }

@@ -8,12 +8,18 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const cookieStore = await cookies();
     const refreshToken = cookieStore.get("refresh_token")?.value;
+    console.log(refreshToken);
     const response = await fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: authHeader,
         Cookie: `refresh_token=${refreshToken}`,
       },
       credentials: "include",
@@ -31,7 +37,14 @@ export async function POST(
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: data.status });
+    const nextResponse = NextResponse.json(data, {
+      status: response.status,
+    });
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      nextResponse.headers.set("set-cookie", setCookie);
+    }
+    return nextResponse;
   } catch (error) {
     console.error("Logout error:", error);
     return NextResponse.json(

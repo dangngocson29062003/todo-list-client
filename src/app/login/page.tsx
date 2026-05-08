@@ -1,25 +1,23 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { ArrowLeft, Lock, Mail } from "lucide-react";
-import { login } from "@/src/service/auth-service";
-import { useRouter } from "next/navigation";
 import { useNotifyContext } from "@/src/components/notification/notificationProvider";
-import { getErrorMessage } from "@/src/utils/helpers";
-import { useAuthContext } from "@/src/context/authContext";
 import { Button } from "@/src/components/shadcn/button";
 import { Input } from "@/src/components/shadcn/input";
+import { useAuthContext } from "@/src/context/authContext";
+import { getErrorMessage } from "@/src/utils/helpers";
+import { Lock, Mail } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const notify = useNotifyContext();
   const { authLogin, authUser, authToken } = useAuthContext();
-
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   useEffect(() => {
     if (authToken && authUser) {
       router.push("/home");
@@ -37,14 +35,25 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to login");
+
+        throw new Error(errorData.error || "Failed to login");
       }
       const result = await res.json();
       const data = result.data;
+      if (data.twoFAToken) {
+        router.push("/login/otp");
+        notify(
+          "info",
+          "Two-factor authentication",
+          "Enter the verification code from your authenticator app.",
+        );
+        return;
+      }
       authLogin(data.accessToken);
     } catch (err) {
       console.error("Login failed:", err);
@@ -56,7 +65,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 px-4">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-xl p-8 space-y-6">
+      <div className="w-full max-w-md p-8 space-y-6">
         {/* Logo + Title */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
@@ -104,12 +113,12 @@ export default function LoginPage() {
 
           {/* Forgot */}
           <div className="flex justify-end text-xs">
-            <a
-              href="#"
+            <Link
+              href="/reset/request"
               className="text-gray-500 hover:text-black dark:hover:text-white"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -137,19 +146,24 @@ export default function LoginPage() {
           }
           className="flex items-center justify-center gap-2 w-full h-11 rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 transition"
         >
-          <img
+          <Image
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png"
-            className="w-4 h-4"
+            alt="logo-google"
+            width={16}
+            height={16}
           />
           <span className="text-sm">Continue with Google</span>
         </button>
 
         {/* Signup */}
         <p className="text-sm text-center text-gray-500">
-          Don’t have an account?{" "}
-          <a href="/signup" className="text-black dark:text-white font-medium">
+          New user?{" "}
+          <Link
+            href="/signup"
+            className="text-black dark:text-white font-medium"
+          >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

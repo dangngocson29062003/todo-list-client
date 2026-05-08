@@ -9,16 +9,12 @@ import { useEffect, useRef, useState } from "react";
 
 export default function VerifyEmailPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "error",
+    "loading",
   );
   const searchParams = useSearchParams();
-  const { authLogin, authToken, authUser } = useAuthContext();
+  const { authLogin } = useAuthContext();
   const router = useRouter();
   useEffect(() => {
-    if (authToken && authUser) {
-      router.push("/home");
-      return;
-    }
     const token = searchParams.get("token");
     const verifyToken = async () => {
       if (!token) return setStatus("error");
@@ -38,13 +34,14 @@ export default function VerifyEmailPage() {
         setStatus("success");
         setTimeout(() => {
           authLogin(data.accessToken);
+          router.replace("/home");
         }, 1000);
       } catch (err) {
         setStatus((prev) => (prev === "success" ? "success" : "error"));
       }
     };
     verifyToken();
-  }, [authToken, authUser]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">

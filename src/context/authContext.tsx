@@ -6,6 +6,7 @@ interface AuthContextType {
   authUser: User | null;
   authToken: string | null;
   authSetToken: (newToken: string) => void;
+  authSetUser: (user: User | null) => void;
   authLogin: (newToken: string) => void;
   authLogout: () => void;
   loading: boolean;
@@ -45,7 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authLogin = async (newToken: string) => {
     setLoading(true);
-
     const payload: any = jwtDecode(newToken);
     console.log(payload);
     if (!payload.verified) {
@@ -55,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.replace("/email/notice");
       return;
     }
-
     localStorage.setItem("token", newToken);
     setAuthToken(newToken);
     await loadUser(newToken);
@@ -63,16 +62,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   async function authLogout() {
+    if (!authToken || loading) return;
     try {
       setLoading(true);
-      await fetch(`/api/user/me`);
-      setAuthToken(null);
-      setAuthUser(null);
-      localStorage.removeItem("token");
+      await fetch(`/api/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
+      setAuthToken(null);
+      setAuthUser(null);
+      localStorage.removeItem("token");
       setLoading(false);
+      router.push("/login");
     }
   }
 
@@ -80,7 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthToken(newToken);
     localStorage.setItem("token", newToken);
   }
-
+  const authSetUser = (user: User | null) => {
+    setAuthUser(user);
+  };
   if (loading) return null;
 
   return (
@@ -89,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authUser,
         authToken,
         authSetToken,
+        authSetUser,
         authLogin,
         authLogout,
         loading,
