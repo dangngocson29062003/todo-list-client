@@ -1,20 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Laptop,
   Loader2,
-  LockKeyhole,
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Button } from "../../shadcn/button";
 import { Switch } from "../../shadcn/switch";
-import { Input } from "../../shadcn/input";
 
 import { useAuthContext } from "@/src/context/authContext";
+import { formatLastActive } from "@/src/utils/helpers";
 import { useNotifyContext } from "../../notification/notificationProvider";
 import {
   InputOTP,
@@ -23,6 +22,7 @@ import {
   InputOTPSlot,
 } from "../../shadcn/input-otp";
 import BackupCodesDialog from "./backup-dialog";
+import TrustedDeviceDialog from "./trusted-device-dialog";
 import VerifyBackupCodeDialog from "./verify-backup-dialog";
 
 export default function SecuritySettings() {
@@ -37,29 +37,31 @@ export default function SecuritySettings() {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [openBackupCodes, setOpenBackupCodes] = useState(false);
   const [openVerifyBackup, setOpenVerifyBackup] = useState(false);
-  const [backupCodeInput, setBackupCodeInput] = useState("");
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [trustedDevice, setTrustedDevice] = useState<Session>();
+  const [openTrustedDevice, setOpenTrustedDevice] = useState(false);
+  const [loadingTrust, setLoadingTrust] = useState(false);
+  useEffect(() => {
+    fetchSessions();
+  }, []);
   useEffect(() => {
     setEnabled2FA(authUser?.twoFaEnabled);
   }, [authUser]);
   async function handleSetup2FA() {
     try {
       setLoadingSetup(true);
-
       const res = await fetch("/api/user/2fa/setup", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
-
       if (!res.ok) {
         const errorData = await res.json();
-
         throw new Error(errorData.error || "Failed to setup 2FA");
       }
-
       const result = await res.json();
-
       setQrUrl(result.data.qrUrl);
       setMode("enable");
       notify(
@@ -84,37 +86,27 @@ export default function SecuritySettings() {
           Authorization: `Bearer ${authToken}`,
         },
       });
-
       if (!res.ok) {
         const errorData = await res.json();
-
         throw new Error(errorData.error || "Invalid OTP");
       }
-
       const result = await res.json();
-
       const data = result.data;
-
       const enabled = data.enabled as boolean;
-
       if (authUser) {
         authSetUser({
           ...authUser,
           twoFaEnabled: enabled,
         });
       }
-
       setEnabled2FA(enabled);
-
       if (data.backupCodes?.length > 0) {
         setBackupCodes(data.backupCodes);
         setOpenBackupCodes(true);
       }
-
       setQrUrl(null);
       setMode(null);
       setOtpCode("");
-
       notify(
         "success",
         enabled ? "2FA enabled" : "2FA disabled",
@@ -132,6 +124,124 @@ export default function SecuritySettings() {
       setLoadingVerify(false);
     }
   }
+  async function handleVerifyWithBackupCode(code: string) {
+    try {
+      setLoadingVerify(true);
+      const res = await fetch(
+        `/api/user/2fa/verify-backup?backupCode=${code}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+      if (!res.ok) throw new Error("Invalid backup code");
+      const result = await res.json();
+      const data = result.data;
+      const enabled = data.enabled as boolean;
+      if (authUser) {
+        authSetUser({
+          ...authUser,
+          twoFaEnabled: enabled,
+        });
+      }
+      setEnabled2FA(false);
+      setOpenVerifyBackup(false);
+      setMode(null);
+      notify("success", "Success", "2FA has been disabled using backup code.");
+    } catch (err: any) {
+      notify("error", "Failed", err.message);
+    } finally {
+      setLoadingVerify(false);
+    }
+  }
+  async function fetchSessions() {
+    try {
+      setLoadingSessions(true);
+
+      const res = await fetch("/api/user/sessions", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to load sessions");
+      }
+
+      const result = await res.json();
+      const data = result.data || [];
+      setSessions(data);
+
+      const currentSession = data.find((s: any) => s.isCurrent);
+
+      if (currentSession) {
+        setTrustedDevice(currentSession);
+      }
+    } catch (err: any) {
+      notify("error", "Failed", err.message);
+    } finally {
+      setLoadingSessions(false);
+    }
+  }
+  async function revokeSession(sessionId: string) {
+    try {
+      setLoadingSessions(true);
+
+      const res = await fetch(
+        `/api/user/sessions/revoke?sessionId=${sessionId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+      if (!res.ok) {
+        throw new Error("Failed to revoke session");
+      }
+      setSessions((prevSessions) =>
+        prevSessions.map((s) =>
+          s.id === sessionId ? { ...s, isExpired: true } : s,
+        ),
+      );
+    } catch (err: any) {
+      notify("error", "Failed", err.message);
+    } finally {
+      setLoadingSessions(false);
+    }
+  }
+  async function handleTrustDevice(otp: string) {
+    try {
+      setLoadingTrust(true);
+      console.log(trustedDevice);
+      const res = await fetch(
+        `/api/user/sessions/trust?sessionId=${trustedDevice?.id}&otp=${otp}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+      if (!res.ok) {
+        throw new Error("Failed to revoke session");
+      }
+      if (trustedDevice) {
+        setTrustedDevice({
+          ...trustedDevice,
+          isTrusted: !trustedDevice?.isTrusted,
+        });
+      }
+      setOpenTrustedDevice(false);
+    } catch (err: any) {
+      notify("error", "Failed", err.message);
+    } finally {
+      setLoadingTrust(false);
+    }
+  }
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-3xl mx-auto px-8 py-8">
@@ -142,40 +252,23 @@ export default function SecuritySettings() {
             Manage your account security and authentication settings.
           </p>
         </div>
-
         {/* 2FA */}
-        <div className="rounded-2xl border bg-background p-6">
+        <div className="rounded-2xl border bg-muted p-6">
           <div className="flex items-start justify-between gap-6">
             <div className="flex gap-4">
               <div>
                 <h2 className="font-medium">Two-factor authentication</h2>
-
                 <p className="text-sm text-muted-foreground mt-1 max-w-[520px]">
                   Protect your account with an additional verification step
                   during sign in.
                 </p>
-
                 {!enabled2FA ? (
-                  <div
-                    className="
-                      mt-3 inline-flex items-center gap-2
-                      rounded-full bg-amber-500/10
-                      px-3 py-1 text-xs font-medium
-                      text-amber-600
-                    "
-                  >
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600">
                     <AlertTriangle className="w-3.5 h-3.5" />
                     Not enabled
                   </div>
                 ) : (
-                  <div
-                    className="
-                      mt-3 inline-flex items-center gap-2
-                      rounded-full bg-green-500/10
-                      px-3 py-1 text-xs font-medium
-                      text-green-600
-                    "
-                  >
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600">
                     <ShieldCheck className="w-3.5 h-3.5" />
                     Enabled
                   </div>
@@ -205,18 +298,12 @@ export default function SecuritySettings() {
               />
             )}
           </div>
-
           {/* METHOD */}
           <div className="mt-6 border-t pt-6">
             <h3 className="text-sm font-medium mb-4">Authentication method</h3>
-
             <div className="grid gap-3">
               {/* APP */}
-              <div
-                className="
-                  rounded-xl border p-4
-                "
-              >
+              <div className="rounded-xl border p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div
@@ -227,7 +314,6 @@ export default function SecuritySettings() {
                     >
                       <Smartphone className="w-5 h-5" />
                     </div>
-
                     <div className="text-left">
                       <p className="text-sm font-medium">Authenticator app</p>
 
@@ -237,7 +323,6 @@ export default function SecuritySettings() {
                     </div>
                   </div>
                 </div>
-
                 {/* QR SECTION */}
                 {(mode === "enable" || mode === "disable") && (
                   <div className="mt-6 border-t pt-6">
@@ -249,21 +334,18 @@ export default function SecuritySettings() {
                           className="w-52 h-52 rounded-xl border bg-white p-2"
                         />
                       )}
-
                       <div className="text-center">
                         <p className="text-sm font-medium">
                           {mode === "enable"
                             ? "Scan this QR code"
                             : "Disable two-factor authentication"}
                         </p>
-
                         <p className="text-xs text-muted-foreground mt-1">
                           {mode === "enable"
                             ? "Open your authenticator app and scan the QR code."
                             : "Enter the 6-digit code from your authenticator app to disable 2FA."}
                         </p>
                       </div>
-
                       <div className="w-full max-w-[240px] space-y-3">
                         <InputOTP
                           id="disabled"
@@ -335,36 +417,111 @@ export default function SecuritySettings() {
                   </div>
                 )}
               </div>
-
               {/* DEVICE */}
-              <div
-                className="
-                  flex items-center justify-between
-                  rounded-xl border p-4
-                  hover:bg-muted/40
-                  transition
-                "
-              >
+              <div className="flex items-center justify-between rounded-xl border p-4 hover:bg-muted/40 transition">
                 <div className="flex items-center gap-4">
-                  <div
-                    className="
-                      w-10 h-10 rounded-lg
-                      bg-muted flex items-center justify-center
-                    "
-                  >
+                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
                     <Laptop className="w-5 h-5" />
                   </div>
-
                   <div className="text-left">
                     <p className="text-sm font-medium">Trusted devices</p>
-
                     <p className="text-xs text-muted-foreground">
                       Skip verification on trusted devices
                     </p>
                   </div>
                 </div>
+                <Switch
+                  checked={trustedDevice?.isTrusted}
+                  onCheckedChange={(checked) => {
+                    setOpenTrustedDevice(true);
+                  }}
+                  disabled={!authUser?.twoFaEnabled}
+                />
+              </div>
+              <div className="mt-6 border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-sm font-medium">Active sessions</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Manage devices currently signed in to your account.
+                    </p>
+                  </div>
+                </div>
 
-                <Switch />
+                <div className="space-y-3">
+                  {loadingSessions ? (
+                    <div className="flex justify-center py-6">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <div className="rounded-xl border p-6 text-sm text-muted-foreground text-center">
+                      No active sessions
+                    </div>
+                  ) : (
+                    sessions
+                      .sort((a, b) =>
+                        a.isCurrent === b.isCurrent ? 0 : a.isCurrent ? -1 : 1,
+                      ) // Đưa isCurrent lên đầu
+                      .map((session) => {
+                        const isCurrent = session.isCurrent;
+
+                        return (
+                          <div
+                            key={session.id}
+                            className={`rounded-xl border p-4 flex items-center justify-between ${
+                              isCurrent ? "bg-muted/30 border-primary/20" : ""
+                            }`}
+                          >
+                            <div className="flex gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                                {session.deviceType === "Mobile" ? (
+                                  <Smartphone className="w-5 h-5" />
+                                ) : (
+                                  <Laptop className="w-5 h-5" />
+                                )}
+                              </div>
+
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium">
+                                    {session.browser} on {session.os}
+                                  </p>
+                                  {isCurrent && (
+                                    <p className="text-xs text-blue-500 font-bold">
+                                      • This device
+                                    </p>
+                                  )}
+                                </div>
+
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatLastActive(session.lastActive)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {!isCurrent && (
+                              <>
+                                {session.isExpired ? (
+                                  <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
+                                    Expired
+                                  </span>
+                                ) : (
+                                  <Button
+                                    size="xs"
+                                    variant="outline"
+                                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={() => revokeSession(session.id)}
+                                  >
+                                    Logout
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        );
+                      })
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -379,9 +536,13 @@ export default function SecuritySettings() {
         open={openVerifyBackup}
         onOpenChange={setOpenVerifyBackup}
         loading={loadingVerify}
-        onVerify={(code) => {
-          console.log("Verifying with backup code:", code);
-        }}
+        onVerify={handleVerifyWithBackupCode}
+      />
+      <TrustedDeviceDialog
+        open={openTrustedDevice}
+        onOpenChange={setOpenTrustedDevice}
+        loading={loadingTrust}
+        onVerify={handleTrustDevice}
       />
     </div>
   );

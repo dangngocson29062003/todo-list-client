@@ -17,8 +17,8 @@ import {
 import { Toaster } from "@/src/components/shadcn/sonner";
 import { useAuthContext } from "@/src/context/authContext";
 import { HomeProvider } from "@/src/context/homeContext";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function DashboardLayout({
   children,
@@ -29,21 +29,71 @@ export default function DashboardLayout({
 }) {
   const { authToken, authUser, loading } = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname();
+  const [checkingWorkspace, setCheckingWorkspace] = useState(true);
   useEffect(() => {
-    if (!loading) {
-      if (!authUser && !authToken) {
+    async function checkAuthAndWorkspace() {
+      if (loading) return;
+
+      if (!authToken || !authUser) {
+        setCheckingWorkspace(false);
         router.replace("/login");
+        return;
+      }
+
+      if (pathname === "/create-workspace") {
+        setCheckingWorkspace(false);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/workspaces", {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json.message || "Failed to fetch workspaces");
+        }
+
+        const workspaces = json.data?.content ?? [];
+
+        if (workspaces.length === 0) {
+          router.replace("/create-workspace");
+          return;
+        }
+
+        setCheckingWorkspace(false);
+      } catch (error) {
+        console.error(error);
+        setCheckingWorkspace(false);
       }
     }
-  }, [authToken, authUser, loading, router]);
-  if (loading) {
+
+    checkAuthAndWorkspace();
+  }, [authToken, authUser, loading, pathname, router]);
+
+  if (loading || checkingWorkspace) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading...
       </div>
     );
   }
+  if (pathname === "/create-workspace") {
+    return (
+      <HomeProvider>
+        <div className="min-h-screen w-full">{children}</div>
 
+        <Toaster position="bottom-center" />
+      </HomeProvider>
+    );
+  }
   return (
     <SidebarProvider>
       <HomeProvider>

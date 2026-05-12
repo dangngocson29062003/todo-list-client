@@ -67,6 +67,38 @@ export default function AccountSettings() {
       throw err;
     }
   }
+  const handleUpdateProfile = async (
+    payload: Partial<{
+      fullName: string;
+      nickName: string;
+    }>,
+  ) => {
+    const res = await fetch("/api/user/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || "Failed to update profile");
+    }
+
+    authSetUser({
+      ...authUser!,
+      ...payload,
+    });
+
+    notify(
+      "success",
+      "Profile updated",
+      "Your profile has been updated successfully.",
+    );
+  };
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-3xl mx-auto px-8 py-8">
@@ -90,7 +122,7 @@ export default function AccountSettings() {
           <div className="relative group">
             <Avatar className="h-16 w-16 hover:scale-105 transition">
               <AvatarImage src={authUser?.avatarUrl} />
-              <AvatarFallback>
+              <AvatarFallback className="bg-background text-xl">
                 {authUser?.email.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -122,6 +154,7 @@ export default function AccountSettings() {
               <InlineEditField
                 value={authUser?.fullName as string}
                 emptyText="Mystery Member"
+                onSave={(fullName) => handleUpdateProfile({ fullName })}
               />
 
               {!authUser?.fullName && (
@@ -145,11 +178,8 @@ export default function AccountSettings() {
               <InlineEditField
                 value={authUser?.nickname as string}
                 emptyText="No nickname"
+                onSave={(nickName) => handleUpdateProfile({ nickName })}
               />
-
-              <p className="text-xs text-muted-foreground">
-                weaver.app/u/{authUser?.nickname || "username"}
-              </p>
             </div>
           </div>
           <div className="grid grid-cols-[180px_1fr] gap-6 items-center">

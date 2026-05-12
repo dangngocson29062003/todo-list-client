@@ -10,12 +10,23 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token");
+    const userAgent = request.headers.get("user-agent") || "";
+    let ipAddress = request.headers.get("x-real-ip") as string;
+    const forwardedFor = request.headers.get("x-forwarded-for") as string;
+    if (!ipAddress && forwardedFor) {
+      ipAddress = forwardedFor?.split(",").at(0) ?? "Unknown";
+    }
+    const cookieStore = await cookies();
+    const deviceId = cookieStore.get("device_id")?.value;
     const response = await fetch(
       `${API_BASE_URL}/auth/verify-email?token=${token}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "User-Agent": userAgent,
+          "X-Forwarded-For": ipAddress,
+          Cookie: `device_id=${deviceId}`,
         },
         credentials: "include",
       },
@@ -32,7 +43,14 @@ export async function GET(
       );
     }
     const data = await response.json();
-    return NextResponse.json(data, { status: 200 });
+    const nextResponse = NextResponse.json(data, {
+      status: response.status,
+    });
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      nextResponse.headers.set("set-cookie", setCookie);
+    }
+    return nextResponse;
   } catch (error) {
     console.error("Verify email error:", error);
     return NextResponse.json(

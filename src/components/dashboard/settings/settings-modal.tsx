@@ -81,6 +81,8 @@ export default function SettingModal({
           p-0 overflow-hidden
           max-w-7xl h-[820px]
           rounded-3xl border
+                        bg-muted
+
         "
       >
         <div className="flex h-full">
@@ -88,7 +90,7 @@ export default function SettingModal({
             className="
               w-[240px]
               border-r
-              bg-muted/30
+
               flex flex-col
             "
           >
@@ -154,9 +156,7 @@ export default function SettingModal({
           </div>
 
           {/* CONTENT */}
-          <div className="flex-1 bg-background overflow-y-auto">
-            {renderContent()}
-          </div>
+          <div className="flex-1 overflow-y-auto">{renderContent()}</div>
         </div>
       </DialogContent>
     </Dialog>

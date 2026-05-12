@@ -18,7 +18,7 @@ import {
   InputOTPSlot,
 } from "../../shadcn/input-otp";
 
-export default function VerifyBackupCodeDialog({
+export default function TrustedDeviceDialog({
   open,
   onOpenChange,
   onVerify,
@@ -29,7 +29,7 @@ export default function VerifyBackupCodeDialog({
   onVerify: (code: string) => void;
   loading: boolean;
 }) {
-  const [backupCodeInput, setBackupCodeInput] = useState("");
+  const [otp, setOtp] = useState("");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
@@ -40,12 +40,12 @@ export default function VerifyBackupCodeDialog({
         >
           <DialogHeader>
             <DialogTitle className="text-xl text-center">
-              Use a backup code
+              Trust this device
             </DialogTitle>
 
             <DialogDescription className="leading-relaxed text-center">
-              Enter one of your 8-character recovery codes to disable two-factor
-              authentication.
+              Enter the 6-digit code from your authenticator app to trust this
+              device.
             </DialogDescription>
           </DialogHeader>
 
@@ -54,21 +54,19 @@ export default function VerifyBackupCodeDialog({
               <InputOTP
                 id="disabled"
                 maxLength={8}
-                value={backupCodeInput}
-                onChange={(value) => setBackupCodeInput(value)}
+                value={otp}
+                onChange={(value) => setOtp(value)}
               >
                 <InputOTPGroup>
                   <InputOTPSlot index={0} className="w-12 h-12" />
                   <InputOTPSlot index={1} className="w-12 h-12" />
                   <InputOTPSlot index={2} className="w-12 h-12" />
-                  <InputOTPSlot index={3} className="w-12 h-12" />
                 </InputOTPGroup>
                 <InputOTPSeparator />
                 <InputOTPGroup>
+                  <InputOTPSlot index={3} className="w-12 h-12" />
                   <InputOTPSlot index={4} className="w-12 h-12" />
                   <InputOTPSlot index={5} className="w-12 h-12" />
-                  <InputOTPSlot index={6} className="w-12 h-12" />
-                  <InputOTPSlot index={7} className="w-12 h-12" />
                 </InputOTPGroup>
               </InputOTP>
               <p className="text-[11px] text-center text-muted-foreground">
@@ -80,17 +78,16 @@ export default function VerifyBackupCodeDialog({
           <DialogFooter className="mt-6 flex-col sm:flex-col gap-2">
             <Button
               className="w-full h-11 rounded-xl"
-              disabled={loading || backupCodeInput.length < 8}
+              disabled={loading || otp.length < 6}
               onClick={() => {
-                const formatted =
-                  backupCodeInput.slice(0, 4) + "-" + backupCodeInput.slice(4);
-                onVerify(formatted);
+                setOtp("");
+                onVerify(otp);
               }}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
               ) : null}
-              Verify Backup Code
+              Verify
             </Button>
             <Button
               variant="outline"

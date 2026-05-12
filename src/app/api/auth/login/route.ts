@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL =
@@ -8,10 +9,21 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
+    const userAgent = request.headers.get("user-agent") || "";
+    let ipAddress = request.headers.get("x-real-ip") as string;
+    const forwardedFor = request.headers.get("x-forwarded-for") as string;
+    if (!ipAddress && forwardedFor) {
+      ipAddress = forwardedFor?.split(",").at(0) ?? "Unknown";
+    }
+    const cookieStore = await cookies();
+    const deviceId = cookieStore.get("device_id")?.value;
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "User-Agent": userAgent,
+        "X-Forwarded-For": ipAddress,
+        Cookie: `device_id=${deviceId}`,
       },
       credentials: "include",
       body: JSON.stringify(body),

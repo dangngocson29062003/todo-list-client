@@ -8,53 +8,55 @@ import { useAuthContext } from "@/src/context/authContext";
 export default function OAuthSuccessPage() {
   const router = useRouter();
   const notify = useNotifyContext();
-  const { authLogin, loading } = useAuthContext();
-  const calledRef = useRef(false);
-  async function handleRefreshToken() {
-    try {
-      const res = await fetch("/api/auth/refresh", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to login");
-      }
-      const result = await res.json();
-      const data = result.data;
-      authLogin(data.accessToken);
-      router.push("/home");
-    } catch (err) {
-      notify(
-        "error",
-        "OAuth Login Failed",
-        "Unable to refresh session. Please try logging in again.",
-      );
-      router.push("/login");
-    }
-  }
+  const { authLogin } = useAuthContext();
+
+  const hasRunRef = useRef(false);
+
   useEffect(() => {
-    if (calledRef.current) return;
-    calledRef.current = true;
-    handleRefreshToken();
-  }, []);
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+    const controller = new AbortController();
+    const refreshToken = async () => {
+      try {
+        const res = await fetch("/api/auth/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          throw new Error(result?.message || "Failed to refresh session");
+        }
+        const accessToken = result?.data?.accessToken;
+        authLogin(accessToken);
+        if (window.opener) {
+          window.opener.postMessage(
+            { type: "AUTH_SUCCESS", token: accessToken },
+            window.location.origin,
+          );
+          window.close();
+          return;
+        }
+        router.replace("/home");
+      } catch (err) {
+        notify(
+          "error",
+          "OAuth Login Failed",
+          "Unable to refresh session. Please try logging in again.",
+        );
+        router.replace("/login");
+      }
+    };
+    refreshToken();
+    return () => controller.abort();
+  }, [authLogin, notify, router]);
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center
-            bg-gray-50 dark:bg-zinc-900 transition-colors"
-    >
-      <div
-        className="w-[450px] text-center
-                border border-gray-200 dark:border-zinc-700
-                bg-white dark:bg-zinc-800
-                shadow-xl py-10 px-8 rounded-xl"
-      >
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-900 transition-colors">
+      <div className="w-[450px] text-center border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-xl py-10 px-8 rounded-xl">
         {/* Spinner */}
         <div className="flex justify-center mb-6">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
 
         {/* Title */}

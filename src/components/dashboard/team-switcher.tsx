@@ -1,15 +1,7 @@
 "use client";
 
+import { ChevronDown, SettingsIcon, UserRoundPlus } from "lucide-react";
 import * as React from "react";
-import {
-  ChevronDown,
-  PersonStanding,
-  Plus,
-  Settings,
-  Settings2,
-  SettingsIcon,
-  UserRoundPlus,
-} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -17,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/src/components/shadcn/dropdown-menu";
 import {
@@ -25,9 +16,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/src/components/shadcn/sidebar";
-import { Button } from "../shadcn/button";
 import { useAuthContext } from "@/src/context/authContext";
 import { useRouter } from "next/navigation";
+import { Button } from "../shadcn/button";
 
 export function TeamSwitcher({
   teams,
@@ -45,7 +36,6 @@ export function TeamSwitcher({
   if (!activeTeam) {
     return null;
   }
-
 
   return (
     <SidebarMenu>
@@ -116,8 +106,9 @@ export function TeamSwitcher({
               className="gap-2 p-2"
               onClick={() => {
                 authLogout();
-                router.push('/login')
-              }}>
+                router.push("/login");
+              }}
+            >
               <div className="text-xs text-muted-foreground">Log out</div>
             </DropdownMenuItem>
           </DropdownMenuContent>

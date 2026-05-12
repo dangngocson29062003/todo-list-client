@@ -19,8 +19,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
+          setLoading(false);
+          return;
+        }
+        setAuthToken(storedToken);
+        try {
+          await loadUser(storedToken);
+        } catch {
+          const newAccessToken = await refreshAccessToken();
+          if (!newAccessToken) {
+            return;
+          }
+          await loadUser(newAccessToken);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    initAuth();
+  }, []);
   const loadUser = async (token: string) => {
     try {
+      setLoading(true);
       const res = await fetch(`/api/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -30,24 +55,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthUser(result.data);
     } catch (err) {
       console.error("Fetch user failed:", err);
+      localStorage.removeItem("token");
+      setAuthToken(null);
+      setAuthUser(null);
     } finally {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setAuthToken(storedToken);
-      loadUser(storedToken);
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
   const authLogin = async (newToken: string) => {
     setLoading(true);
     const payload: any = jwtDecode(newToken);
-    console.log(payload);
     if (!payload.verified) {
       localStorage.setItem("token", newToken);
       setAuthToken(newToken);
@@ -60,7 +77,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loadUser(newToken);
     setLoading(false);
   };
+  const refreshAccessToken = async () => {
+    try {
+      const res = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      if (!res.ok) {
+        throw new Error("Refresh failed");
+      }
+
+      const result = await res.json();
+      localStorage.setItem("token", result.data.accessToken);
+      setAuthToken(result.data.accessToken);
+      return result.data.accessToken;
+    } catch (err) {
+      console.error(err);
+      localStorage.removeItem("token");
+      setAuthToken(null);
+      setAuthUser(null);
+      return null;
+    }
+  };
   async function authLogout() {
     if (!authToken || loading) return;
     try {
@@ -79,7 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.push("/login");
     }
   }
-
   function authSetToken(newToken: string) {
     setAuthToken(newToken);
     localStorage.setItem("token", newToken);
@@ -88,7 +128,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthUser(user);
   };
   if (loading) return null;
-
   return (
     <AuthContext.Provider
       value={{
