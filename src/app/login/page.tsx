@@ -88,7 +88,7 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 px-4">
       <div className="w-full max-w-md p-8 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -144,7 +144,7 @@ export default function LoginPage() {
         <Button
           disabled={loading}
           onClick={handleLogin}
-          className="w-full h-11"
+          className="w-full h-11 cursor-pointer"
         >
           {loading ? "Signing in..." : "Sign in"}
         </Button>
@@ -170,11 +170,11 @@ export default function LoginPage() {
         </Button>
 
         {/* Signup */}
-        <p className="text-sm text-center text-gray-500">
+        <p className="text-sm text-center text-gray-500 cursor-pointer">
           New user?{" "}
           <Link
             href="/signup"
-            className="font-medium text-black dark:text-white"
+            className="font-medium text-black dark:text-white "
           >
             Sign up
           </Link>

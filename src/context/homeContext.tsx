@@ -50,99 +50,99 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [limit, setLimit] = useState(6);
 
-  const fetchProjects = useCallback(
-    async (pageToFetch: number, isAppending: boolean) => {
-      if (!authToken) return;
+  // const fetchProjects = useCallback(
+  //   async (pageToFetch: number, isAppending: boolean) => {
+  //     if (!authToken) return;
 
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          page: pageToFetch.toString(),
-          limit: limit.toString(),
-          sortBy: currentSort,
-          ...(searchTerm && { name: searchTerm }),
-        });
+  //     setLoading(true);
+  //     try {
+  //       const params = new URLSearchParams({
+  //         page: pageToFetch.toString(),
+  //         limit: limit.toString(),
+  //         sortBy: currentSort,
+  //         ...(searchTerm && { name: searchTerm }),
+  //       });
 
-        const res = await fetch(`/api/projects?${params.toString()}`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        if (res.status === 404) {
-          setProjects([]);
-          setCurrentPage(0);
-          setHasNext(false);
-          return;
-        }
+  //       const res = await fetch(`/api/projects?${params.toString()}`, {
+  //         headers: { Authorization: `Bearer ${authToken}` },
+  //       });
+  //       if (res.status === 404) {
+  //         setProjects([]);
+  //         setCurrentPage(0);
+  //         setHasNext(false);
+  //         return;
+  //       }
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch projects");
-        }
+  //       if (!res.ok) {
+  //         throw new Error("Failed to fetch projects");
+  //       }
 
-        const result = await res.json();
-        const {
-          projects: fetchedProjects,
-          currentPage: respPage,
-          hasNext: respHasNext,
-        } = result.data;
+  //       const result = await res.json();
+  //       const {
+  //         projects: fetchedProjects,
+  //         currentPage: respPage,
+  //         hasNext: respHasNext,
+  //       } = result.data;
 
-        setProjects((prev) =>
-          isAppending ? [...prev, ...fetchedProjects] : fetchedProjects,
-        );
-        setCurrentPage(respPage);
-        setHasNext(respHasNext);
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [authToken, currentSort, searchTerm, limit],
-  );
+  //       setProjects((prev) =>
+  //         isAppending ? [...prev, ...fetchedProjects] : fetchedProjects,
+  //       );
+  //       setCurrentPage(respPage);
+  //       setHasNext(respHasNext);
+  //     } catch (error) {
+  //       console.error("Failed to fetch projects:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  //   [authToken, currentSort, searchTerm, limit],
+  // );
 
   const fetchFavoriteProjects = useCallback(async () => {
-    if (!authToken) return;
+    // if (!authToken) return;
 
-    setFavoriteLoading(true);
-    try {
-      const params = new URLSearchParams({
-        favorite: "true",
-        limit: "50",
-      });
+    // setFavoriteLoading(true);
+    // try {
+    //   const params = new URLSearchParams({
+    //     favorite: "true",
+    //     limit: "50",
+    //   });
 
-      const res = await fetch(`/api/projects?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+    //   const res = await fetch(`/api/projects?${params.toString()}`, {
+    //     headers: { Authorization: `Bearer ${authToken}` },
+    //   });
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch favorite projects");
-      }
+    //   if (!res.ok) {
+    //     throw new Error("Failed to fetch favorite projects");
+    //   }
 
-      const result = await res.json();
-      setFavoriteProjects(result.data.projects || []);
-    } catch (error) {
-      console.error("Failed to fetch favorite projects:", error);
-    } finally {
-      setFavoriteLoading(false);
-    }
+    //   const result = await res.json();
+    //   setFavoriteProjects(result.data.projects || []);
+    // } catch (error) {
+    //   console.error("Failed to fetch favorite projects:", error);
+    // } finally {
+    //   setFavoriteLoading(false);
+    // }
   }, [authToken]);
   const fetchRecentProjects = useCallback(async () => {
     if (!authToken) return;
 
-    try {
-      const res = await fetch(`/api/projects?sortBy=recent&limit=6`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+    // try {
+    //   const res = await fetch(`/api/projects?sortBy=recent&limit=6`, {
+    //     headers: { Authorization: `Bearer ${authToken}` },
+    //   });
 
-      if (!res.ok) throw new Error("Failed to fetch recent projects");
+    //   if (!res.ok) throw new Error("Failed to fetch recent projects");
 
-      const result = await res.json();
-      setRecentProjects(result.data.projects || []);
-    } catch (error) {
-      console.error("Failed to fetch recent projects:", error);
-    }
+    //   const result = await res.json();
+    //   setRecentProjects(result.data.projects || []);
+    // } catch (error) {
+    //   console.error("Failed to fetch recent projects:", error);
+    // }
   }, [authToken]);
-  useEffect(() => {
-    fetchProjects(0, false);
-  }, [fetchProjects]);
+  // useEffect(() => {
+  //   fetchProjects(0, false);
+  // }, [fetchProjects]);
   useEffect(() => {
     fetchRecentProjects();
   }, [fetchRecentProjects]);
@@ -182,7 +182,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   };
   const loadMore = () => {
     if (!loading && hasNext) {
-      fetchProjects(currentPage + 1, true);
+      // fetchProjects(currentPage + 1, true);
     }
   };
 
@@ -249,11 +249,11 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   );
   const refresh = useCallback(async () => {
     await Promise.all([
-      fetchProjects(0, false),
+      // fetchProjects(0, false),
       fetchFavoriteProjects(),
       fetchRecentProjects(),
     ]);
-  }, [fetchProjects, fetchFavoriteProjects]);
+  }, [fetchFavoriteProjects]);
   return (
     <HomeContext.Provider
       value={{

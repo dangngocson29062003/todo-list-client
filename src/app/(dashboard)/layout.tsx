@@ -17,6 +17,8 @@ import {
 import { Toaster } from "@/src/components/shadcn/sonner";
 import { useAuthContext } from "@/src/context/authContext";
 import { HomeProvider } from "@/src/context/homeContext";
+import { useNotificationWebSocket } from "@/src/hooks/useNotificationWebSocket";
+import { NotificationResponse, UnreadCountNotification } from "@/src/types/notification";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -31,69 +33,193 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [checkingWorkspace, setCheckingWorkspace] = useState(true);
-  useEffect(() => {
-    async function checkAuthAndWorkspace() {
-      if (loading) return;
+  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
-      if (!authToken || !authUser) {
-        setCheckingWorkspace(false);
-        router.replace("/login");
-        return;
+  // const [notificationsLoading, setNotificationsLoading] = useState(true);
+
+
+  const [loadMoreLoading, setLoadMoreLoading] = useState(false);
+
+  const [page, setPage] = useState(1);
+
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchNotifications = async (
+    currentPage: number,
+    append = false
+  ) => {
+    try {
+      const res = await fetch(`/api/notifications?page=${currentPage}&size=5`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        }
+      });
+
+      const data: ApiResponse<PageResponse<NotificationResponse>> = await res.json();
+
+      if (data.status !== 200) {
+        throw new Error(data.message || "Failed to retrieve all notifications");
       }
 
-      if (pathname === "/create-workspace") {
-        setCheckingWorkspace(false);
-        return;
-      }
 
-      try {
-        const res = await fetch("/api/workspaces", {
-          method: "GET",
-          cache: "no-store",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
+      setHasMore(!data.data.last);
+
+      if (append) {
+
+        setNotifications(prev => {
+
+          const map = new Map<number, NotificationResponse>();
+
+          [...prev, ...data.data.content]
+            .forEach(n => map.set(n.id, n));
+
+          return Array.from(map.values());
         });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-          throw new Error(json.message || "Failed to fetch workspaces");
-        }
-
-        const workspaces = json.data?.content ?? [];
-
-        if (workspaces.length === 0) {
-          router.replace("/create-workspace");
-          return;
-        }
-
-        setCheckingWorkspace(false);
-      } catch (error) {
-        console.error(error);
-        setCheckingWorkspace(false);
+      } else {
+        setNotifications(data.data.content);
       }
+
+    } catch (error) {
+      console.error(">>>>> ERROR", error)
+    }
+  }
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await fetch(`/api/notifications/unread`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        }
+      });
+
+      const data: ApiResponse<UnreadCountNotification> = await res.json();
+
+      if (data.status !== 200) {
+        throw new Error(data.message || "Failed to retrieve quantity of unread notifications");
+      }
+
+      setUnreadCount(data.data.unreadCount);
+    } catch (error) {
+      console.error(">>>> ERROR Unread Count", error)
+    }
+  }
+
+  const handleCollapseNotification = async () => {
+    setPage(1);
+    await fetchNotifications(1, false);
+    setHasMore(true);
+  }
+
+  const handleLoadMore = async () => {
+    if (!hasMore || loadMoreLoading) return;
+
+    try {
+      setLoadMoreLoading(true);
+
+      const nextPage = page + 1;
+
+      await fetchNotifications(nextPage, true);
+
+      setPage(nextPage);
+    } finally {
+      setLoadMoreLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    // async function checkAuthAndWorkspace() {
+    //   if (loading) return;
+
+    if (!authToken || !authUser) {
+      // setCheckingWorkspace(false);
+      router.replace("/login");
+      return;
     }
 
-    checkAuthAndWorkspace();
+    // if (pathname === "/create-workspace") {
+    //   setCheckingWorkspace(false);
+    //   return;
+    // }
+
+    //   try {
+    //     const res = await fetch("/api/workspaces", {
+    //       method: "GET",
+    //       cache: "no-store",
+    //       headers: {
+    //         Authorization: `Bearer ${authToken}`,
+    //       },
+    //     });
+
+    //     const json = await res.json();
+
+    //     if (!res.ok) {
+    //       throw new Error(json.message || "Failed to fetch workspaces");
+    //     }
+
+    //     const workspaces = json.data?.content ?? [];
+
+    //     if (workspaces.length === 0) {
+    //       router.replace("/create-workspace");
+    //       return;
+    //     }
+
+    //     setCheckingWorkspace(false);
+    //   } catch (error) {
+    //     console.error(error);
+    //     setCheckingWorkspace(false);
+    //   }
+    // }
+
+    // checkAuthAndWorkspace();
+
+
+
+    const initializeNotifications = async () => {
+      setPage(1)
+      await Promise.all([
+        fetchNotifications(1),
+        fetchUnreadCount(),
+      ]);
+
+    };
+
+    initializeNotifications();
   }, [authToken, authUser, loading, pathname, router]);
 
-  if (loading || checkingWorkspace) {
+  useNotificationWebSocket({
+    onNotification: (notification) => {
+      setNotifications(prev => [
+        notification,
+        ...prev,
+      ]);
+    },
+
+    onUnreadCount: (count) => {
+      setUnreadCount(count)
+    }
+  })
+
+  if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
         Loading...
       </div>
     );
   }
-  if (pathname === "/create-workspace") {
-    return (
-      <HomeProvider>
-        <div className="min-h-screen w-full">{children}</div>
+  // if (pathname === "/create-workspace") {
+  //   return (
+  //     <HomeProvider>
+  //       <div className="min-h-screen w-full">{children}</div>
 
-        <Toaster position="bottom-center" />
-      </HomeProvider>
-    );
-  }
+  //       <Toaster position="bottom-center" />
+  //     </HomeProvider>
+  //   );
+  // }
   return (
     <SidebarProvider>
       <HomeProvider>
@@ -117,7 +243,16 @@ export default function DashboardLayout({
             </div>
 
             <div className="ml-auto px-3">
-              <NavActions />
+              <NavActions
+                notifications={notifications}
+                setNotifications={setNotifications}
+                unreadCount={unreadCount}
+                setUnreadCount={setUnreadCount}
+                onLoadMore={handleLoadMore}
+                loading={loadMoreLoading}
+                onCollapse={handleCollapseNotification}
+                hasMore={hasMore}
+              />
             </div>
           </header>
           <div className="w-full p-4 mx-auto relative">{children}</div>

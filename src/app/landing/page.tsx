@@ -56,10 +56,10 @@ export default function LandingPage() {
             <>
               <div className="absolute inset-0 -z-10">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_40%,rgba(0,255,200,0.18),transparent)]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black" />
+                <div className="absolute inset-0 bg-linear-to-r from-black via-transparent to-black" />
               </div>
 
-              <div className="absolute bottom-0 left-0 w-full h-20 md:h-40 bg-gradient-to-b from-transparent to-background" />
+              <div className="absolute bottom-0 left-0 w-full h-20 md:h-40 bg-linear-to-b from-transparent to-background" />
             </>
           )}
           <div className="max-w-7xl w-full flex flex-col gap-2 justify-start">

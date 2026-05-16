@@ -1,4 +1,5 @@
-import { format, isToday, isYesterday } from "date-fns";
+import { format, formatDistanceToNow, isToday, isYesterday } from "date-fns";
+import { vi } from "date-fns/locale";
 
 export function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -16,4 +17,10 @@ export function formatLastActive(dateString: Date) {
   }
 
   return format(date, "MMM d, yyyy 'at' hh:mm a");
+}
+
+export function formatDateDistanceToNow(date: string) {
+  const createdAt = new Date(date);
+
+  return formatDistanceToNow(createdAt, { addSuffix: true });
 }

@@ -3,10 +3,17 @@ import { NotificationProvider } from "../components/notification/notificationPro
 import { ThemeProvider } from "../components/theme-provider";
 import { AuthProvider } from "../context/authContext";
 import "./globals.css";
+import { Metadata } from "next";
 const lexend = Lexend({
   subsets: ["latin"],
   display: "swap",
 });
+
+export const metadata: Metadata = {
+  title: "Weaver — Work Together, Better",
+  description: "Weaver combines project management, team collaboration, and workspace organization into a simple and flexible platform designed for modern teams.",
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
